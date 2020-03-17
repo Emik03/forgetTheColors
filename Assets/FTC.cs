@@ -481,11 +481,12 @@ public class FTC : MonoBehaviour
                         while (_nixies[i] != values[i])
                         {
                             Buttons[i].OnInteract();
-                            yield return new WaitForSeconds(0.25f);
+                            yield return new WaitForSeconds(0.5f);
                         }
                     }
 
                 //key
+				yield return new WaitForSeconds(0.8f);
                 Buttons[2].OnInteract();
             }
         }
