@@ -16,8 +16,18 @@ public class FTC : MonoBehaviour
     public KMSelectable[] Buttons;
     public Color[] Color = new Color[10];
 
-    private bool _inputMode, _solved, _debug = false;
-    private int _button, _gear, _moduleId, _stage = 0, _maxStage = 5;
+    //very large souvenir dump
+    bool solved;
+    int maxStage = 5;
+    List<byte> gear = new List<byte>(0);
+    List<short> largeDisplay = new List<short>(0);
+    List<int> sineNumber = new List<int>(0);
+    List<int> finalValue = new List<int>(0);
+    List<string> gearColor = new List<string>(0);
+    List<string> ruleColor = new List<string>(0);
+
+    private bool _inputMode, _debug = false;
+    private int _button, _gear, _moduleId, _stage = 0;
     private float _answer;
     private double _index;
 
@@ -48,16 +58,16 @@ public class FTC : MonoBehaviour
     {
         //if debug is turned on, max stage should equal the initial value assigned, otherwise set it to the proper value
         if (!_debug)
-            _maxStage = Bomb.GetSolvableModuleNames().Where(a => !_ignore.Contains(a)).Count();
+            maxStage = Bomb.GetSolvableModuleNames().Where(a => !_ignore.Contains(a)).Count();
 
-        _storedValues = new int[_maxStage + 1];
+        _storedValues = new int[maxStage + 1];
 
         //proper grammar!!
-        if (_maxStage != 1)
-            Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - On this bomb we will have {1} stages.", _moduleId, _maxStage);
+        if (maxStage != 1)
+            Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - On this bomb we will have {1} stages.", _moduleId, maxStage);
 
         else
-            Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - On this bomb we will have {1} stage.", _moduleId, _maxStage);
+            Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - On this bomb we will have {1} stage.", _moduleId, maxStage);
 
         Audio.PlaySoundAtTransform("start", Buttons[2].transform);
         StartCoroutine(Generate());
@@ -66,7 +76,7 @@ public class FTC : MonoBehaviour
     void FixedUpdate()
     {
         //if there are more stages left, generate new stage
-        if (_stage < Bomb.GetSolvedModuleNames().Count() && !_solved)
+        if (_stage < Bomb.GetSolvedModuleNames().Where(a => !_ignore.Contains(a)).Count() && !solved)
         {
             _stage++;
             StartCoroutine(Generate());
@@ -76,7 +86,7 @@ public class FTC : MonoBehaviour
     IEnumerator Generate()
     {
         //if solved, don't generate
-        if (_solved)
+        if (solved)
             StopAllCoroutines();
 
         //plays sound
@@ -84,7 +94,7 @@ public class FTC : MonoBehaviour
             Audio.PlaySoundAtTransform("nextStage", Buttons[2].transform);
 
         //if this is the submission/final stage
-        if (_stage == _maxStage || _answer != 0)
+        if (_stage == maxStage || _answer != 0)
         {
             for (int i = 0; i < _nixies.Length; i++)
             {
@@ -103,7 +113,7 @@ public class FTC : MonoBehaviour
         }
 
         //if it's supposed to be randomising
-        if (!_solved && _stage != _maxStage && _answer == 0)
+        if (!solved && _stage != maxStage && _answer == 0)
         {
             //stage 0: runs 20 times, stage 1+: runs 10 times
             for (int i = 0; i < 10 + ((Mathf.Clamp(_stage, 0, 1) - 1) * -10); i++)
@@ -125,11 +135,16 @@ public class FTC : MonoBehaviour
 
             _mainDisplays[1] = _stage;
 
+            //souvenir
+            gear.Add((byte)_gear);
+            largeDisplay.Add((short)_mainDisplays[0]);
+            gearColor.Add(_colors[_colorNums[3]]);
+
             Render();
         }
 
         //if it's not last stage
-        if (_stage != _maxStage && _answer == 0)
+        if (_stage != maxStage && _answer == 0)
         {
             Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The large display is {2}. The Colors are {3}, {4}, and {5}. The Nixie numbers are {6}{7}, and the gear is numbered {8} and colored {9}.", _moduleId, _stage, _mainDisplays[0], _colors[_colorNums[0]], _colors[_colorNums[1]], _colors[_colorNums[2]], _nixies[0], _nixies[1], _gear, _colors[_colorNums[3]]);
             Calculate();
@@ -139,7 +154,7 @@ public class FTC : MonoBehaviour
 
     void HandlePress(KMSelectable btn)
     {
-        if (_solved)
+        if (solved)
             return;
 
         //if it's not ready for input, strike
@@ -166,7 +181,7 @@ public class FTC : MonoBehaviour
         else
         {
             //debugging
-            if (_debug && _stage != _maxStage)
+            if (_debug && _stage != maxStage)
             {
                 _stage++;
                 StartCoroutine(Generate());
@@ -175,7 +190,7 @@ public class FTC : MonoBehaviour
             //if both correct
             else if (_nixies[0] == _nixieCorrect[0] && _nixies[1] == _nixieCorrect[1])
             {
-                _solved = true;
+                solved = true;
                 GetComponent<KMBombModule>().HandlePass();
                 Audio.PlaySoundAtTransform("keySuccess", Buttons[2].transform);
                 Audio.PlaySoundAtTransform("solved", Buttons[2].transform);
@@ -344,42 +359,52 @@ public class FTC : MonoBehaviour
         {
             case 0:
                 _tempStorage[5] += Bomb.GetBatteryCount();
+                ruleColor.Add(_colors[0]);
                 break;
 
             case 1:
                 _tempStorage[5] -= Bomb.GetPortCount();
+                ruleColor.Add(_colors[1]);
                 break;
 
             case 2:
                 _tempStorage[5] += serial.Last();
+                ruleColor.Add(_colors[2]);
                 break;
 
             case 3:
                 _tempStorage[5] -= Bomb.GetSolvedModuleNames().Count();
+                ruleColor.Add(_colors[3]);
                 break;
 
             case 4:
                 _tempStorage[5] += Bomb.GetPortPlateCount();
+                ruleColor.Add(_colors[4]);
                 break;
 
             case 5:
                 _tempStorage[5] -= Bomb.GetModuleNames().Count();
+                ruleColor.Add(_colors[5]);
                 break;
 
             case 6:
                 _tempStorage[5] += Bomb.GetBatteryHolderCount();
+                ruleColor.Add(_colors[6]);
                 break;
 
             case 7:
                 _tempStorage[5] -= Bomb.GetOnIndicators().Count();
+                ruleColor.Add(_colors[7]);
                 break;
 
             case 8:
                 _tempStorage[5] += Bomb.GetIndicators().Count();
+                ruleColor.Add(_colors[8]);
                 break;
 
             case 9:
                 _tempStorage[5] -= Bomb.GetOffIndicators().Count();
+                ruleColor.Add(_colors[9]);
                 break;
         }
 
@@ -396,6 +421,9 @@ public class FTC : MonoBehaviour
         _tempStorage[1] = _tempStorage[0] + _tempStorage[2];
 
         _storedValues[_stage] = (int)_tempStorage[1] % 100000;
+
+        sineNumber.Add((int)_tempStorage[2]);
+        finalValue.Add((int)_tempStorage[1]);
 
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The stage number is {2}, the calculated values of the Nixie tubes are {3} and {4}, the calculated gear number is {5}, the modifier (sine) for the stage number is {6}.", _moduleId, _stage, _tempStorage[0], _tempStorage[3], _tempStorage[4],  _tempStorage[5], _tempStorage[2]);
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The final value for this stage is {2}.", _moduleId, _stage, _storedValues[_stage]);
