@@ -17,7 +17,7 @@ public class FTC : MonoBehaviour
     public Color[] Color = new Color[10];
 
     private bool _inputMode, _solved, _debug = false;
-    private int _button, _gear, _moduleId, _stage = 0, _maxStage = 2;
+    private int _button, _gear, _moduleId, _stage = 0, _maxStage = 5;
     private float _answer;
     private double _index;
 
@@ -105,8 +105,8 @@ public class FTC : MonoBehaviour
         //if it's supposed to be randomising
         if (!_solved && _stage != _maxStage && _answer == 0)
         {
-            //stage 0: runs 40 times, stage 1+: runs 20 times
-            for (int i = 0; i < 20 + ((Mathf.Clamp(_stage, 0, 1) - 1) * -20); i++)
+            //stage 0: runs 20 times, stage 1+: runs 10 times
+            for (int i = 0; i < 10 + ((Mathf.Clamp(_stage, 0, 1) - 1) * -10); i++)
             {
                 for (int j = 0; j < _nixies.Length; j++)
                     _nixies[j] = UnityEngine.Random.Range(0, 10);
@@ -465,38 +465,25 @@ public class FTC : MonoBehaviour
 
     IEnumerator TwitchHandleForcedSolve()
     {
-        //forces stage to go to final stage
-        _stage = _maxStage;
-
         //resets all colors
         for (int i = 0; i < _nixies.Length; i++)
         {
             _mainDisplays[i] = 0;
-            _nixies[i] = 0;
+            _nixies[i] = 9 - (i * 9);
         }
 
         for (int i = 0; i < _colorNums.Length; i++)
             _colorNums[i] = 10;
 
-        _gear = 0;
+        //forces solve
+        _nixieCorrect[0] = _nixies[0];
+        _nixieCorrect[1] = _nixies[1];
+        _inputMode = true;
 
         Render();
-        _answer = 90;
-
-        byte[] values = new byte[2] { (byte)(_answer / 10), (byte)(_answer % 10) };
-
-        //submit answer
-        for (int i = 0; i < Buttons.Length - 1; i++)
-        {
-            //keep pushing until button value is met by player
-            while (_nixies[i] != values[i])
-            {
-                Buttons[i].OnInteract();
-                yield return new WaitForSeconds(0.25f);
-            }
-        }
 
         //key
+        Debug.LogFormat("[Forget The Colors #{0}]: bruh", _moduleId);
         Buttons[2].OnInteract();
         yield return null;
     }
