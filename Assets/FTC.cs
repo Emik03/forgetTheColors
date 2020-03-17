@@ -1,25 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using KModkit;
 using System.Linq;
 using System;
+using KModkit;
 
 public class FTC : MonoBehaviour
 {
     public KMAudio Audio;
+    public KMBombModule Module;
     public KMBombInfo Bomb;
     public TextMesh[] Number;
     public Renderer[] ColorChanger;
     public KMSelectable[] Buttons;
     public Color[] Color = new Color[10];
 
-    private bool _inputMode, _solved;
-    private int _button, _gear, _moduleId, _stage = 0, _maxStage = 0;
+    private bool _inputMode, _solved, _render, _debug = true;
+    private int _button, _gear, _moduleId, _stage = 0, _maxStage = 50;
     private float _answer;
     private double _index;
 
-    private List<char> _serial;
     private int[] _nixies = new int[2], _mainDisplays = new int[2], _colorNums = new int[4], _nixieCorrect = new int[2], _storedValues;
     private double[] _tempStorage = new double[6];
     private IEnumerable<string> _solvable;
@@ -35,63 +35,20 @@ public class FTC : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             var btn = Buttons[i];
-            btn.OnInteract += delegate { HandlePress(btn); return false; };
-        }
-    }
-    void HandlePress(KMSelectable btn)
-    {
-        if (_solved)
-            return;
-
-        //if it's not ready for input, strike
-        if (!_inputMode)
-        {
-            Audio.PlaySoundAtTransform("key", Buttons[2].transform);
-            GetComponent<KMBombModule>().HandleStrike();
-            return;
-        }
-
-        //gets the specific button pushed
-        var c = Array.IndexOf(Buttons, btn);
-
-        //NOT the key
-        if (c != 2)
-        {
-            _nixies[c] = (_nixies[c] + 1) % 10;
-
-            Buttons[c].AddInteractionPunch();
-            Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, Buttons[c].transform);
-        }
-
-        //key
-        else
-        {
-            Audio.PlaySoundAtTransform("keySuccess", Buttons[2].transform);
-
-            //if both correct
-            if (_nixies[0] == _nixieCorrect[0] && _nixies[1] == _nixieCorrect[1])
+            btn.OnInteract += delegate 
             {
-                _solved = true;
-                GetComponent<KMBombModule>().HandlePass();
-                Audio.PlaySoundAtTransform("solved", Buttons[2].transform);
-
-                Debug.LogFormat("[Forget The Colors #{0}]: Congration you done it.", _moduleId);
-            }
-
-            //if either incorrect
-            else
-            {
-                Audio.PlaySoundAtTransform("key", Buttons[2].transform);
-                GetComponent<KMBombModule>().HandleStrike();
-                Debug.LogFormat("[Forget The Colors #{0}]: You did a goodn't, you submitted {1}{2} when I expected {3}{4}.", _moduleId, _nixies[0], _nixies[1], _nixieCorrect[0], _nixieCorrect[1]);
-            }
+                HandlePress(btn);
+                return false;
+            };
         }
     }
 
     void Start()
     {
-        _serial = Bomb.GetSerialNumber().ToList();
-        _maxStage = Bomb.GetSolvableModuleNames().Where(a => !_ignore.Contains(a)).Count();
+        //if debug is turned on, max stage should equal the initial value assigned, otherwise set it to the proper value
+        if (!_debug)
+            _maxStage = Bomb.GetSolvableModuleNames().Where(a => !_ignore.Contains(a)).Count();
+
         _storedValues = new int[_maxStage + 1];
 
         //proper grammar!!
@@ -103,6 +60,16 @@ public class FTC : MonoBehaviour
 
         Audio.PlaySoundAtTransform("start", Buttons[2].transform);
         StartCoroutine(Generate());
+    }
+
+    void FixedUpdate()
+    {
+        //if there are more stages left, generate new stage
+        if (_stage < Bomb.GetSolvedModuleNames().Count() && !_solved)
+        {
+            _stage++;
+            StartCoroutine(Generate());
+        }
     }
 
     IEnumerator Generate()
@@ -129,15 +96,16 @@ public class FTC : MonoBehaviour
 
             _gear = 0;
 
+            Render();
             CalculateAnswer();
             StopAllCoroutines();
         }
 
         //if it's supposed to be randomising
-        if (_stage == 0 && !_solved && _stage != _maxStage && _answer == 0)
+        if (!_solved && _stage != _maxStage && _answer == 0)
         {
-            //stage 0: runs 75 times, stage 1+: runs 25 times
-            for (int i = 0; i < 25 + ((Mathf.Clamp(_stage, 0, 1) - 1) * -25); i++)
+            //stage 0: runs 40 times, stage 1+: runs 20 times
+            for (int i = 0; i < 20 + ((Mathf.Clamp(_stage, 0, 1) - 1) * -20); i++)
             {
                 for (int j = 0; j < _nixies.Length; j++)
                     _nixies[j] = UnityEngine.Random.Range(0, 10);
@@ -148,6 +116,8 @@ public class FTC : MonoBehaviour
                 _mainDisplays[0] = UnityEngine.Random.Range(0, 991);
                 _mainDisplays[1] = UnityEngine.Random.Range(0, 100);
                 _gear = UnityEngine.Random.Range(0, 10);
+
+                Render();
 
                 yield return new WaitForSeconds(.075f);
             }
@@ -164,7 +134,65 @@ public class FTC : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
+    void HandlePress(KMSelectable btn)
+    {
+        if (_solved)
+            return;
+
+        //if it's not ready for input, strike
+        if (!_inputMode && !_debug)
+        {
+            Audio.PlaySoundAtTransform("key", Buttons[2].transform);
+            GetComponent<KMBombModule>().HandleStrike();
+            return;
+        }
+
+        //gets the specific button pushed
+        var c = Array.IndexOf(Buttons, btn);
+
+        //NOT the key
+        if (c != 2)
+        {
+            _nixies[c] = (_nixies[c] + 1) % 10;
+
+            Buttons[c].AddInteractionPunch();
+            Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, Buttons[c].transform);
+        }
+
+        //key
+        else
+        {
+            //debugging
+            if (_debug && _stage != _maxStage)
+            {
+                _stage++;
+                StartCoroutine(Generate());
+            }
+
+            //if both correct
+            else if (_nixies[0] == _nixieCorrect[0] && _nixies[1] == _nixieCorrect[1])
+            {
+                _solved = true;
+                GetComponent<KMBombModule>().HandlePass();
+                Audio.PlaySoundAtTransform("keySuccess", Buttons[2].transform);
+                Audio.PlaySoundAtTransform("solved", Buttons[2].transform);
+
+                Debug.LogFormat("[Forget The Colors #{0}]: Congration, you did it.", _moduleId);
+            }
+
+            //if either incorrect
+            else
+            {
+                Audio.PlaySoundAtTransform("key", Buttons[2].transform);
+                GetComponent<KMBombModule>().HandleStrike();
+                Debug.LogFormat("[Forget The Colors #{0}]: You did a goodn't, you submitted {1}{2} when I expected {3}{4}.", _moduleId, _nixies[0], _nixies[1], _nixieCorrect[0], _nixieCorrect[1]);
+            }
+        }
+
+        Render();
+    }
+
+    private void Render()
     {
         //render initial displays
         Number[0].text = _mainDisplays[0].ToString();
@@ -188,13 +216,6 @@ public class FTC : MonoBehaviour
         //set colors
         for (int i = 0; i < ColorChanger.Length; i++)
             ColorChanger[i].material.color = Color[_colorNums[i]];
-
-        //if there are more stages left, generate new stage
-        if (_stage != Bomb.GetSolvedModuleNames().Count() && !_solved)
-        {
-            _stage++;
-            StartCoroutine(Generate());
-        }
     }
 
     void CalculateAnswer()
@@ -221,9 +242,8 @@ public class FTC : MonoBehaviour
 
         _tempStorage[5] = _gear;
 
-        //run for each color
+        //this will run through the changes applied to both nixie tubes during step 1 of second page on manual
         for (int i = 0; i < _colorNums.Length - 1; i++)
-        {
             //each digit rule
             switch (_colorNums[i])
             {
@@ -301,7 +321,6 @@ public class FTC : MonoBehaviour
                     if (_tempStorage[4] > 9) { _tempStorage[4] -= 10; }
                     break;
             }
-        }
 
         //new gear = calculated nixies + gear
         _tempStorage[5] = _tempStorage[3] + _tempStorage[4] + _gear;
@@ -317,7 +336,10 @@ public class FTC : MonoBehaviour
         if (_index < 0) { _index += 10; }
         if (_index > 9) { _index -= 10; }
 
-        //commit index
+        //get serial
+        List<char> serial = Bomb.GetSerialNumber().ToList();
+
+        //this will run through the changes applied to the gear during step 2 of second page on manual
         switch ((int)_index)
         {
             case 0:
@@ -329,7 +351,7 @@ public class FTC : MonoBehaviour
                 break;
 
             case 2:
-                _tempStorage[5] += _serial.Last();
+                _tempStorage[5] += serial.Last();
                 break;
 
             case 3:
@@ -380,5 +402,9 @@ public class FTC : MonoBehaviour
         _storedValues[_stage] = (int)_tempStorage[1] % 100000;
 
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The final value is {2}.", _moduleId, _stage, _storedValues[_stage]);
+
+        //stop constant updates with rendering, but render it one more time
+        _render = false;
+        Render();
     }
 }

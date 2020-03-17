@@ -19,5 +19,6 @@ MonoBehaviour:
 
     Module ID: ForgetTheColors'
   version: 1
-  outputFolder: D:\Steam\steamapps\common\Keep Talking and Nobody Explodes\mods
+  outputFolder: C:\Program Files (x86)\Steam\steamapps\common\Keep Talking and Nobody
+    Explodes\mods
   previewImage: {fileID: 2800000, guid: fe35a5baafea97f4eaeb0ac174ab3ff7, type: 3}
