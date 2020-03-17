@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Linq;
 using System;
 using KModkit;
+using System.Text.RegularExpressions;
 
 public class FTC : MonoBehaviour
 {
@@ -15,8 +16,8 @@ public class FTC : MonoBehaviour
     public KMSelectable[] Buttons;
     public Color[] Color = new Color[10];
 
-    private bool _inputMode, _solved, _render, _debug = true;
-    private int _button, _gear, _moduleId, _stage = 0, _maxStage = 50;
+    private bool _inputMode, _solved, _debug = false;
+    private int _button, _gear, _moduleId, _stage = 0, _maxStage = 2;
     private float _answer;
     private double _index;
 
@@ -32,7 +33,7 @@ public class FTC : MonoBehaviour
     void Awake()
     {
         _moduleId = _moduleIdCounter++;
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < Buttons.Length; i++)
         {
             var btn = Buttons[i];
             btn.OnInteract += delegate 
@@ -123,6 +124,8 @@ public class FTC : MonoBehaviour
             }
 
             _mainDisplays[1] = _stage;
+
+            Render();
         }
 
         //if it's not last stage
@@ -199,12 +202,9 @@ public class FTC : MonoBehaviour
         Number[1].text = (_mainDisplays[1] % 100).ToString();
 
         //if the large display lacks 3 characters, add 0's
-        while (Number[0].text.Length < 3)
-            Number[0].text = Number[0].text.Insert(0, "0");
-
-        //if the small display lacks 2 characters, add 0's
-        while (Number[1].text.Length < 2)
-            Number[1].text = Number[1].text.Insert(0, "0");
+        for (int i = 0; i < 2; i++)
+            while (Number[i].text.Length < 3 - i)
+                Number[i].text = Number[i].text.Insert(0, "0");
 
         //set nixies
         for (int i = 0; i < _nixies.Length; i++)
@@ -392,19 +392,112 @@ public class FTC : MonoBehaviour
 
         //calculate final answer for that stage
         _tempStorage[0] = Math.Floor(Math.Abs(Math.Cos(_mainDisplays[0] * Mathf.Deg2Rad) * Math.Pow(10, 5)));
-
         _tempStorage[2] = Math.Truncate(Math.Sin(int.Parse(String.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5])) * Mathf.Deg2Rad) * Math.Pow(10, 5));
-
         _tempStorage[1] = _tempStorage[0] + _tempStorage[2];
 
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The stage number is {2}, the calculated values of the Nixie tubes are {3} and {4}, the calculated gear number is {5}, the modifier (sine) for the stage number is {6}.", _moduleId, _stage, _tempStorage[0], _tempStorage[3], _tempStorage[4],  _tempStorage[5], _tempStorage[2]);
-        
         _storedValues[_stage] = (int)_tempStorage[1] % 100000;
 
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The final value is {2}.", _moduleId, _stage, _storedValues[_stage]);
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The stage number is {2}, the calculated values of the Nixie tubes are {3} and {4}, the calculated gear number is {5}, the modifier (sine) for the stage number is {6}.", _moduleId, _stage, _tempStorage[0], _tempStorage[3], _tempStorage[4],  _tempStorage[5], _tempStorage[2]);
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The final value for this stage is {2}.", _moduleId, _stage, _storedValues[_stage]);
+    }
 
-        //stop constant updates with rendering, but render it one more time
-        _render = false;
+    private bool IsValid(string par)
+    {
+        //if number is 00-99, return true, otherwise return false
+        byte b;
+        if (byte.TryParse(par, out b))
+            return b < 100;
+
+        return false;
+    }
+
+#pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"!{0} submit <##> (Cycles through both nixies to match '##', then hits submit. | Valid numbers are from 0-99)";
+#pragma warning restore 414
+
+    IEnumerator ProcessTwitchCommand(string command)
+    {
+        string[] buttonPressed = command.Split(' ');
+
+        //if command is formatted correctly
+        if (Regex.IsMatch(buttonPressed[0], @"^\s*submit\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+
+            //if command has no parameters
+            if (buttonPressed.Length < 2)
+                yield return "sendtochaterror Please specify the value to submit! (Valid: 0-99)";
+
+            //if command has too many parameters
+            else if (buttonPressed.Length > 2)
+                yield return "sendtochaterror Too many parameters! Please submit only a single 2-digit number.";
+
+            //if command has an invalid parameter
+            else if (!IsValid(buttonPressed.ElementAt(1)))
+                yield return "sendtochaterror Invalid number! Only values 0-99 are valid.";
+
+            //if command is valid, push button accordingly
+            else
+            {
+                byte user = 0;
+                byte.TryParse(buttonPressed[1], out user);
+
+                //splits values
+                byte[] values = new byte[2] { (byte)(user / 10), (byte)(user % 10) };
+
+                //submit answer only if it's ready
+                if (_inputMode)
+                    for (int i = 0; i < Buttons.Length - 1; i++)
+                    {
+                        //keep pushing until button value is met by player
+                        while (_nixies[i] != values[i])
+                        {
+                            Buttons[i].OnInteract();
+                            yield return new WaitForSeconds(0.25f);
+                        }
+                    }
+
+                //key
+                Buttons[2].OnInteract();
+            }
+        }
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        //forces stage to go to final stage
+        _stage = _maxStage;
+
+        //resets all colors
+        for (int i = 0; i < _nixies.Length; i++)
+        {
+            _mainDisplays[i] = 0;
+            _nixies[i] = 0;
+        }
+
+        for (int i = 0; i < _colorNums.Length; i++)
+            _colorNums[i] = 10;
+
+        _gear = 0;
+
         Render();
+        _answer = 90;
+
+        byte[] values = new byte[2] { (byte)(_answer / 10), (byte)(_answer % 10) };
+
+        //submit answer
+        for (int i = 0; i < Buttons.Length - 1; i++)
+        {
+            //keep pushing until button value is met by player
+            while (_nixies[i] != values[i])
+            {
+                Buttons[i].OnInteract();
+                yield return new WaitForSeconds(0.25f);
+            }
+        }
+
+        //key
+        Buttons[2].OnInteract();
+        yield return null;
     }
 }
