@@ -16,15 +16,13 @@ public class FTC : MonoBehaviour
     public KMSelectable[] Buttons;
     public Color[] Color = new Color[10];
 
-    //very large souvenir dump
+    //large souvenir dump
     bool solved;
-    int maxStage = 5;
+    int maxStage = 3;
     List<byte> gear = new List<byte>(0);
     List<short> largeDisplay = new List<short>(0);
     List<int> sineNumber = new List<int>(0);
-    List<int> finalValue = new List<int>(0);
-    List<string> gearColor = new List<string>(0);
-    List<string> ruleColor = new List<string>(0);
+    List<string> gearColor = new List<string>(0), ruleColor = new List<string>(0);
 
     private bool _inputMode, _debug = false;
     private int _button, _gear, _moduleId, _stage = 0;
@@ -423,7 +421,6 @@ public class FTC : MonoBehaviour
         _storedValues[_stage] = (int)_tempStorage[1] % 100000;
 
         sineNumber.Add((int)_tempStorage[2]);
-        finalValue.Add((int)_tempStorage[1]);
 
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The stage number is {2}, the calculated values of the Nixie tubes are {3} and {4}, the calculated gear number is {5}, the modifier (sine) for the stage number is {6}.", _moduleId, _stage, _tempStorage[0], _tempStorage[3], _tempStorage[4],  _tempStorage[5], _tempStorage[2]);
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The final value for this stage is {2}.", _moduleId, _stage, _storedValues[_stage]);
@@ -492,28 +489,28 @@ public class FTC : MonoBehaviour
         }
     }
 
-    IEnumerator TwitchHandleForcedSolve(){
-			Debug.LogFormat("[Forget The Colors #{0}]: Thank you for attempting FTC. You gave up on stage {1}", _moduleId,_stage);
-			while(!_inputMode)
-			{yield return true;
-			}
-			yield return new WaitForSeconds(1f);
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        Debug.LogFormat("[Forget The Colors #{0}]: Thank you for attempting FTC. You gave up on stage {1}", _moduleId, _stage);
 
-				for(int i=0; i<2; i++){
-					while(_nixieCorrect[i]!=_nixies[i]){
-				Buttons[i].OnInteract();
-					yield return new WaitForSeconds(.1f);
-					Render();
-			}
-				}
-			
-			if(_nixies[0]==_nixieCorrect[0]&&_nixies[1]==_nixieCorrect[1]){
-				yield return new WaitForSeconds(.5f);
-				Buttons[2].OnInteract();
-				}
-				yield return null;
+        while (!_inputMode)
+            yield return true;
 
-		}
+        yield return new WaitForSeconds(1f);
 
- 
+        for (int i = 0; i < 2; i++)
+            while (_nixieCorrect[i] != _nixies[i])
+            {
+                Buttons[i].OnInteract();
+                yield return new WaitForSeconds(.1f);
+                Render();
+            }
+
+        if (_nixies[0] == _nixieCorrect[0] && _nixies[1] == _nixieCorrect[1])
+        {
+            yield return new WaitForSeconds(.5f);
+            Buttons[2].OnInteract();
+        }
+        yield return null;
+    }
 }
