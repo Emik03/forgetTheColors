@@ -479,9 +479,9 @@ public class FTC : MonoBehaviour
                     {
                         //keep pushing until button value is met by player
                         while (_nixies[i] != values[i])
-                        {
+                        {                            
+							yield return new WaitForSeconds(0.5f);
                             Buttons[i].OnInteract();
-                            yield return new WaitForSeconds(0.5f);
                         }
                     }
 
@@ -492,28 +492,28 @@ public class FTC : MonoBehaviour
         }
     }
 
-    IEnumerator TwitchHandleForcedSolve()
-    {
-        //resets all colors
-        for (int i = 0; i < _nixies.Length; i++)
-        {
-            _mainDisplays[i] = 0;
-            _nixies[i] = 9 - (i * 9);
-        }
+    IEnumerator TwitchHandleForcedSolve(){
+			Debug.LogFormat("[Forget The Colors #{0}]: Thank you for attempting FTC. You gave up on stage {1}", _moduleId,_stage);
+			while(!_inputMode)
+			{yield return true;
+			}
+			yield return new WaitForSeconds(1f);
 
-        for (int i = 0; i < _colorNums.Length; i++)
-            _colorNums[i] = 10;
+				for(int i=0; i<2; i++){
+					while(_nixieCorrect[i]!=_nixies[i]){
+				Buttons[i].OnInteract();
+					yield return new WaitForSeconds(.1f);
+					Render();
+			}
+				}
+			
+			if(_nixies[0]==_nixieCorrect[0]&&_nixies[1]==_nixieCorrect[1]){
+				yield return new WaitForSeconds(.5f);
+				Buttons[2].OnInteract();
+				}
+				yield return null;
 
-        //forces solve
-        _nixieCorrect[0] = _nixies[0];
-        _nixieCorrect[1] = _nixies[1];
-        _inputMode = true;
+		}
 
-        Render();
-
-        //key
-        Debug.LogFormat("[Forget The Colors #{0}]: bruh", _moduleId);
-        Buttons[2].OnInteract();
-        yield return null;
-    }
+ 
 }
