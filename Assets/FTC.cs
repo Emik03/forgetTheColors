@@ -253,101 +253,73 @@ public class FTC : MonoBehaviour
         for (int i = 0; i < _nixies.Length; i++)
             _tempStorage[i + 3] = _nixies[i];
 
-        _tempStorage[5] = _gear;
-
         //this will run through the changes applied to both nixie tubes during step 1 of second page on manual
         for (int i = 0; i < _colorNums.Length - 1; i++)
             //each digit rule
             switch (_colorNums[i])
             {
                 case 0:
-                    _tempStorage[3] += 5f;
-                    if (_tempStorage[3] > 9) { _tempStorage[3] -= 10f; }
-
-                    _tempStorage[4] -= 1f;
-                    if (_tempStorage[4] < 0) { _tempStorage[4] += 10f; }
+                    _tempStorage[3] += 5;
+                    _tempStorage[4] -= 1;
                     break;
 
                 case 1:
-                    _tempStorage[3] -= 1f;
-                    if (_tempStorage[3] < 0) { _tempStorage[3] += 10f; }
-
-                    _tempStorage[4] -= 6f;
-                    if (_tempStorage[4] < 0) { _tempStorage[4] += 10f; }
+                    _tempStorage[3] -= 1;
+                    _tempStorage[4] -= 6;
                     break;
 
                 case 2:
-                    _tempStorage[3] += 3f;
-                    if (_tempStorage[3] > 9) { _tempStorage[3] -= 10f; }
+                    _tempStorage[3] += 3;
                     break;
 
                 case 3:
-                    _tempStorage[3] += 7f;
-                    if (_tempStorage[3] > 9) { _tempStorage[3] -= 10f; }
-
-                    _tempStorage[4] -= 4f;
-                    if (_tempStorage[4] < 0) { _tempStorage[4] += 10; }
+                    _tempStorage[3] += 7;
+                    _tempStorage[4] -= 4;
                     break;
 
                 case 4:
-                    _tempStorage[3] -= 7f;
-                    if (_tempStorage[3] < 0) { _tempStorage[3] += 10f; }
-
+                    _tempStorage[3] -= 7;
                     _tempStorage[4] -= 5;
-                    if (_tempStorage[4] < 0) { _tempStorage[4] += 10; }
                     break;
 
                 case 5:
-                    _tempStorage[3] += 8f;
-                    if (_tempStorage[3] > 9) { _tempStorage[3] -= 10f; }
-
+                    _tempStorage[3] += 8;
                     _tempStorage[4] += 9;
-                    if (_tempStorage[4] > 9) { _tempStorage[4] -= 10; }
                     break;
 
                 case 6:
-                    _tempStorage[3] += 5f;
-                    if (_tempStorage[3] > 9) { _tempStorage[3] -= 10f; }
-
+                    _tempStorage[3] += 5;
                     _tempStorage[4] -= 9;
-                    if (_tempStorage[4] < 0) { _tempStorage[4] += 10; }
                     break;
 
                 case 7:
-                    _tempStorage[3] -= 9f;
-                    if (_tempStorage[3] < 0) { _tempStorage[3] += 10f; }
-
+                    _tempStorage[3] -= 9;
                     _tempStorage[4] += 4;
-                    if (_tempStorage[4] > 9) { _tempStorage[4] -= 10; }
                     break;
 
                 case 8:
                     _tempStorage[4] += 7;
-                    if (_tempStorage[4] > 9) { _tempStorage[4] -= 10; }
                     break;
 
                 case 9:
-                    _tempStorage[3] -= 3f;
-                    if (_tempStorage[3] < 0) { _tempStorage[3] += 10f; }
-
+                    _tempStorage[3] -= 3;
                     _tempStorage[4] += 5;
-                    if (_tempStorage[4] > 9) { _tempStorage[4] -= 10; }
                     break;
             }
 
+        //modulo
+        _tempStorage[3] = (_tempStorage[3] + 10) % 10;
+        _tempStorage[4] = (_tempStorage[4] + 10) % 10;
+
         //new gear = calculated nixies + gear
         _tempStorage[5] = _tempStorage[3] + _tempStorage[4] + _gear;
-
-        //modulo
-        while (_tempStorage[5] > 9)
-            _tempStorage[5] -= 10;
+        _tempStorage[5] %= 10;
 
         //move the index up and down according to calculated nixies
         _index = _colorNums[3] - _tempStorage[3] + _tempStorage[4];
 
         //modulo
-        if (_index < 0) { _index += 10; }
-        if (_index > 9) { _index -= 10; }
+        _index = (_index + 10) % 10;
 
         //get serial
         List<char> serial = Bomb.GetSerialNumber().ToList();
@@ -357,72 +329,62 @@ public class FTC : MonoBehaviour
         {
             case 0:
                 _tempStorage[5] += Bomb.GetBatteryCount();
-                ruleColor.Add(_colors[0]);
                 break;
 
             case 1:
                 _tempStorage[5] -= Bomb.GetPortCount();
-                ruleColor.Add(_colors[1]);
                 break;
 
             case 2:
                 _tempStorage[5] += serial.Last();
-                ruleColor.Add(_colors[2]);
                 break;
 
             case 3:
                 _tempStorage[5] -= Bomb.GetSolvedModuleNames().Count();
-                ruleColor.Add(_colors[3]);
                 break;
 
             case 4:
                 _tempStorage[5] += Bomb.GetPortPlateCount();
-                ruleColor.Add(_colors[4]);
                 break;
 
             case 5:
                 _tempStorage[5] -= Bomb.GetModuleNames().Count();
-                ruleColor.Add(_colors[5]);
                 break;
 
             case 6:
                 _tempStorage[5] += Bomb.GetBatteryHolderCount();
-                ruleColor.Add(_colors[6]);
                 break;
 
             case 7:
                 _tempStorage[5] -= Bomb.GetOnIndicators().Count();
-                ruleColor.Add(_colors[7]);
                 break;
 
             case 8:
                 _tempStorage[5] += Bomb.GetIndicators().Count();
-                ruleColor.Add(_colors[8]);
                 break;
 
             case 9:
                 _tempStorage[5] -= Bomb.GetOffIndicators().Count();
-                ruleColor.Add(_colors[9]);
                 break;
         }
+
+        ruleColor.Add(_colors[(int)_index]);
 
         //modulo
         while (_tempStorage[5] < 0)
             _tempStorage[5] += 10;
 
-        while (_tempStorage[5] > 9)
-            _tempStorage[5] -= 10;
+        _tempStorage[5] %= 10;
 
         //calculate final answer for that stage
         _tempStorage[0] = Math.Floor(Math.Abs(Math.Cos(_mainDisplays[0] * Mathf.Deg2Rad) * Math.Pow(10, 5)));
-        _tempStorage[2] = Math.Truncate(Math.Sin(int.Parse(String.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5])) * Mathf.Deg2Rad) * Math.Pow(10, 5));
+        _tempStorage[2] = Math.Truncate(Math.Sin(int.Parse(string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5])) * Mathf.Deg2Rad) * Math.Pow(10, 5));
         _tempStorage[1] = _tempStorage[0] + _tempStorage[2];
 
         _storedValues[_stage] = (int)_tempStorage[1] % 100000;
-
         sineNumber.Add((int)_tempStorage[2]);
 
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The stage number is {2}, the calculated values of the Nixie tubes are {3} and {4}, the calculated gear number is {5}, the modifier (sine) for the stage number is {6}.", _moduleId, _stage, _tempStorage[0], _tempStorage[3], _tempStorage[4],  _tempStorage[5], _tempStorage[2]);
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The stage number is {2}, the calculated values of the Nixie tubes are {3} and {4}, the rule applied was for Step 2 was {5}, the calculated gear number is {6}, the modifier (sine) for the stage number is {7}.", _moduleId, _stage, _tempStorage[0], _tempStorage[3], _tempStorage[4], ruleColor.Last(), _tempStorage[5], _tempStorage[2]);
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The final value for this stage is {2}.", _moduleId, _stage, _storedValues[_stage]);
     }
 
