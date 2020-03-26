@@ -18,14 +18,14 @@ public class FTC : MonoBehaviour
 
     //large souvenir dump
     bool solved;
-    int maxStage = 3;
+    int stage = 0, maxStage = 3;
     List<byte> gear = new List<byte>(0);
     List<short> largeDisplay = new List<short>(0);
     List<int> sineNumber = new List<int>(0);
     List<string> gearColor = new List<string>(0), ruleColor = new List<string>(0);
 
     private bool _inputMode, _debug = false;
-    private int _button, _gear, _moduleId, _stage = 0;
+    private int _button, _gear, _moduleId;
     private float _answer;
     private double _index;
 
@@ -74,9 +74,9 @@ public class FTC : MonoBehaviour
     void FixedUpdate()
     {
         //if there are more stages left, generate new stage
-        if (_stage < Bomb.GetSolvedModuleNames().Where(a => !_ignore.Contains(a)).Count() && !solved)
+        if (stage < Bomb.GetSolvedModuleNames().Where(a => !_ignore.Contains(a)).Count() && !solved)
         {
-            _stage++;
+            stage++;
             StartCoroutine(Generate());
         }
     }
@@ -88,11 +88,11 @@ public class FTC : MonoBehaviour
             StopAllCoroutines();
 
         //plays sound
-        if (_stage != 0)
+        if (stage != 0)
             Audio.PlaySoundAtTransform("nextStage", Buttons[2].transform);
 
         //if this is the submission/final stage
-        if (_stage == maxStage || _answer != 0)
+        if (stage == maxStage || _answer != 0)
         {
             for (int i = 0; i < _nixies.Length; i++)
             {
@@ -111,10 +111,10 @@ public class FTC : MonoBehaviour
         }
 
         //if it's supposed to be randomising
-        if (!solved && _stage != maxStage && _answer == 0)
+        if (!solved && stage != maxStage && _answer == 0)
         {
             //stage 0: runs 20 times, stage 1+: runs 10 times
-            for (int i = 0; i < 10 + ((Mathf.Clamp(_stage, 0, 1) - 1) * -10); i++)
+            for (int i = 0; i < 10 + ((Mathf.Clamp(stage, 0, 1) - 1) * -10); i++)
             {
                 for (int j = 0; j < _nixies.Length; j++)
                     _nixies[j] = UnityEngine.Random.Range(0, 10);
@@ -131,7 +131,7 @@ public class FTC : MonoBehaviour
                 yield return new WaitForSeconds(.075f);
             }
 
-            _mainDisplays[1] = _stage;
+            _mainDisplays[1] = stage;
 
             //souvenir
             gear.Add((byte)_gear);
@@ -142,9 +142,9 @@ public class FTC : MonoBehaviour
         }
 
         //if it's not last stage
-        if (_stage != maxStage && _answer == 0)
+        if (stage != maxStage && _answer == 0)
         {
-            Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The large display is {2}. The Colors are {3}, {4}, and {5}. The Nixie numbers are {6}{7}, and the gear is numbered {8} and colored {9}.", _moduleId, _stage, _mainDisplays[0], _colors[_colorNums[0]], _colors[_colorNums[1]], _colors[_colorNums[2]], _nixies[0], _nixies[1], _gear, _colors[_colorNums[3]]);
+            Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The large display is {2}. The Colors are {3}, {4}, and {5}. The Nixie numbers are {6}{7}, and the gear is numbered {8} and colored {9}.", _moduleId, stage, _mainDisplays[0], _colors[_colorNums[0]], _colors[_colorNums[1]], _colors[_colorNums[2]], _nixies[0], _nixies[1], _gear, _colors[_colorNums[3]]);
             Calculate();
             StopCoroutine(Generate());
         }
@@ -179,9 +179,9 @@ public class FTC : MonoBehaviour
         else
         {
             //debugging
-            if (_debug && _stage != maxStage)
+            if (_debug && stage != maxStage)
             {
-                _stage++;
+                stage++;
                 StartCoroutine(Generate());
             }
 
@@ -233,7 +233,7 @@ public class FTC : MonoBehaviour
 
     void CalculateAnswer()
     {
-        for (int i = 0; i < _stage; i++)
+        for (int i = 0; i < stage; i++)
             _answer += _storedValues[i];
 
         _inputMode = true;
@@ -381,11 +381,11 @@ public class FTC : MonoBehaviour
         _tempStorage[2] = Math.Truncate(Math.Sin(int.Parse(string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5])) * Mathf.Deg2Rad) * Math.Pow(10, 5));
         _tempStorage[1] = _tempStorage[0] + _tempStorage[2];
 
-        _storedValues[_stage] = (int)_tempStorage[1] % 100000;
+        _storedValues[stage] = (int)_tempStorage[1] % 100000;
         sineNumber.Add((int)_tempStorage[2]);
 
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The stage number is {2}, the calculated values of the Nixie tubes are {3} and {4}, the rule applied was for Step 2 was {5}, the calculated gear number is {6}, the modifier (sine) for the stage number is {7}.", _moduleId, _stage, _tempStorage[0], _tempStorage[3], _tempStorage[4], ruleColor.Last(), _tempStorage[5], _tempStorage[2]);
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The final value for this stage is {2}.", _moduleId, _stage, _storedValues[_stage]);
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The stage number is {2}, the calculated values of the Nixie tubes are {3} and {4}, the rule applied was for Step 2 was {5}, the calculated gear number is {6}, the modifier (sine) for the stage number is {7}.", _moduleId, stage, _tempStorage[0], _tempStorage[3], _tempStorage[4], ruleColor.Last(), _tempStorage[5], _tempStorage[2]);
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The final value for this stage is {2}.", _moduleId, stage, _storedValues[stage]);
     }
 
     private bool IsValid(string par)
@@ -453,7 +453,7 @@ public class FTC : MonoBehaviour
 
     IEnumerator TwitchHandleForcedSolve()
     {
-        Debug.LogFormat("[Forget The Colors #{0}]: Thank you for attempting FTC. You gave up on stage {1}", _moduleId, _stage);
+        Debug.LogFormat("[Forget The Colors #{0}]: Thank you for attempting FTC. You gave up on stage {1}", _moduleId, stage);
 
         while (!_inputMode)
             yield return true;
