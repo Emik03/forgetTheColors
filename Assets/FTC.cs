@@ -308,8 +308,8 @@ public class FTC : MonoBehaviour
             }
 
         //modulo
-        _tempStorage[3] = (_tempStorage[3] + 10) % 10;
-        _tempStorage[4] = (_tempStorage[4] + 10) % 10;
+        _tempStorage[3] = (_tempStorage[3] + 100) % 10;
+        _tempStorage[4] = (_tempStorage[4] + 100) % 10;
 
         //new gear = calculated nixies + gear
         _tempStorage[5] = _tempStorage[3] + _tempStorage[4] + _gear;
