@@ -1,15 +1,17 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
 using KModkit;
 using System.Text.RegularExpressions;
+using Rnd = UnityEngine.Random;
 
 public class FTC : MonoBehaviour
 {
     public KMAudio Audio;
     public KMBombModule Module;
+    public KMBossModule Boss;
     public KMBombInfo Bomb;
     public TextMesh[] Number;
     public Renderer[] ColorChanger;
@@ -17,29 +19,34 @@ public class FTC : MonoBehaviour
     public Color[] Color = new Color[10];
 
     //large souvenir dump
-    bool solved;
-    int stage = 0, maxStage = 3;
+    bool solved = false;
+    int stage = 0, maxStage = 30;
     List<byte> gear = new List<byte>(0);
     List<short> largeDisplay = new List<short>(0);
     List<int> sineNumber = new List<int>(0);
     List<string> gearColor = new List<string>(0), ruleColor = new List<string>(0);
 
-    private bool _inputMode, _debug = false;
+    private bool _inputMode, _strike = false;
     private int _button, _gear, _moduleId;
-    private float _answer;
+    private float _answer, _y = 0;
     private double _index;
 
     private int[] _nixies = new int[2], _mainDisplays = new int[2], _colorNums = new int[4], _nixieCorrect = new int[2], _storedValues;
     private double[] _tempStorage = new double[6];
     private IEnumerable<string> _solvable;
-
-    readonly static private string[] _colors = { "Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Purple", "Pink", "Maroon", "Azure", "Gray" };
-    readonly static private string[] _ignore = { "Forget The Colors", "14", "Bamboozling Time Keeper", "Brainf---", "Forget Enigma", "Forget Everything", "Forget It Not", "Forget Me Not", "Forget Me Later", "Forget Perspecive", "Forget Them All", "Forget This", "Forget Us Not", "Organization", "Purgatory", "Simon Forgets", "Simons's Stages", "Souvenir", "Tallordered Keys", "The Time Keeper", "The Troll", "The Very Annoying Button", "Timing Is Everything", "Turn The Key", "Ultimate Custom Night", "�bermodule" };
-
-    private static int _moduleIdCounter = 1;
+    
+    readonly static private string[] _colors = { "Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Purple", "Pink", "Maroon", "White", "Gray" };
+    readonly static private string[] _failPhrases = { "You did a goodn't", "Congratulations! You got a strike", "You have just won a free gift card containing 1 strike and no solve! In other words", "This is so sad", "This must be really embarrasing for you", "I just came back, where we again? Oh yeah", "Unsuprisingly, your 1/91 chance went unsuccessful", "Did Emik break the module or are you just bad?", "Did Cooldoom break the module or are you just bad?", "This looks like a WHITE ABORT to me", "Correct... your mistakes in the future", "?!", "‽", "The phrase \"It's just a module\" is such a weak mindset, you are okay with what happened, losing, imperfection of a craft.", "Good for you", "Have fun doing the math again", "Was that MAROON or RED?", "Are you sure the experts wrote it down correctly?", "Are you sure the defuser said it correctly?", "The key spun backwards", "THE ANSWER IS IN THE WRONG POSITION", "key.wav", "Module.HandleStrike()", "Is your calculator broken?", "Is your KTANE broken?", "A wide-screen monitor would really help here", "VR would make this easier", "E", "bruh moment", "Failed executing external process for 'Bake Runtime' job.", "Did Discord cut vital communication off?", "You failed the vibe check", "Looks like you failed your exam", "Could not find USER_ANSWER in ACTUAL_ANSWER", "nah", "noppen", "yesn't", "This is the moment where you quit out the bomb", "You just lost the game", "Noooo, why'd you do that?", "*pufferfish noises*", "I was thinking about being generous this round, it didn't change my mind though", "Have you tried turning this module on and off?", "It's been so long, since I last have seen an answer, lost to this monster", "Oof", "Yikes", "Good luck figuring out why you're wrong", "Oog", "Nice one buckaroo", ":̶.̶|̶:̶;̶  <--- Is this loss?" };
+    readonly static private string[] _winPhrases = { "Hey, that's pretty good", "*intense cat noises*", "While you're at it, be sure to like, comment, favorite and subscribe", "This is oddly calming", "GG m8", "I just came back, where we again? Oh yeah", "Suprisingly, your 1/91 chance went successful", "Did Emik fix the module or are you just that good?", "Did Cooldoom fix the module or are you just that good?", "This looks like a NUT BUTTON to me", "Opposite of incorrect", "Damn, I should ban you from solving me", "You haven't forgotten the colors?", "Do you still think it's Very Hard?", "I think I'm supposed to Module.HandlePass()", "I really hope you didn't look at the logs", "I really hope you didn't use an auto-solver", "I should have just used Azure instead of White", "How many shrimps do I have to eat, before it makes my gears turn pink", "The key spun forwards", "THE ANSWER IS IN THE RIGHT POSITION", "keyCorrect.wav", "Module.HandlePass()", "Did you use a calculator?", "Did you enjoy it?", "Please rate us 5 stars in the ModuleStore at your KTaNEPhone", "Maybe I should've called myself \"Write Down Colors\"", "E", "bruh moment", "*happy music*", ":) good", "You passed the vibe check", "Looks like you passed your exam", "Successfully found USER_ANSWER in ACTUAL_ANSWER", "yes", "yesper", "non't", "This is the moment where you say \"LET'S GO!!\"", "You just won the game", "*key turned*", "opposite of bruh moment", "I was thinking about being generous this round, but you were correct anyway", ":joy: 99% IMPOSSIBLE :joy:", "Forget The Colors, is this where you want to be, I just don't get it, why do you want to stay?", "Mood", "!!", "Now go brag to your friends", "PogChamp", "Poggers", "You passed with flying colors" };
+    static private string[] _ignore = { "Forget The Colors", "14", "Bamboozling Time Keeper", "Brainf---", "Forget Enigma", "Forget Everything", "Forget It Not", "Forget Me Not", "Forget Me Later", "Forget Perspective", "Forget Them All", "Forget This", "Forget Us Not", "Organization", "Purgatory", "Simon Forgets", "Simon's Stages", "Souvenir", "Tallordered Keys", "The Time Keeper", "The Troll", "The Very Annoying Button", "Timing Is Everything", "Turn The Key", "Ultimate Custom Night", "Übermodule" };
+    static private int _moduleIdCounter = 1;
 
     void Awake()
     {
+        string[] ignoredModules = Boss.GetIgnoredModules(Module, _ignore);
+        if (ignoredModules != null)
+            _ignore = ignoredModules;
+
         _moduleId = _moduleIdCounter++;
         for (int i = 0; i < Buttons.Length; i++)
         {
@@ -54,8 +61,8 @@ public class FTC : MonoBehaviour
 
     void Start()
     {
-        //if debug is turned on, max stage should equal the initial value assigned, otherwise set it to the proper value
-        if (!_debug)
+        //if on unity, max stage should equal the initial value assigned, otherwise set it to the proper value
+        if (!Application.isEditor)
             maxStage = Bomb.GetSolvableModuleNames().Where(a => !_ignore.Contains(a)).Count();
 
         _storedValues = new int[maxStage + 1];
@@ -73,8 +80,27 @@ public class FTC : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (solved)
+        {
+            _y += (420 - _y) / 24;
+            Buttons[2].transform.localRotation = Quaternion.Euler(0, _y, 0);
+        }
+
+        else if (_strike)
+        {
+            _y += (360 - _y) / 8;
+            float newY = Math.Abs(180 - _y);
+            Buttons[2].transform.localRotation = Quaternion.Euler(0, -newY, 0);
+
+            if (_y > 359)
+            {
+                _strike = false;
+                _y = 0;
+            }
+        }
+
         //if there are more stages left, generate new stage
-        if (stage < Bomb.GetSolvedModuleNames().Where(a => !_ignore.Contains(a)).Count() && !solved)
+        else if (stage < Bomb.GetSolvedModuleNames().Where(a => !_ignore.Contains(a)).Count() && !solved)
         {
             stage++;
             StartCoroutine(Generate());
@@ -94,11 +120,9 @@ public class FTC : MonoBehaviour
         //if this is the submission/final stage
         if (stage == maxStage || _answer != 0)
         {
-            for (int i = 0; i < _nixies.Length; i++)
-            {
-                _mainDisplays[i] = 0;
-                _nixies[i] = 0;
-            }
+            //reset visuals
+            _nixies[0] = 0;
+            _nixies[1] = 0;
 
             for (int i = 0; i < _colorNums.Length; i++)
                 _colorNums[i] = 10;
@@ -106,6 +130,7 @@ public class FTC : MonoBehaviour
             _gear = 0;
 
             Render();
+
             CalculateAnswer();
             StopAllCoroutines();
         }
@@ -117,14 +142,14 @@ public class FTC : MonoBehaviour
             for (int i = 0; i < 10 + ((Mathf.Clamp(stage, 0, 1) - 1) * -10); i++)
             {
                 for (int j = 0; j < _nixies.Length; j++)
-                    _nixies[j] = UnityEngine.Random.Range(0, 10);
+                    _nixies[j] = Rnd.Range(0, 10);
 
                 for (int j = 0; j < _colorNums.Length; j++)
-                    _colorNums[j] = UnityEngine.Random.Range(0, 10);
+                    _colorNums[j] = Rnd.Range(0, 10);
 
-                _mainDisplays[0] = UnityEngine.Random.Range(0, 991);
-                _mainDisplays[1] = UnityEngine.Random.Range(0, 100);
-                _gear = UnityEngine.Random.Range(0, 10);
+                _mainDisplays[0] = Rnd.Range(0, 991);
+                _mainDisplays[1] = Rnd.Range(0, 100);
+                _gear = Rnd.Range(0, 10);
 
                 Render();
 
@@ -139,14 +164,13 @@ public class FTC : MonoBehaviour
             gearColor.Add(_colors[_colorNums[3]]);
 
             Render();
-        }
 
-        //if it's not last stage
-        if (stage != maxStage && _answer == 0)
-        {
-            Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The large display is {2}. The Colors are {3}, {4}, and {5}. The Nixie numbers are {6}{7}, and the gear is numbered {8} and colored {9}.", _moduleId, stage, _mainDisplays[0], _colors[_colorNums[0]], _colors[_colorNums[1]], _colors[_colorNums[2]], _nixies[0], _nixies[1], _gear, _colors[_colorNums[3]]);
-            Calculate();
-            StopCoroutine(Generate());
+            //if it's not last stage
+            if (stage != maxStage && _answer == 0)
+            {
+                Calculate();
+                StopCoroutine(Generate());
+            }
         }
     }
 
@@ -156,10 +180,11 @@ public class FTC : MonoBehaviour
             return;
 
         //if it's not ready for input, strike
-        if (!_inputMode && !_debug)
+        if (!_inputMode && !Application.isEditor)
         {
             Audio.PlaySoundAtTransform("key", Buttons[2].transform);
             GetComponent<KMBombModule>().HandleStrike();
+            _strike = true;
             return;
         }
 
@@ -169,7 +194,7 @@ public class FTC : MonoBehaviour
         //NOT the key
         if (c != 2)
         {
-            _nixies[c] = (_nixies[c] + 1) % 10;
+            _nixies[c] = (int)Modulo(_nixies[c] + 1, 10);
 
             Buttons[c].AddInteractionPunch();
             Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, Buttons[c].transform);
@@ -179,7 +204,7 @@ public class FTC : MonoBehaviour
         else
         {
             //debugging
-            if (_debug && stage != maxStage)
+            if (Application.isEditor && stage != maxStage)
             {
                 stage++;
                 StartCoroutine(Generate());
@@ -188,20 +213,21 @@ public class FTC : MonoBehaviour
             //if both correct
             else if (_nixies[0] == _nixieCorrect[0] && _nixies[1] == _nixieCorrect[1])
             {
-                solved = true;
-                GetComponent<KMBombModule>().HandlePass();
                 Audio.PlaySoundAtTransform("keySuccess", Buttons[2].transform);
                 Audio.PlaySoundAtTransform("solved", Buttons[2].transform);
+                solved = true;
+                Module.HandlePass();
 
-                Debug.LogFormat("[Forget The Colors #{0}]: Congration, you did it.", _moduleId);
+                Debug.LogFormat("[Forget The Colors #{0}]: {1}; module solved!", _moduleId, _winPhrases[Rnd.Range(0, _winPhrases.Length)]);
             }
 
             //if either incorrect
             else
             {
                 Audio.PlaySoundAtTransform("key", Buttons[2].transform);
-                GetComponent<KMBombModule>().HandleStrike();
-                Debug.LogFormat("[Forget The Colors #{0}]: You did a goodn't, you submitted {1}{2} when I expected {3}{4}.", _moduleId, _nixies[0], _nixies[1], _nixieCorrect[0], _nixieCorrect[1]);
+                _strike = true;
+                Module.HandleStrike();
+                Debug.LogFormat("[Forget The Colors #{0}]: {1}; you submitted {2}{3} when I expected {4}{5}.", _moduleId, _failPhrases[Rnd.Range(0, _failPhrases.Length)], _nixies[0], _nixies[1], _nixieCorrect[0], _nixieCorrect[1]);
             }
         }
 
@@ -210,9 +236,19 @@ public class FTC : MonoBehaviour
 
     private void Render()
     {
-        //render initial displays
-        Number[0].text = _mainDisplays[0].ToString();
-        Number[1].text = (_mainDisplays[1] % 100).ToString();
+        if (maxStage == stage)
+        {
+            //render turned off displays
+            Number[0].text = "";
+            Number[1].text = "";
+        }
+
+        else
+        {
+            //render initial displays
+            Number[0].text = _mainDisplays[0].ToString();
+            Number[1].text = Modulo(_mainDisplays[1], 100).ToString();
+        }
 
         //if the large display lacks 3 characters, add 0's
         for (int i = 0; i < 2; i++)
@@ -233,28 +269,49 @@ public class FTC : MonoBehaviour
 
     void CalculateAnswer()
     {
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> FINAL STAGE <-------=------->", _moduleId);
         for (int i = 0; i < stage; i++)
+        {
             _answer += _storedValues[i];
+            Debug.LogFormat("[Forget The Colors #{0}]: Adding stage {1}'s {2}, now the total is {3}.", _moduleId, i, _storedValues[i], _answer);
+        }
 
         _inputMode = true;
 
-        _answer = (float)Math.Abs(_answer / Math.Pow(10, 5) % 1);
+        _answer = (float)Modulo(Math.Abs(_answer / Math.Pow(10, 5)), 1);
+        Debug.LogFormat("[Forget The Colors #{0}]: After forcing the number to be 5 digits long, the inverse cosine is {1} which returns {2}.", _moduleId, _answer, Math.Truncate(Mathf.Acos(_answer) * Mathf.Rad2Deg));
         _answer = (float)Math.Truncate(Mathf.Acos(_answer) * Mathf.Rad2Deg);
-
+        
         //gets correct answer
         _nixieCorrect[0] = (int)Math.Truncate((double)_answer / 10);
-        _nixieCorrect[1] = (int)Math.Truncate((double)_answer % 10);
+        _nixieCorrect[1] = (int)Math.Truncate(Modulo(_answer, 10));
+
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> SOLUTION <-------=------->", _moduleId);
 
         Debug.LogFormat("[Forget The Colors #{0}]: The expected answer is {1}.", _moduleId, _answer);
+
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> LET'S SEE HOW THE USER DOES <-------=------->", _moduleId);
     }
 
     void Calculate()
     {
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> STAGE {1} (CALCULATED GEAR NUMBER) <-------=------->", _moduleId, stage);
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The large display is {2}. The Colors are {3}, {4}, and {5}. The Nixie numbers are {6}{7}, and the gear is numbered {8} and colored {9}.", _moduleId, stage, _mainDisplays[0], _colors[_colorNums[0]], _colors[_colorNums[1]], _colors[_colorNums[2]], _nixies[0], _nixies[1], _gear, _colors[_colorNums[3]]);
+
+        //get stage number
+        _tempStorage[0] = Math.Floor(Math.Abs(Math.Cos(_mainDisplays[0] * Mathf.Deg2Rad) * Math.Pow(10, 5)));
+
+        //because of floating point rounding, if the numbers end up being a multiple of 90, it will return 99999 when it should return 0
+        if (Modulo(_mainDisplays[0], 90) == 0)
+            _tempStorage[0] = 0;
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The stage number is the absolute of the first five decimals of of cos({2}), which is {3}.", _moduleId, stage, _mainDisplays[0], _tempStorage[0]);
+
         for (int i = 0; i < _nixies.Length; i++)
             _tempStorage[i + 3] = _nixies[i];
 
         //this will run through the changes applied to both nixie tubes during step 1 of second page on manual
         for (int i = 0; i < _colorNums.Length - 1; i++)
+        {
             //each digit rule
             switch (_colorNums[i])
             {
@@ -306,24 +363,28 @@ public class FTC : MonoBehaviour
                     _tempStorage[4] += 5;
                     break;
             }
+            Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Applying the {2}-colored cylinder on Step 1, the nixies are now {3} and {4}", _moduleId, stage, _colors[_colorNums[i]], _tempStorage[3], _tempStorage[4]);
+        }
 
         //modulo
-        _tempStorage[3] = (_tempStorage[3] + 10) % 10;
-        _tempStorage[4] = (_tempStorage[4] + 10) % 10;
+        _tempStorage[3] = Modulo(_tempStorage[3], 10);
+        _tempStorage[4] = Modulo(_tempStorage[4], 10);
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of both nixies by 10, their values are now {2} and {3}", _moduleId, stage, _tempStorage[3], _tempStorage[4]);
 
         //new gear = calculated nixies + gear
         _tempStorage[5] = _tempStorage[3] + _tempStorage[4] + _gear;
-        _tempStorage[5] %= 10;
-
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The total number is calculated with the first nixie ({2}) + the second nixie ({3}) + the gear number ({4}) which totals to {5}.", _moduleId, stage, _tempStorage[3], _tempStorage[4], _gear, _tempStorage[5]);
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of the total number {2} with 10, its value is {3}.", _moduleId, stage, _tempStorage[5], Modulo(_tempStorage[5], 10));
+        _tempStorage[5] = Modulo(_tempStorage[5], 10);
+        
         //move the index up and down according to calculated nixies
         _index = _colorNums[3] - _tempStorage[3] + _tempStorage[4];
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Starting on the color of the gear ({2}), move up the first calculated nixie tube ({3}) which lands on {4}, then move down the second calculated nixie tube ({5}) which lands us on {6}.", _moduleId, stage, _colors[_colorNums[3]], _tempStorage[3], _colors[(int)Modulo(_colorNums[3] - _tempStorage[3], 10)], _tempStorage[4], _colors[(int)Modulo(_colorNums[3] - _tempStorage[3] + _tempStorage[4], 10)]);
 
         //modulo
-        _index = (_index + 10) % 10;
-
-        //get serial
-        List<char> serial = Bomb.GetSerialNumber().ToList();
-
+        _index = Modulo(_index, 10);
+        double temp = _tempStorage[5];
+        
         //this will run through the changes applied to the gear during step 2 of second page on manual
         switch ((int)_index)
         {
@@ -336,7 +397,7 @@ public class FTC : MonoBehaviour
                 break;
 
             case 2:
-                _tempStorage[5] += serial.Last();
+                _tempStorage[5] += Bomb.GetSerialNumberNumbers().Last();
                 break;
 
             case 3:
@@ -368,24 +429,56 @@ public class FTC : MonoBehaviour
                 break;
         }
 
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Apply the color rule {2} to the total number {3}, which gives us {4}.", _moduleId, stage, _colors[(int)_index], temp, _tempStorage[5]);
+
         ruleColor.Add(_colors[(int)_index]);
 
         //modulo
-        while (_tempStorage[5] < 0)
-            _tempStorage[5] += 10;
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of the total number {2}, its value is {3}. This is the calculated gear number.", _moduleId, stage, _tempStorage[5], Modulo(_tempStorage[5], 10));
+        _tempStorage[5] = Modulo(_tempStorage[5], 10);
 
-        _tempStorage[5] %= 10;
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> STAGE {1} (CALCULATED STAGE NUMBER) <-------=------->", _moduleId, stage);
 
-        //calculate final answer for that stage
-        _tempStorage[0] = Math.Floor(Math.Abs(Math.Cos(_mainDisplays[0] * Mathf.Deg2Rad) * Math.Pow(10, 5)));
+        //get the sine degrees
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The nixies are {2} and {3}, and the calculated gear number is {4}, combining all of them gives us {5}", _moduleId, stage, _tempStorage[3], _tempStorage[4], _tempStorage[5], string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5]));
         _tempStorage[2] = Math.Truncate(Math.Sin(int.Parse(string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5])) * Mathf.Deg2Rad) * Math.Pow(10, 5));
+
+        //because of floating point rounding, if the numbers end up being a multiple of 90, it will return 99999 when it should return 0
+        if (Modulo(int.Parse(string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5])), 90) == 0)
+            _tempStorage[2] = 0;
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The sine number is sin({2}), which gets us {3} after flooring all decimals.", _moduleId, stage, string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5]), _tempStorage[2]);
+
+        //get final value for the stage
         _tempStorage[1] = _tempStorage[0] + _tempStorage[2];
+        _storedValues[stage] = (int)Modulo(_tempStorage[1], (int)Math.Pow(10, 5));
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The final value for this stage is the initial stage number {2} and the sine number {3}, which gives the final value of {4}.", _moduleId, stage, _tempStorage[0], _tempStorage[2], _tempStorage[1]);
 
-        _storedValues[stage] = (int)_tempStorage[1] % 100000;
         sineNumber.Add((int)_tempStorage[2]);
+    }
 
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The stage number is {2}, the calculated values of the Nixie tubes are {3} and {4}, the rule applied was for Step 2 was {5}, the calculated gear number is {6}, the modifier (sine) for the stage number is {7}.", _moduleId, stage, _tempStorage[0], _tempStorage[3], _tempStorage[4], ruleColor.Last(), _tempStorage[5], _tempStorage[2]);
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The final value for this stage is {2}.", _moduleId, stage, _storedValues[stage]);
+    private double Modulo(double num, int mod)
+    {
+        while (true)
+        {
+            //modulation for negatives
+            if (num < 0)
+            {
+                num += mod;
+                continue;
+            }
+
+            //modulation for positives
+            else if (num >= mod)
+            {
+                num -= mod;
+                continue;
+            }
+
+            //once it reaches here, we know it's modulated and we can return it
+            break;
+        }
+
+        return num;
     }
 
     private bool IsValid(string par)
@@ -430,7 +523,7 @@ public class FTC : MonoBehaviour
                 byte.TryParse(buttonPressed[1], out user);
 
                 //splits values
-                byte[] values = new byte[2] { (byte)(user / 10), (byte)(user % 10) };
+                byte[] values = new byte[2] { (byte)(user / 10), (byte)Modulo(user, 10) };
 
                 //submit answer only if it's ready
                 if (_inputMode)
