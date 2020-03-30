@@ -13,6 +13,8 @@ public class FTC : MonoBehaviour
     public KMBombModule Module;
     public KMBossModule Boss;
     public KMBombInfo Bomb;
+    public Transform Gear;
+    public Transform CylinderKey;
     public TextMesh[] Number;
     public Renderer[] ColorChanger;
     public KMSelectable[] Buttons;
@@ -20,15 +22,15 @@ public class FTC : MonoBehaviour
 
     //large souvenir dump
     bool solved = false;
-    int stage = 0, maxStage = 30;
+    int stage = 0, maxStage = 20;
     List<byte> gear = new List<byte>(0);
     List<short> largeDisplay = new List<short>(0);
     List<int> sineNumber = new List<int>(0);
     List<string> gearColor = new List<string>(0), ruleColor = new List<string>(0);
 
-    private bool _inputMode, _strike = false;
-    private int _button, _gear, _moduleId;
-    private float _answer, _y = 0;
+    private bool _inputMode, _strike = false, _rotating = false;
+    private int _button, _gear, _gearDir = 0, _currentDir = 0, _moduleId = 0;
+    private float _answer, _easeSolve = 0, _easeGear = 0;
     private double _index;
 
     private int[] _nixies = new int[2], _mainDisplays = new int[2], _colorNums = new int[4], _nixieCorrect = new int[2], _storedValues;
@@ -80,28 +82,72 @@ public class FTC : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (Gear.localRotation.y != _gearDir + _currentDir)
+        {
+            _easeGear += 0.025f;
+
+            if (_inputMode)
+            {
+                Gear.localRotation = Quaternion.Euler(0, _currentDir % 360 * Math.Abs(Ease.Cubic.Out(_easeGear) - 1), 0);
+
+                if (_easeGear > 1)
+                    Gear.localRotation = Quaternion.Euler(0, 0, 0);
+            }
+
+            else
+            {
+                Gear.localRotation = Quaternion.Euler(0, Ease.Cubic.Out(_easeGear) * _gearDir + _currentDir, 0);
+
+                if (_easeGear > 1)
+                    Gear.localRotation = Quaternion.Euler(0, _gearDir + _currentDir, 0);
+            }
+            _rotating = _easeGear <= 1;
+        }
+
         if (solved)
         {
-            _y += (420 - _y) / 24;
-            Buttons[2].transform.localRotation = Quaternion.Euler(0, _y, 0);
+            if (_easeSolve <= 1)
+            {
+                _easeSolve += 0.02f;
+
+                Buttons[2].transform.localRotation = Quaternion.Euler(0, Ease.Back.Out(_easeSolve) * 420, 0);
+                CylinderKey.localScale = new Vector3(Ease.Elastic.Out(_easeSolve) * 0.5f, 1, Ease.Elastic.Out(_easeSolve) * 0.5f);
+            }
+
+            else if (_easeSolve <= 2)
+            {
+                _easeSolve += 0.04f;
+
+                Buttons[2].transform.localPosition = new Vector3(0, (Ease.Back.In(_easeSolve - 1) * -3) - 0.91f, 0);
+                CylinderKey.localScale = new Vector3((1 - Ease.Elastic.In(_easeSolve - 1)) / 2, 1, (1 - Ease.Elastic.In(_easeSolve - 1)) / 2);
+            }
+
+            else
+                CylinderKey.localPosition = new Vector3(0, -0.2f, 0);
         }
 
         else if (_strike)
         {
-            _y += (360 - _y) / 8;
-            float newY = Math.Abs(180 - _y);
-            Buttons[2].transform.localRotation = Quaternion.Euler(0, -newY, 0);
+            _easeSolve += 0.04f;
+            Buttons[2].transform.localRotation = Quaternion.Euler(0, (Ease.Elastic.Out(_easeSolve) - _easeSolve) * 69, 0);
 
-            if (_y > 359)
+            if (_easeSolve >= 1)
             {
                 _strike = false;
-                _y = 0;
+                _easeSolve = 0;
             }
         }
 
         //if there are more stages left, generate new stage
         else if (stage < Bomb.GetSolvedModuleNames().Where(a => !_ignore.Contains(a)).Count() && !solved)
         {
+            if (!_rotating)
+            {
+                _currentDir += _gearDir;
+                _gearDir = Rnd.Range(180, 360);
+                _easeGear = 0;
+            }
+
             stage++;
             StartCoroutine(Generate());
         }
@@ -179,17 +225,18 @@ public class FTC : MonoBehaviour
         if (solved)
             return;
 
+        //gets the specific button pushed
+        var c = Array.IndexOf(Buttons, btn);
+
         //if it's not ready for input, strike
         if (!_inputMode && !Application.isEditor)
         {
             Audio.PlaySoundAtTransform("key", Buttons[2].transform);
             GetComponent<KMBombModule>().HandleStrike();
-            _strike = true;
+            if (c == 2)
+                _strike = true;
             return;
         }
-
-        //gets the specific button pushed
-        var c = Array.IndexOf(Buttons, btn);
 
         //NOT the key
         if (c != 2)
@@ -206,6 +253,13 @@ public class FTC : MonoBehaviour
             //debugging
             if (Application.isEditor && stage != maxStage)
             {
+                if (!_rotating)
+                {
+                    _currentDir += _gearDir;
+                    _gearDir = Rnd.Range(180, 360);
+                    _easeGear = 0;
+                }
+
                 stage++;
                 StartCoroutine(Generate());
             }
@@ -295,7 +349,7 @@ public class FTC : MonoBehaviour
 
     void Calculate()
     {
-        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> STAGE {1} (CALCULATED GEAR NUMBER) <-------=------->", _moduleId, stage);
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> STAGE {1} (CALCULATED GEAR NUMBER - STEP 1) <-------=------->", _moduleId, stage);
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The large display is {2}. The Colors are {3}, {4}, and {5}. The Nixie numbers are {6}{7}, and the gear is numbered {8} and colored {9}.", _moduleId, stage, _mainDisplays[0], _colors[_colorNums[0]], _colors[_colorNums[1]], _colors[_colorNums[2]], _nixies[0], _nixies[1], _gear, _colors[_colorNums[3]]);
 
         //get stage number
@@ -376,7 +430,9 @@ public class FTC : MonoBehaviour
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The total number is calculated with the first nixie ({2}) + the second nixie ({3}) + the gear number ({4}) which totals to {5}.", _moduleId, stage, _tempStorage[3], _tempStorage[4], _gear, _tempStorage[5]);
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of the total number {2} with 10, its value is {3}.", _moduleId, stage, _tempStorage[5], Modulo(_tempStorage[5], 10));
         _tempStorage[5] = Modulo(_tempStorage[5], 10);
-        
+
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> STAGE {1} (CALCULATED GEAR NUMBER - STEP 2) <-------=------->", _moduleId, stage);
+
         //move the index up and down according to calculated nixies
         _index = _colorNums[3] - _tempStorage[3] + _tempStorage[4];
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Starting on the color of the gear ({2}), move up the first calculated nixie tube ({3}) which lands on {4}, then move down the second calculated nixie tube ({5}) which lands us on {6}.", _moduleId, stage, _colors[_colorNums[3]], _tempStorage[3], _colors[(int)Modulo(_colorNums[3] - _tempStorage[3], 10)], _tempStorage[4], _colors[(int)Modulo(_colorNums[3] - _tempStorage[3] + _tempStorage[4], 10)]);
@@ -569,3 +625,52 @@ public class FTC : MonoBehaviour
         yield return null;
     }
 }
+
+public class Ease
+{
+    public class Elastic
+    {
+        public static float In(float k)
+        {
+            if (k == 0) return 0;
+            if (k == 1) return 1;
+            return -Mathf.Pow(2f, 10f * (k -= 1f)) * Mathf.Sin((k - 0.1f) * (2f * Mathf.PI) / 0.4f);
+        }
+
+        public static float Out(float k)
+        {
+            if (k == 0) return 0;
+            if (k == 1) return 1;
+            return Mathf.Pow(2f, -10f * k) * Mathf.Sin((k - 0.1f) * (2f * Mathf.PI) / 0.4f) + 1f;
+        }
+    }
+
+    public class Back
+    {
+        static float s = 1.70158f;
+        static float s2 = 2.5949095f;
+
+        public static float In(float k)
+        {
+            return k * k * ((s + 1f) * k - s);
+        }
+
+        public static float Out(float k)
+        {
+            return (k -= 1f) * k * ((s + 1f) * k + s) + 1f;
+        }
+    };
+
+    public class Cubic
+    {
+        public static float In(float k)
+        {
+            return k * k * k;
+        }
+
+        public static float Out(float k)
+        {
+            return 1f + ((k -= 1f) * k * k);
+        }
+    };
+};
