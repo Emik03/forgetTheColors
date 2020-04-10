@@ -22,7 +22,7 @@ public class FTC : MonoBehaviour
 
     //large souvenir dump
     bool solved = false;
-    int stage = 0, maxStage = 20;
+    int stage = 0, maxStage = 5;
     List<byte> gear = new List<byte>(0);
     List<short> largeDisplay = new List<short>(0);
     List<int> sineNumber = new List<int>(0);
@@ -88,7 +88,7 @@ public class FTC : MonoBehaviour
 
             if (_inputMode)
             {
-                Gear.localRotation = Quaternion.Euler(0, _currentDir % 360 * Math.Abs(Ease.Cubic.Out(_easeGear) - 1), 0);
+                Gear.localRotation = Quaternion.Euler(0, _currentDir % 360 * Math.Abs(CubicOut(_easeGear) - 1), 0);
 
                 if (_easeGear > 1)
                     Gear.localRotation = Quaternion.Euler(0, 0, 0);
@@ -96,7 +96,7 @@ public class FTC : MonoBehaviour
 
             else
             {
-                Gear.localRotation = Quaternion.Euler(0, Ease.Cubic.Out(_easeGear) * _gearDir + _currentDir, 0);
+                Gear.localRotation = Quaternion.Euler(0, CubicOut(_easeGear) * _gearDir + _currentDir, 0);
 
                 if (_easeGear > 1)
                     Gear.localRotation = Quaternion.Euler(0, _gearDir + _currentDir, 0);
@@ -110,16 +110,16 @@ public class FTC : MonoBehaviour
             {
                 _easeSolve += 0.02f;
 
-                Buttons[2].transform.localRotation = Quaternion.Euler(0, Ease.Back.Out(_easeSolve) * 420, 0);
-                CylinderKey.localScale = new Vector3(Ease.Elastic.Out(_easeSolve) * 0.5f, 1, Ease.Elastic.Out(_easeSolve) * 0.5f);
+                Buttons[2].transform.localRotation = Quaternion.Euler(0, BackOut(_easeSolve) * 420, 0);
+                CylinderKey.localScale = new Vector3(ElasticOut(_easeSolve) * 0.5f, 1, ElasticOut(_easeSolve) * 0.5f);
             }
 
             else if (_easeSolve <= 2)
             {
                 _easeSolve += 0.04f;
 
-                Buttons[2].transform.localPosition = new Vector3(0, (Ease.Back.In(_easeSolve - 1) * -3) - 0.91f, 0);
-                CylinderKey.localScale = new Vector3((1 - Ease.Elastic.In(_easeSolve - 1)) / 2, 1, (1 - Ease.Elastic.In(_easeSolve - 1)) / 2);
+                Buttons[2].transform.localPosition = new Vector3(0, (BackIn(_easeSolve - 1) * -3) - 0.91f, 0);
+                CylinderKey.localScale = new Vector3((1 - ElasticIn(_easeSolve - 1)) / 2, 1, (1 - ElasticIn(_easeSolve - 1)) / 2);
             }
 
             else
@@ -129,7 +129,7 @@ public class FTC : MonoBehaviour
         else if (_strike)
         {
             _easeSolve += 0.04f;
-            Buttons[2].transform.localRotation = Quaternion.Euler(0, (Ease.Elastic.Out(_easeSolve) - _easeSolve) * 69, 0);
+            Buttons[2].transform.localRotation = Quaternion.Euler(0, (ElasticOut(_easeSolve) - _easeSolve) * 69, 0);
 
             if (_easeSolve >= 1)
             {
@@ -184,8 +184,8 @@ public class FTC : MonoBehaviour
         //if it's supposed to be randomising
         if (!solved && stage != maxStage && _answer == 0)
         {
-            //stage 0: runs 20 times, stage 1+: runs 10 times
-            for (int i = 0; i < 10 + ((Mathf.Clamp(stage, 0, 1) - 1) * -10); i++)
+            //stage 0: runs 40 times, stage 1+: runs 10 times
+            for (int i = 0; i < 10 + ((Mathf.Clamp(stage, 0, 1) - 1) * -30); i++)
             {
                 for (int j = 0; j < _nixies.Length; j++)
                     _nixies[j] = Rnd.Range(0, 10);
@@ -199,7 +199,7 @@ public class FTC : MonoBehaviour
 
                 Render();
 
-                yield return new WaitForSeconds(.075f);
+                yield return new WaitForSeconds(.06f);
             }
 
             _mainDisplays[1] = stage;
@@ -355,9 +355,10 @@ public class FTC : MonoBehaviour
         //get stage number
         _tempStorage[0] = Math.Floor(Math.Abs(Math.Cos(_mainDisplays[0] * Mathf.Deg2Rad) * Math.Pow(10, 5)));
 
-        //because of floating point rounding, if the numbers end up being a multiple of 90, it will return 99999 when it should return 0
-        if (Modulo(_mainDisplays[0], 90) == 0)
-            _tempStorage[0] = 0;
+        //floating point rounding fix
+        if (Modulo(_tempStorage[0], 1000) == 999)
+            _tempStorage[0] = Modulo(_tempStorage[0] + 1, (int)Math.Pow(10, 5));
+
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The stage number is the absolute of the first five decimals of of cos({2}), which is {3}.", _moduleId, stage, _mainDisplays[0], _tempStorage[0]);
 
         for (int i = 0; i < _nixies.Length; i++)
@@ -417,13 +418,13 @@ public class FTC : MonoBehaviour
                     _tempStorage[4] += 5;
                     break;
             }
-            Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Applying the {2}-colored cylinder on Step 1, the nixies are now {3} and {4}", _moduleId, stage, _colors[_colorNums[i]], _tempStorage[3], _tempStorage[4]);
+            Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Applying the {2}-colored cylinder on Step 1, the nixies are now {3} and {4}.", _moduleId, stage, _colors[_colorNums[i]], _tempStorage[3], _tempStorage[4]);
         }
 
         //modulo
         _tempStorage[3] = Modulo(_tempStorage[3], 10);
         _tempStorage[4] = Modulo(_tempStorage[4], 10);
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of both nixies by 10, their values are now {2} and {3}", _moduleId, stage, _tempStorage[3], _tempStorage[4]);
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of both nixies by 10, their values are now {2} and {3}.", _moduleId, stage, _tempStorage[3], _tempStorage[4]);
 
         //new gear = calculated nixies + gear
         _tempStorage[5] = _tempStorage[3] + _tempStorage[4] + _gear;
@@ -499,9 +500,9 @@ public class FTC : MonoBehaviour
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The nixies are {2} and {3}, and the calculated gear number is {4}, combining all of them gives us {5}", _moduleId, stage, _tempStorage[3], _tempStorage[4], _tempStorage[5], string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5]));
         _tempStorage[2] = Math.Truncate(Math.Sin(int.Parse(string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5])) * Mathf.Deg2Rad) * Math.Pow(10, 5));
 
-        //because of floating point rounding, if the numbers end up being a multiple of 90, it will return 99999 when it should return 0
-        if (Modulo(int.Parse(string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5])), 90) == 0)
-            _tempStorage[2] = 0;
+        //floating point rounding fix
+        if (Modulo(_tempStorage[2], 1000) == 999)
+            _tempStorage[2] = Modulo(_tempStorage[2] + 1, (int)Math.Pow(10, 5));
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The sine number is sin({2}), which gets us {3} after flooring all decimals.", _moduleId, stage, string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5]), _tempStorage[2]);
 
         //get final value for the stage
@@ -531,10 +532,39 @@ public class FTC : MonoBehaviour
             }
 
             //once it reaches here, we know it's modulated and we can return it
-            break;
+            return num;
         }
+    }
 
-        return num;
+    private float ElasticIn(float k)
+    {
+        if (Modulo(k, 1) == 0)
+            return k;
+        return -Mathf.Pow(2f, 10f * (k -= 1f)) * Mathf.Sin((k - 0.1f) * (2f * Mathf.PI) / 0.4f);
+    }
+
+    private float ElasticOut(float k)
+    {
+        if (Modulo(k, 1) == 0)
+            return k;
+        return Mathf.Pow(2f, -10f * k) * Mathf.Sin((k - 0.1f) * (2f * Mathf.PI) / 0.4f) + 1f;
+    }
+
+    private static float BackIn(float k)
+    {
+        float s = 1.70158f;
+        return k * k * ((s + 1f) * k - s);
+    }
+
+    private static float BackOut(float k)
+    {
+        float s = 1.70158f;
+        return (k -= 1f) * k * ((s + 1f) * k + s) + 1f;
+    }
+
+    private static float CubicOut(float k)
+    {
+        return 1f + ((k -= 1f) * k * k);
     }
 
     private bool IsValid(string par)
@@ -625,52 +655,3 @@ public class FTC : MonoBehaviour
         yield return null;
     }
 }
-
-public class Ease
-{
-    public class Elastic
-    {
-        public static float In(float k)
-        {
-            if (k == 0) return 0;
-            if (k == 1) return 1;
-            return -Mathf.Pow(2f, 10f * (k -= 1f)) * Mathf.Sin((k - 0.1f) * (2f * Mathf.PI) / 0.4f);
-        }
-
-        public static float Out(float k)
-        {
-            if (k == 0) return 0;
-            if (k == 1) return 1;
-            return Mathf.Pow(2f, -10f * k) * Mathf.Sin((k - 0.1f) * (2f * Mathf.PI) / 0.4f) + 1f;
-        }
-    }
-
-    public class Back
-    {
-        static float s = 1.70158f;
-        static float s2 = 2.5949095f;
-
-        public static float In(float k)
-        {
-            return k * k * ((s + 1f) * k - s);
-        }
-
-        public static float Out(float k)
-        {
-            return (k -= 1f) * k * ((s + 1f) * k + s) + 1f;
-        }
-    };
-
-    public class Cubic
-    {
-        public static float In(float k)
-        {
-            return k * k * k;
-        }
-
-        public static float Out(float k)
-        {
-            return 1f + ((k -= 1f) * k * k);
-        }
-    };
-};
