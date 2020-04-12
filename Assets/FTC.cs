@@ -22,20 +22,21 @@ public class FTC : MonoBehaviour
 
     //large souvenir dump
     bool solved = false;
-    int stage = 0, maxStage = 5;
+    int stage = 0, maxStage = 3;
     List<byte> gear = new List<byte>(0);
     List<short> largeDisplay = new List<short>(0);
     List<int> sineNumber = new List<int>(0);
     List<string> gearColor = new List<string>(0), ruleColor = new List<string>(0);
 
     private bool _inputMode, _strike = false, _rotating = false;
-    private int _button, _gear, _gearDir = 0, _currentDir = 0, _moduleId = 0;
+    private int _gear, _gearDir = 0, _currentDir = 0, _moduleId = 0;
     private float _answer, _easeSolve = 0, _easeGear = 0;
     private double _index;
 
-    private int[] _nixies = new int[2], _mainDisplays = new int[2], _colorNums = new int[4], _nixieCorrect = new int[2], _storedValues;
-    private double[] _tempStorage = new double[6];
-    private IEnumerable<string> _solvable;
+    private int[] _nixies = new int[2], _colorNums = new int[4], _storedValues;
+    readonly private int[] _mainDisplays = new int[2], _nixieCorrect = new int[2];
+    readonly private double[] _tempStorage = new double[6];
+    readonly private IEnumerable<string> _solvable;
     
     readonly static private string[] _colors = { "Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Purple", "Pink", "Maroon", "White", "Gray" };
     readonly static private string[] _failPhrases = { "You did a goodn't", "Congratulations! You got a strike", "You have just won a free gift card containing 1 strike and no solve! In other words", "This is so sad", "This must be really embarrasing for you", "I just came back, where we again? Oh yeah", "Unsuprisingly, your 1/91 chance went unsuccessful", "Did Emik break the module or are you just bad?", "Did Cooldoom break the module or are you just bad?", "This looks like a WHITE ABORT to me", "Correct... your mistakes in the future", "?!", "‽", "The phrase \"It's just a module\" is such a weak mindset, you are okay with what happened, losing, imperfection of a craft.", "Good for you", "Have fun doing the math again", "Was that MAROON or RED?", "Are you sure the experts wrote it down correctly?", "Are you sure the defuser said it correctly?", "The key spun backwards", "THE ANSWER IS IN THE WRONG POSITION", "key.wav", "Module.HandleStrike()", "Is your calculator broken?", "Is your KTANE broken?", "A wide-screen monitor would really help here", "VR would make this easier", "E", "bruh moment", "Failed executing external process for 'Bake Runtime' job.", "Did Discord cut vital communication off?", "You failed the vibe check", "Looks like you failed your exam", "Could not find USER_ANSWER in ACTUAL_ANSWER", "nah", "noppen", "yesn't", "This is the moment where you quit out the bomb", "You just lost the game", "Noooo, why'd you do that?", "*pufferfish noises*", "I was thinking about being generous this round, it didn't change my mind though", "Have you tried turning this module on and off?", "It's been so long, since I last have seen an answer, lost to this monster", "Oof", "Yikes", "Good luck figuring out why you're wrong", "Oog", "Nice one buckaroo", ":̶.̶|̶:̶;̶  <--- Is this loss?" };
@@ -330,9 +331,12 @@ public class FTC : MonoBehaviour
             Debug.LogFormat("[Forget The Colors #{0}]: Adding stage {1}'s {2}, now the total is {3}.", _moduleId, i, _storedValues[i], _answer);
         }
 
+        //turns to decimal
+        _answer = (float)Modulo(Mathf.Abs(_answer) / Math.Pow(10, 5), 1);
+
+        //allow inputs in the module
         _inputMode = true;
 
-        _answer = (float)Modulo(Math.Abs(_answer / Math.Pow(10, 5)), 1);
         Debug.LogFormat("[Forget The Colors #{0}]: After forcing the number to be 5 digits long, the inverse cosine is {1} which returns {2}.", _moduleId, _answer, Math.Truncate(Mathf.Acos(_answer) * Mathf.Rad2Deg));
         _answer = (float)Math.Truncate(Mathf.Acos(_answer) * Mathf.Rad2Deg);
         
@@ -507,7 +511,7 @@ public class FTC : MonoBehaviour
 
         //get final value for the stage
         _tempStorage[1] = _tempStorage[0] + _tempStorage[2];
-        _storedValues[stage] = (int)Modulo(_tempStorage[1], (int)Math.Pow(10, 5));
+        _storedValues[stage] = (int)_tempStorage[1];
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The final value for this stage is the initial stage number {2} and the sine number {3}, which gives the final value of {4}.", _moduleId, stage, _tempStorage[0], _tempStorage[2], _tempStorage[1]);
 
         sineNumber.Add((int)_tempStorage[2]);
