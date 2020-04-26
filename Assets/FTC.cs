@@ -13,12 +13,15 @@ public class FTC : MonoBehaviour
     public KMBombModule Module;
     public KMBossModule Boss;
     public KMBombInfo Bomb;
+    public KMColorblindMode Colorblind;
+    public KMRuleSeedable Rule;
     public Transform Gear;
     public Transform CylinderKey;
+    public Transform[] ColorblindCylinder;
     public TextMesh[] Number;
     public Renderer[] ColorChanger;
     public KMSelectable[] Buttons;
-    public Color[] Color = new Color[10];
+    public Texture[] Texture = new Texture[10];
 
     //large souvenir dump
     bool solved = false;
@@ -28,7 +31,7 @@ public class FTC : MonoBehaviour
     List<int> sineNumber = new List<int>(0);
     List<string> gearColor = new List<string>(0), ruleColor = new List<string>(0);
 
-    private bool _inputMode, _strike = false, _rotating = false;
+    private bool _inputMode, _strike = false, _rotating = false, colorblind;
     private int _gear, _gearDir = 0, _currentDir = 0, _moduleId = 0;
     private float _answer, _easeSolve = 0, _easeGear = 0;
     private double _index;
@@ -37,12 +40,14 @@ public class FTC : MonoBehaviour
     readonly private int[] _mainDisplays = new int[2], _nixieCorrect = new int[2];
     readonly private double[] _tempStorage = new double[6];
     readonly private IEnumerable<string> _solvable;
-    
+    private Rule[][] rules;
+    static private int _moduleIdCounter = 1;
+
     readonly static private string[] _colors = { "Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Purple", "Pink", "Maroon", "White", "Gray" };
     readonly static private string[] _failPhrases = { "You did a goodn't", "Congratulations! You got a strike", "You have just won a free gift card containing 1 strike and no solve! In other words", "This is so sad", "This must be really embarrasing for you", "I just came back, where we again? Oh yeah", "Unsuprisingly, your 1/91 chance went unsuccessful", "Did Emik break the module or are you just bad?", "Did Cooldoom break the module or are you just bad?", "This looks like a WHITE ABORT to me", "Correct... your mistakes in the future", "?!", "‽", "The phrase \"It's just a module\" is such a weak mindset, you are okay with what happened, losing, imperfection of a craft.", "Good for you", "Have fun doing the math again", "Was that MAROON or RED?", "Are you sure the experts wrote it down correctly?", "Are you sure the defuser said it correctly?", "The key spun backwards", "THE ANSWER IS IN THE WRONG POSITION", "key.wav", "Module.HandleStrike()", "Is your calculator broken?", "Is your KTANE broken?", "A wide-screen monitor would really help here", "VR would make this easier", "E", "bruh moment", "Failed executing external process for 'Bake Runtime' job.", "Did Discord cut vital communication off?", "You failed the vibe check", "Looks like you failed your exam", "Could not find USER_ANSWER in ACTUAL_ANSWER", "nah", "noppen", "yesn't", "This is the moment where you quit out the bomb", "You just lost the game", "Noooo, why'd you do that?", "*pufferfish noises*", "I was thinking about being generous this round, it didn't change my mind though", "Have you tried turning this module on and off?", "It's been so long, since I last have seen an answer, lost to this monster", "Oof", "Yikes", "Good luck figuring out why you're wrong", "Oog", "Nice one buckaroo", ":̶.̶|̶:̶;̶  <--- Is this loss?" };
     readonly static private string[] _winPhrases = { "Hey, that's pretty good", "*intense cat noises*", "While you're at it, be sure to like, comment, favorite and subscribe", "This is oddly calming", "GG m8", "I just came back, where we again? Oh yeah", "Suprisingly, your 1/91 chance went successful", "Did Emik fix the module or are you just that good?", "Did Cooldoom fix the module or are you just that good?", "This looks like a NUT BUTTON to me", "Opposite of incorrect", "Damn, I should ban you from solving me", "You haven't forgotten the colors?", "Do you still think it's Very Hard?", "I think I'm supposed to Module.HandlePass()", "I really hope you didn't look at the logs", "I really hope you didn't use an auto-solver", "I should have just used Azure instead of White", "How many shrimps do I have to eat, before it makes my gears turn pink", "The key spun forwards", "THE ANSWER IS IN THE RIGHT POSITION", "keyCorrect.wav", "Module.HandlePass()", "Did you use a calculator?", "Did you enjoy it?", "Please rate us 5 stars in the ModuleStore at your KTaNEPhone", "Maybe I should've called myself \"Write Down Colors\"", "E", "bruh moment", "*happy music*", ":) good", "You passed the vibe check", "Looks like you passed your exam", "Successfully found USER_ANSWER in ACTUAL_ANSWER", "yes", "yesper", "non't", "This is the moment where you say \"LET'S GO!!\"", "You just won the game", "*key turned*", "opposite of bruh moment", "I was thinking about being generous this round, but you were correct anyway", ":joy: 99% IMPOSSIBLE :joy:", "Forget The Colors, is this where you want to be, I just don't get it, why do you want to stay?", "Mood", "!!", "Now go brag to your friends", "PogChamp", "Poggers", "You passed with flying colors" };
     static private string[] _ignore = { "Forget The Colors", "14", "Bamboozling Time Keeper", "Brainf---", "Forget Enigma", "Forget Everything", "Forget It Not", "Forget Me Not", "Forget Me Later", "Forget Perspective", "Forget Them All", "Forget This", "Forget Us Not", "Organization", "Purgatory", "Simon Forgets", "Simon's Stages", "Souvenir", "Tallordered Keys", "The Time Keeper", "The Troll", "The Very Annoying Button", "Timing Is Everything", "Turn The Key", "Ultimate Custom Night", "Übermodule" };
-    static private int _moduleIdCounter = 1;
+
 
     void Awake()
     {
@@ -51,10 +56,10 @@ public class FTC : MonoBehaviour
             _ignore = ignoredModules;
 
         _moduleId = _moduleIdCounter++;
-        for (int i = 0; i < Buttons.Length; i++)
+        for (byte i = 0; i < Buttons.Length; i++)
         {
-            var btn = Buttons[i];
-            btn.OnInteract += delegate 
+            KMSelectable btn = Buttons[i];
+            btn.OnInteract += delegate
             {
                 HandlePress(btn);
                 return false;
@@ -64,6 +69,27 @@ public class FTC : MonoBehaviour
 
     void Start()
     {
+        //enables colorblind mode if needed
+        colorblind = Colorblind.ColorblindModeActive;
+
+        //gets seed
+        MonoRandom rnd = Rule.GetRNG();
+        Debug.LogFormat("[Forget The Colors #{0}] Using rule seed: {1}", _moduleId, rnd.Seed);
+        if (rnd.Seed == 1)
+            rules = null;
+        else
+        {
+            rules = new Rule[2][];
+            rules[0] = new Rule[20];
+            rules[1] = new Rule[10];
+
+            for (byte i = 0; i < 20; i++)
+                rules[0][i] = new Rule { Cylinder = (byte)rnd.Next(10), Parameter = (byte)rnd.Next(5) };
+
+            for (byte i = 0; i < 10; i++)
+                rules[1][i] = new Rule { Edgework = (byte)rnd.Next(21), Parameter = (byte)rnd.Next(5) };
+        }
+
         //if on unity, max stage should equal the initial value assigned, otherwise set it to the proper value
         if (!Application.isEditor)
             maxStage = Bomb.GetSolvableModuleNames().Where(a => !_ignore.Contains(a)).Count();
@@ -171,7 +197,7 @@ public class FTC : MonoBehaviour
             _nixies[0] = 0;
             _nixies[1] = 0;
 
-            for (int i = 0; i < _colorNums.Length; i++)
+            for (byte i = 0; i < _colorNums.Length; i++)
                 _colorNums[i] = 10;
 
             _gear = 0;
@@ -186,12 +212,12 @@ public class FTC : MonoBehaviour
         if (!solved && stage != maxStage && _answer == 0)
         {
             //stage 0: runs 40 times, stage 1+: runs 10 times
-            for (int i = 0; i < 10 + ((Mathf.Clamp(stage, 0, 1) - 1) * -30); i++)
+            for (byte i = 0; i < 10 + ((Mathf.Clamp(stage, 0, 1) - 1) * -30); i++)
             {
-                for (int j = 0; j < _nixies.Length; j++)
+                for (byte j = 0; j < _nixies.Length; j++)
                     _nixies[j] = Rnd.Range(0, 10);
 
-                for (int j = 0; j < _colorNums.Length; j++)
+                for (byte j = 0; j < _colorNums.Length; j++)
                     _colorNums[j] = Rnd.Range(0, 10);
 
                 _mainDisplays[0] = Rnd.Range(0, 991);
@@ -227,7 +253,7 @@ public class FTC : MonoBehaviour
             return;
 
         //gets the specific button pushed
-        var c = Array.IndexOf(Buttons, btn);
+        byte c = (byte)Array.IndexOf(Buttons, btn);
 
         //if it's not ready for input, strike
         if (!_inputMode && !Application.isEditor)
@@ -306,26 +332,40 @@ public class FTC : MonoBehaviour
         }
 
         //if the large display lacks 3 characters, add 0's
-        for (int i = 0; i < 2; i++)
+        for (byte i = 0; i < 2; i++)
             while (Number[i].text.Length < 3 - i)
                 Number[i].text = Number[i].text.Insert(0, "0");
 
         //set nixies
-        for (int i = 0; i < _nixies.Length; i++)
+        for (byte i = 0; i < _nixies.Length; i++)
             Number[i + 2].text = _nixies[i].ToString();
 
         //set gear
         Number[4].text = _gear.ToString();
+        Number[4].characterSize = 0.1f - (Convert.ToByte(colorblind) * 0.04f);
+
+        if (colorblind && maxStage != stage)
+            Number[4].text += _colors[_colorNums[3]].First();
 
         //set colors
-        for (int i = 0; i < ColorChanger.Length; i++)
-            ColorChanger[i].material.color = Color[_colorNums[i]];
+        for (byte i = 0; i < ColorChanger.Length; i++)
+        {
+            ColorChanger[i].material.mainTexture = Texture[_colorNums[i]];
+            ColorChanger[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(colorblind), -0.04f));
+        }
+        ColorChanger[3].material.SetTextureScale("_MainTex", new Vector2(0, 0));
+
+        //deletes cylinders if needed
+        for (byte i = 0; i < ColorblindCylinder.Length; i++)
+        {
+            ColorblindCylinder[i].localRotation = new Quaternion(90 * Convert.ToByte(colorblind), -90, 0, 0);
+        }
     }
 
     void CalculateAnswer()
     {
         Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> FINAL STAGE <-------=------->", _moduleId);
-        for (int i = 0; i < stage; i++)
+        for (byte i = 0; i < stage; i++)
         {
             _answer += _storedValues[i];
             Debug.LogFormat("[Forget The Colors #{0}]: Adding stage {1}'s {2}, now the total is {3}.", _moduleId, i, _storedValues[i], _answer);
@@ -339,7 +379,7 @@ public class FTC : MonoBehaviour
 
         Debug.LogFormat("[Forget The Colors #{0}]: After forcing the number to be 5 digits long, the inverse cosine is {1} which returns {2}.", _moduleId, _answer, Math.Truncate(Mathf.Acos(_answer) * Mathf.Rad2Deg));
         _answer = (float)Math.Truncate(Mathf.Acos(_answer) * Mathf.Rad2Deg);
-        
+
         //gets correct answer
         _nixieCorrect[0] = (int)Math.Truncate((double)_answer / 10);
         _nixieCorrect[1] = (int)Math.Truncate(Modulo(_answer, 10));
@@ -365,66 +405,97 @@ public class FTC : MonoBehaviour
 
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The stage number is the absolute of the first five decimals of of cos({2}), which is {3}.", _moduleId, stage, _mainDisplays[0], _tempStorage[0]);
 
-        for (int i = 0; i < _nixies.Length; i++)
+        for (byte i = 0; i < _nixies.Length; i++)
             _tempStorage[i + 3] = _nixies[i];
 
-        //this will run through the changes applied to both nixie tubes during step 1 of second page on manual
-        for (int i = 0; i < _colorNums.Length - 1; i++)
+        if (rules == null)
         {
-            //each digit rule
-            switch (_colorNums[i])
+            //this will run through the changes applied to both nixie tubes during step 1 of second page on manual
+            for (byte i = 0; i < _colorNums.Length - 1; i++)
             {
-                case 0:
-                    _tempStorage[3] += 5;
-                    _tempStorage[4] -= 1;
-                    break;
+                //each digit rule
+                switch (_colorNums[i])
+                {
+                    case 0:
+                        _tempStorage[3] += 5;
+                        _tempStorage[4] -= 1;
+                        break;
 
-                case 1:
-                    _tempStorage[3] -= 1;
-                    _tempStorage[4] -= 6;
-                    break;
+                    case 1:
+                        _tempStorage[3] -= 1;
+                        _tempStorage[4] -= 6;
+                        break;
 
-                case 2:
-                    _tempStorage[3] += 3;
-                    break;
+                    case 2:
+                        _tempStorage[3] += 3;
+                        break;
 
-                case 3:
-                    _tempStorage[3] += 7;
-                    _tempStorage[4] -= 4;
-                    break;
+                    case 3:
+                        _tempStorage[3] += 7;
+                        _tempStorage[4] -= 4;
+                        break;
 
-                case 4:
-                    _tempStorage[3] -= 7;
-                    _tempStorage[4] -= 5;
-                    break;
+                    case 4:
+                        _tempStorage[3] -= 7;
+                        _tempStorage[4] -= 5;
+                        break;
 
-                case 5:
-                    _tempStorage[3] += 8;
-                    _tempStorage[4] += 9;
-                    break;
+                    case 5:
+                        _tempStorage[3] += 8;
+                        _tempStorage[4] += 9;
+                        break;
 
-                case 6:
-                    _tempStorage[3] += 5;
-                    _tempStorage[4] -= 9;
-                    break;
+                    case 6:
+                        _tempStorage[3] += 5;
+                        _tempStorage[4] -= 9;
+                        break;
 
-                case 7:
-                    _tempStorage[3] -= 9;
-                    _tempStorage[4] += 4;
-                    break;
+                    case 7:
+                        _tempStorage[3] -= 9;
+                        _tempStorage[4] += 4;
+                        break;
 
-                case 8:
-                    _tempStorage[4] += 7;
-                    break;
+                    case 8:
+                        _tempStorage[4] += 7;
+                        break;
 
-                case 9:
-                    _tempStorage[3] -= 3;
-                    _tempStorage[4] += 5;
-                    break;
+                    case 9:
+                        _tempStorage[3] -= 3;
+                        _tempStorage[4] += 5;
+                        break;
+                }
+                Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Applying the {2}-colored cylinder on Step 1, the nixies are now {3} and {4}.", _moduleId, stage, _colors[_colorNums[i]], _tempStorage[3], _tempStorage[4]);
             }
-            Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Applying the {2}-colored cylinder on Step 1, the nixies are now {3} and {4}.", _moduleId, stage, _colors[_colorNums[i]], _tempStorage[3], _tempStorage[4]);
         }
+        else
+        {
+            for (byte i = 0; i < _colorNums.Length - 1; i++)
+            {
+                Rule rule = rules[0][_colorNums[i]];
 
+                switch (rule.Parameter)
+                {
+                    case 0: _tempStorage[3] += rule.Cylinder; break;
+                    case 1: _tempStorage[3] -= rule.Cylinder; break;
+                    case 2: _tempStorage[3] *= rule.Cylinder; break;
+                    case 3: if (_tempStorage[3] != 0) _tempStorage[3] = Mathf.Floor((float)(_tempStorage[3] / rule.Cylinder)); break;
+                    case 4: if (rule.Cylinder != 0) _tempStorage[3] = Modulo(_tempStorage[3], rule.Cylinder); break;
+                }
+
+                rule = rules[0][_colorNums[i] + 10];
+
+                switch (rule.Parameter)
+                {
+                    case 0: _tempStorage[4] += rule.Cylinder; break;
+                    case 1: _tempStorage[4] -= rule.Cylinder; break;
+                    case 2: _tempStorage[4] *= rule.Cylinder; break;
+                    case 3: if (_tempStorage[4] != 0) _tempStorage[4] = Mathf.Floor((float)(_tempStorage[4] / rule.Cylinder)); break;
+                    case 4: if (rule.Cylinder != 0) _tempStorage[4] = Modulo(_tempStorage[4], rule.Cylinder); break;
+                }
+                
+                Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Applying the {2}-colored cylinder on Step 1, the nixies are now {3} and {4}.", _moduleId, stage, _colors[_colorNums[i]], _tempStorage[3], _tempStorage[4]);
+            }
+        }
         //modulo
         _tempStorage[3] = Modulo(_tempStorage[3], 10);
         _tempStorage[4] = Modulo(_tempStorage[4], 10);
@@ -445,49 +516,75 @@ public class FTC : MonoBehaviour
         //modulo
         _index = Modulo(_index, 10);
         double temp = _tempStorage[5];
-        
-        //this will run through the changes applied to the gear during step 2 of second page on manual
-        switch ((int)_index)
+
+        if (rules == null)
         {
-            case 0:
-                _tempStorage[5] += Bomb.GetBatteryCount();
-                break;
+            //this will run through the changes applied to the gear during step 2 of second page on manual
+            switch ((int)_index)
+            {
+                case 0:
+                    _tempStorage[5] += Bomb.GetBatteryCount();
+                    break;
 
-            case 1:
-                _tempStorage[5] -= Bomb.GetPortCount();
-                break;
+                case 1:
+                    _tempStorage[5] -= Bomb.GetPortCount();
+                    break;
 
-            case 2:
-                _tempStorage[5] += Bomb.GetSerialNumberNumbers().Last();
-                break;
+                case 2:
+                    _tempStorage[5] += Bomb.GetSerialNumberNumbers().Last();
+                    break;
 
-            case 3:
-                _tempStorage[5] -= Bomb.GetSolvedModuleNames().Count();
-                break;
+                case 3:
+                    _tempStorage[5] -= Bomb.GetSolvedModuleNames().Count();
+                    break;
 
-            case 4:
-                _tempStorage[5] += Bomb.GetPortPlateCount();
-                break;
+                case 4:
+                    _tempStorage[5] += Bomb.GetPortPlateCount();
+                    break;
 
-            case 5:
-                _tempStorage[5] -= Bomb.GetModuleNames().Count();
-                break;
+                case 5:
+                    _tempStorage[5] -= Bomb.GetModuleNames().Count();
+                    break;
 
-            case 6:
-                _tempStorage[5] += Bomb.GetBatteryHolderCount();
-                break;
+                case 6:
+                    _tempStorage[5] += Bomb.GetBatteryHolderCount();
+                    break;
 
-            case 7:
-                _tempStorage[5] -= Bomb.GetOnIndicators().Count();
-                break;
+                case 7:
+                    _tempStorage[5] -= Bomb.GetOnIndicators().Count();
+                    break;
 
-            case 8:
-                _tempStorage[5] += Bomb.GetIndicators().Count();
-                break;
+                case 8:
+                    _tempStorage[5] += Bomb.GetIndicators().Count();
+                    break;
 
-            case 9:
-                _tempStorage[5] -= Bomb.GetOffIndicators().Count();
-                break;
+                case 9:
+                    _tempStorage[5] -= Bomb.GetOffIndicators().Count();
+                    break;
+            }
+        }
+        else
+        {
+            string[] ports = new string[Bomb.GetPorts().Count()];
+            for (int i = 0; i < Bomb.GetPorts().Count(); i++)
+                ports[i] = Bomb.GetPorts().ElementAt(i);
+                
+            int ignoredCount = 0;
+            foreach (string module in Bomb.GetModuleNames())
+                if (_ignore.Contains(module))
+                    ignoredCount++;
+
+            Rule rule = rules[0][(int)_index];
+            int[] edgework = new int[21] { Bomb.GetBatteryCount(), Bomb.GetBatteryCount(Battery.AA) + Bomb.GetBatteryCount(Battery.AAx3) + Bomb.GetBatteryCount(Battery.AAx4), Bomb.GetBatteryCount(Battery.D), Bomb.GetBatteryHolderCount(), Bomb.GetIndicators().Count(), Bomb.GetOnIndicators().Count(), Bomb.GetOffIndicators().Count(), Bomb.GetPortPlateCount(), Bomb.GetPorts().Distinct().Count(), Bomb.GetPorts().Count() - Bomb.GetPorts().Distinct().Count(), Bomb.GetPortCount(), Bomb.GetSerialNumberNumbers().First(), Bomb.GetSerialNumberNumbers().Last(), Bomb.GetSerialNumberNumbers().Count(), Bomb.GetSerialNumberLetters().Count(), Bomb.GetSolvedModuleNames().Count(), maxStage, Bomb.GetModuleNames().Count(), Bomb.GetSolvableModuleNames().Count() - Bomb.GetSolvedModuleNames().Count(), ignoredCount, _mainDisplays[1]};
+
+            switch (rule.Parameter)
+            {
+                case 0: _tempStorage[5] += edgework[rule.Edgework]; break;
+                case 1: _tempStorage[5] -= edgework[rule.Edgework]; break;
+                case 2: _tempStorage[5] *= edgework[rule.Edgework]; break;
+                case 3: if (edgework[rule.Edgework] != 0) _tempStorage[5] = Mathf.Floor((float)(_tempStorage[4] / edgework[rule.Edgework])); break;
+                case 4: if (edgework[rule.Edgework] != 0) _tempStorage[5] = Modulo(_tempStorage[4], edgework[rule.Edgework]); break;
+            }
         }
 
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Apply the color rule {2} to the total number {3}, which gives us {4}.", _moduleId, stage, _colors[(int)_index], temp, _tempStorage[5]);
@@ -581,6 +678,7 @@ public class FTC : MonoBehaviour
         return false;
     }
 
+
 #pragma warning disable 414
     private readonly string TwitchHelpMessage = @"!{0} submit <##> (Cycles through both nixies to match '##', then hits submit. | Valid numbers are from 0-99)";
 #pragma warning restore 414
@@ -589,8 +687,16 @@ public class FTC : MonoBehaviour
     {
         string[] buttonPressed = command.Split(' ');
 
-        //if command is formatted correctly
-        if (Regex.IsMatch(buttonPressed[0], @"^\s*submit\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        //colorblind
+        if (Regex.IsMatch(command, @"^\s*colorblind\s*$", RegexOptions.IgnoreCase))
+        {
+            yield return null;
+            colorblind = !colorblind;
+            Render();
+        }
+
+        //submit command
+        else if (Regex.IsMatch(buttonPressed[0], @"^\s*submit\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
             yield return null;
 
@@ -617,18 +723,18 @@ public class FTC : MonoBehaviour
 
                 //submit answer only if it's ready
                 if (_inputMode)
-                    for (int i = 0; i < Buttons.Length - 1; i++)
+                    for (byte i = 0; i < Buttons.Length - 1; i++)
                     {
                         //keep pushing until button value is met by player
                         while (_nixies[i] != values[i])
-                        {                            
-							yield return new WaitForSeconds(0.5f);
+                        {
+                            yield return new WaitForSeconds(0.5f);
                             Buttons[i].OnInteract();
                         }
                     }
 
                 //key
-				yield return new WaitForSeconds(0.8f);
+                yield return new WaitForSeconds(0.8f);
                 Buttons[2].OnInteract();
             }
         }
@@ -643,7 +749,7 @@ public class FTC : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        for (int i = 0; i < 2; i++)
+        for (byte i = 0; i < 2; i++)
             while (_nixieCorrect[i] != _nixies[i])
             {
                 Buttons[i].OnInteract();
@@ -658,4 +764,9 @@ public class FTC : MonoBehaviour
         }
         yield return null;
     }
+}
+
+sealed class Rule
+{
+    public byte Cylinder, Edgework, Parameter;
 }
