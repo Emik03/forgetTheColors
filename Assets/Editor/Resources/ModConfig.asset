@@ -25,6 +25,6 @@ MonoBehaviour:
     HTML: https://ktane.timwi.de/HTML/Forget%20The%20Colors.html
 
     PDF: https://ktane.timwi.de/PDF/Forget%20The%20Colors.pdf'
-  version: 1.6
+  version: 1.6.1
   outputFolder: E:\Setam\steamapps\common\Keep Talking and Nobody Explodes\mods
   previewImage: {fileID: 2800000, guid: fe35a5baafea97f4eaeb0ac174ab3ff7, type: 3}

@@ -342,23 +342,28 @@ public class FTC : MonoBehaviour
 
         //set gear
         Number[4].text = _gear.ToString();
-        Number[4].characterSize = 0.1f - (Convert.ToByte(colorblind) * 0.04f);
+        Number[4].characterSize = 0.1f - (Convert.ToByte(colorblind) * Convert.ToByte(maxStage != stage) * 0.04f);
 
         if (colorblind && maxStage != stage)
-            Number[4].text += _colors[_colorNums[3]].First();
+        {
+            if (_colorNums[3] != 7)
+                Number[4].text += _colors[_colorNums[3]].First();
+            else
+                Number[4].text += 'I';
+        }
 
         //set colors
         for (byte i = 0; i < ColorChanger.Length; i++)
         {
             ColorChanger[i].material.mainTexture = Texture[_colorNums[i]];
-            ColorChanger[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(colorblind), -0.04f));
+            ColorChanger[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(colorblind) * Convert.ToByte(maxStage != stage), -0.04f));
         }
         ColorChanger[3].material.SetTextureScale("_MainTex", new Vector2(0, 0));
 
         //deletes cylinders if needed
         for (byte i = 0; i < ColorblindCylinder.Length; i++)
         {
-            ColorblindCylinder[i].localRotation = new Quaternion(90 * Convert.ToByte(colorblind), -90, 0, 0);
+            ColorblindCylinder[i].localRotation = new Quaternion(90 * Convert.ToByte(colorblind) * Convert.ToByte(maxStage != stage), -90, 0, 0);
         }
     }
 
