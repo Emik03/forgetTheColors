@@ -119,9 +119,9 @@
 
     function setRules(rnd) {
         getDefaultRules();
-
-        var action = ['Add', 'Subtract', 'Multiply', 'Divide', "Modulo"];
-        var actionShort = ['+', '-', '*', '/', "%"];
+		document.getElementById(`rule-extra-1`).innerText = " from left to right. When using either table, don't record decimals and ignore divisions (/) or modulo (%) 0";
+		var action = ['Add', 'Subtract', 'Multiply', 'Divide', "Modulo"];
+		var actionShort = ['+', '-', '*', '/', "%"];
 
         for (var instruction = 0; instruction < 20; instruction++) {
             var span = document.getElementById(`rule-1-${instruction + 1}`);
@@ -202,7 +202,7 @@
 
                     <h3 class="padding">For every stage:</h3>
 
-                    <p>Using the first table, modify both nixies based on the colors of each cylinder<span class='rule' id='rule-extra-1'> from left to right. <strong>When using either table, don't record decimals and ignore divisions (/) or modulo (%) 0</strong></span>.</p>
+                    <p>Using the first table, modify both nixies based on the colors of each cylinder<strong><span class='rule' id='rule-extra-1'> from left to right. When using either table, don't record decimals and ignore divisions (/) or modulo (%) 0</span></strong>.</p>
 
                     <table style="margin-left:-40px;">
                         <tr>
