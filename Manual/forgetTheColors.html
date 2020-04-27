@@ -61,6 +61,19 @@
             text-align: right;
         }
     }
+    
+    #showPDF {
+      display:none;
+    }
+    
+    @media print {
+      #showPDF {
+        display:inline;
+      }
+      #hidePDF {
+        display:none;
+      }
+    }
 
     .padding {
         padding-top: 15px;
@@ -80,7 +93,7 @@
         var cos = parseInt(document.getElementById("cos").value) ? parseInt(document.getElementById("cos").value) : 0;
         var acos = parseFloat(document.getElementById("acos").value) ? parseFloat(document.getElementById("acos").value) : 0;
 
-        document.getElementById("sinAns").value = Math.floor(Math.sin(sin * Math.PI / 180) * 10000) / 100000;
+        document.getElementById("sinAns").value = Math.floor(Math.sin(sin * Math.PI / 180) * 100000) / 100000;
         document.getElementById("cosAns").value = Math.floor(Math.abs(Math.cos(cos * Math.PI / 180)) * 100000) / 100000;
         document.getElementById("acosAns").value = Math.floor(Math.acos(acos) / Math.PI * 180);
     }
@@ -172,7 +185,7 @@
                     <span class="page-header-section-title">Forget The Colors</span>
                 </div>
                 <div class="page-content">
-                    <img src="img/Component/forgetTheColors.svg" class="diagram">
+                    <img src="img/Component/Forget The Colors.svg" class="diagram">
                     <h2>On the Subject of Forget The Colors</h2>
                     <p class="flavour-text">Since when was trigonometry relevant to colors?</p>
 
@@ -301,18 +314,18 @@
                 <div class="page-content">
 					
 					<p>Construct a 3-digit number using the left nixie, then the right nixie, and then the number obtained above.</p>
-                    <p>Write this 3-digit number below to get the first five decimals of sine. This number can be negative.</p>
+                    <p><span id="showPDF">Get the Sine (sin) of that 3-digit number and take the first five digits of the sine past the decimal point. This number can be negative.</span> <div id="hidePDF">Write this 3-digit number below to get the first five decimals of sine. This number can be negative.</p>
 
                     <input type="text" id="sin" class="top" style="width:30px">
                     <input type="text" id="sinAns" class="top" style="width:60px" readonly></br>
 
-                    <p></p>
-                    <p>Take the three-digit display and write it below to get the absolute of the first five decimals of cosine. This number will always be positive.</p>
+                    <p></p></div>
+                    <p><span id="showPDF">Take the three-digit display and get the first five digits of Cosine (cos) past the decimal point. Drop any negative signs so that this value is always positive.</span><div id="hidePDF"> Take the three-digit display and write it below to get the absolute of the first five decimals of cosine. This number will always be positive.</p>
 
                     <input type="text" id="cos" class="top" style="width:30px">
                     <input type="text" id="cosAns" class="top" style="width:60px" readonly></br>
 
-                    <p></p>
+                    <p></p></div>
                     <p><strong>The sum of both numbers are the calculated number for that stage, hold onto it.</strong></p>
 
                     <h3 class="padding">After all modules are solved**:</h3>
@@ -320,12 +333,12 @@
 					<p>When the module's cylinders and gear number turn gray, this is an indication that it is ready to be solved.</p>
                     <p>Add all of the calculated stage numbers, taking only the first five decimals.</p>
 
-                    <p>Keep the number positive and use floored Cos<sup>-1</sup> below to get a number from 0 to 90.</p>
+                    <p><span id="showPDF">Take this value and apply a Cos<sup>-1</sup> to it. This will require at least a scientific calculator. Floor the given value and drop all of the decimal values to get a number from 0 and 90.</span><div id="hidePDF">Keep the number positive and use floored Cos<sup>-1</sup> below to get a number from 0 to 90.</p>
 
                     <input type="text" id="acos" class="top" style="width:60px">
                     <input type="text" id="acosAns" class="top" style="width:30px" readonly></br>
 
-                    <p></p>
+                    <p></p></div>
                     <p>Input the final number by clicking the 2 nixie tubes to change their values. Proceed to turn the key to submit your number.</p>
 
                     <p><i>**BUT if there are exactly 0 solvable modules on your bomb, ignore all other rules. The module did the work for you. Just throw a 90. Thanks module.</i></p>
