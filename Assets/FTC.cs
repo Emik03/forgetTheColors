@@ -652,7 +652,7 @@ public class FTC : MonoBehaviour
         _tempStorage[0] = Math.Floor(Math.Abs(Math.Cos(_mainDisplays[0] * Mathf.Deg2Rad) * Math.Pow(10, 5)));
 
         //floating point rounding fix
-        if (Modulo(Math.Abs(_tempStorage[0], 1000)) == 999)
+        if (Modulo(Math.Abs(_tempStorage[0]), 1000) == 999)
             _tempStorage[0] = Modulo(_tempStorage[0] + 1, (int)Math.Pow(10, 5));
 
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Taking the stage display, get the absolute of the first five decimals of cos({2}), which is {3}.", _moduleId, stage, _mainDisplays[0], _tempStorage[0]);
