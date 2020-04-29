@@ -362,7 +362,21 @@ Prefab:
     - target: {fileID: 114919301630483750, guid: 73662ecb0f7a8f74fa4a1a39c0508726,
         type: 2}
       propertyPath: _seed
-      value: 22
+      value: 23
+      objectReference: {fileID: 0}
+    - target: {fileID: 102874183208032154, guid: 73662ecb0f7a8f74fa4a1a39c0508726,
+        type: 2}
+      propertyPath: m_FontSize
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 102874183208032154, guid: 73662ecb0f7a8f74fa4a1a39c0508726,
+        type: 2}
+      propertyPath: m_Text
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4551276974666176, guid: 73662ecb0f7a8f74fa4a1a39c0508726, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0.55
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 73662ecb0f7a8f74fa4a1a39c0508726, type: 2}
