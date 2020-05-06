@@ -9,15 +9,16 @@ using Rnd = UnityEngine.Random;
 
 public class FTC : MonoBehaviour
 {
+    //import assets
     public KMAudio Audio;
     public KMBombModule Module;
     public KMBossModule Boss;
     public KMBombInfo Bomb;
     public KMColorblindMode Colorblind;
     public KMRuleSeedable Rule;
-    public Transform Gear;
-    public Transform CylinderKey;
+    public Transform Gear, CylinderKey;
     public Transform[] ColorblindCylinder;
+    public TextMesh SmallBackground;
     public TextMesh[] Number;
     public Renderer[] ColorChanger;
     public KMSelectable[] Buttons;
@@ -31,30 +32,37 @@ public class FTC : MonoBehaviour
     List<int> sineNumber = new List<int>(0);
     List<string> gearColor = new List<string>(0), ruleColor = new List<string>(0);
 
+    //variables for solving
     private bool _inputMode, _strike = false, _rotating = false, _colorblind;
     private byte _debugSelect = 0;
     private int _gear, _gearDir = 0, _currentDir = 0, _moduleId = 0;
+    private int[] _nixies = new int[2], _colorNums = new int[4], _storedValues;
     private float _answer, _easeSolve = 0, _easeGear = 0;
     private double _index;
 
-    private int[] _nixies = new int[2], _colorNums = new int[4], _storedValues;
+    //temporary storage
     readonly private int[] _mainDisplays = new int[2], _nixieCorrect = new int[2];
     readonly private double[] _tempStorage = new double[6];
-    readonly private IEnumerable<string> _solvable;
-    private Rule[][] _rules;
-    static private int _moduleIdCounter = 1;
 
-    readonly static private string[] _colors = { "Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Purple", "Pink", "Maroon", "White", "Gray" };
-    readonly static private string[] _failPhrases = { "You did a goodn't", "Congratulations! You got a strike", "You have just won a free gift card containing 1 strike and no solve! In other words", "This is so sad", "This must be really embarrasing for you", "I just came back, where we again? Oh yeah", "Unsuprisingly, your 1/91 chance went unsuccessful", "Did Emik break the module or are you just bad?", "Did Cooldoom break the module or are you just bad?", "This looks like a WHITE ABORT to me", "Correct... your mistakes in the future", "?!", "‽", "The phrase \"It's just a module\" is such a weak mindset, you are okay with what happened, striking, imperfection of a solve.", "Good for you", "Have fun doing the math again", "Was that MAROON or RED?", "Are you sure the experts wrote it down correctly?", "Are you sure the defuser said it correctly?", "The key spun backwards", "THE ANSWER IS IN THE WRONG POSITION", "key.wav", "Module.HandleStrike()", "Is your calculator broken?", "Is your KTANE broken?", "A wide-screen monitor would really help here", "VR would make this easier", "A mechanical keyboard would make this easier.", "A \"gaming mouse\" would make this easier.", "E", "bruh moment", "Failed executing external process for 'Bake Runtime' job.", "Did Discord cut vital communication off?", "You failed the vibe check", "Looks like you failed your exam", "Could not find USER_ANSWER in ACTUAL_ANSWER", "nah", "noppen", "yesn't", "This is the moment where you quit out the bomb", "You just lost the game", "Noooo, why'd you do that?", "*pufferfish noises*", "I was thinking about being generous this round, it didn't change my mind though", "Have you tried turning this module on and off?", "It's been so long, since I last have seen an answer, lost to this monster", "Oof", "Yikes", "Good luck figuring out why you're wrong", "Oog", "Nice one buckaroo", ":̶.̶|̶:̶;̶  <--- Is this loss?" , "Oh, you got it wrong? Report it as a bug because it's definitely not your fault", "I'm not rated \"Very Hard\" for no reason after all", "Forget The Colors be like: cringe" };
-    readonly static private string[] _winPhrases = { "Hey, that's pretty good", "*intense cat noises*", "While you're at it, be sure to like, comment, favorite and subscribe", "This is oddly calming", "GG m8", "I just came back, where we again? Oh yeah", "Suprisingly, your 1/91 chance went successful", "Did Emik fix the module or are you just that good?", "Did Cooldoom fix the module or are you just that good?", "This looks like a NUT BUTTON to me", "Opposite of incorrect", "Damn, I should ban you from solving me", "You haven't forgotten the colors?", "Do you still think it's Very Hard?", "I think I'm supposed to Module.HandlePass()", "I really hope you didn't look at the logs", "I really hope you didn't use an auto-solver", "I should have just used Azure instead of White", "How many shrimps do I have to eat, before it makes my gears turn pink", "The key spun forwards", "THE ANSWER IS IN THE RIGHT POSITION", "keyCorrect.wav", "Module.HandlePass()", "Did you use a calculator?", "Did you enjoy it?", "Please rate us 5 stars in the ModuleStore at your KTaNEPhone", "Alexa, play the victory tune", "VICTORY", "Maybe I should've called myself \"Write Down Colors\"", "E", "bruh moment", "*happy music*", ":) good", "You passed the vibe check", "Looks like you passed your exam", "Successfully found USER_ANSWER in ACTUAL_ANSWER", "yes", "yesper", "non't", "This is the moment where you say \"LET'S GO!!\"", "You just won the game", "*key turned*", "opposite of bruh moment", "I was thinking about being generous this round, but you were correct anyway", ":joy: 99% IMPOSSIBLE :joy:", "Forget The Colors, is this where you want to be, I just don't get it, why do you want to stay?", "Mood", "!!", "Now go brag to your friends", "PogChamp", "Poggers", "You passed with flying colors", "Oh, you got it right? Report it as a bug because I'm too easy, y'know?", "I agree, I'm just as easy as The Simpleton right beside me!", "Forget The Colors says: uncringe" };
+    //global attributes
+    static private int _moduleIdCounter = 1;
+    static readonly private IEnumerable<string> _solvable;
+    static private Rule[][] _rules;
     static private string[] _ignore = { "Forget The Colors", "14", "Bamboozling Time Keeper", "Brainf---", "Forget Enigma", "Forget Everything", "Forget It Not", "Forget Me Not", "Forget Me Later", "Forget Perspective", "Forget Them All", "Forget This", "Forget Us Not", "Organization", "Purgatory", "Simon Forgets", "Simon's Stages", "Souvenir", "Tallordered Keys", "The Time Keeper", "The Troll", "The Very Annoying Button", "Timing Is Everything", "Turn The Key", "Ultimate Custom Night", "Übermodule" };
+
+    //logging
+    readonly static private string[] _colors = { "Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Purple", "Pink", "Maroon", "White", "Gray" };
+    readonly static private string[] _failPhrases = { "You did a goodn't", "Congratulations! You got a strike", "You have just won a free gift card containing 1 strike and no solve! In other words", "This is so sad", "This must be really embarrasing for you", "I just came back, where we again? Oh yeah", "Unsuprisingly, your 1/91 chance went unsuccessful", "Did Emik break the module or are you just bad?", "Did Cooldoom break the module or are you just bad?", "This looks like a WHITE ABORT to me", "Correct... your mistakes in the future", "?!", "‽", "The phrase \"It's just a module\" is such a weak mindset, you are okay with what happened, striking, imperfection of a solve", "Good for you", "Have fun doing the math again", "Was that MAROON or RED?", "Are you sure the experts wrote it down correctly?", "Are you sure the defuser said it correctly?", "The key spun backwards", "THE ANSWER IS IN THE WRONG POSITION", "key.wav", "Module.HandleStrike()", "Is your calculator broken?", "Is your KTANE broken?", "A wide-screen monitor would really help here", "VR would make this easier", "A mechanical keyboard would make this easier", "A \"gaming mouse\" would make this easier", "E", "bruh moment", "Failed executing external process for 'Bake Runtime' job", "Did Discord cut vital communication off?", "You failed the vibe check", "Looks like you failed your exam", "Could not find USER_ANSWER in ACTUAL_ANSWER", "nah", "noppen", "yesn't", "This is the moment where you quit out the bomb", "You just lost the game", "Noooo, why'd you do that?", "*pufferfish noises*", "I was thinking about being generous this round, it didn't change my mind though", "Have you tried turning this module on and off?", "It's been so long, since I last have seen an answer, lost to this monster", "Oof", "Yikes", "Good luck figuring out why you're wrong", "Oog", "Nice one buckaroo", ":̶.̶|̶:̶;̶  <--- Is this loss?", "Oh, you got it wrong? Report it as a bug because it's definitely not your fault", "I'm not rated \"Very Hard\" for no reason after all", "Forget The Colors be like: cringe", "The manual said I is Pink, are you colorblind?", "Not cool, meet your doom", "What were you thinking!?", "Emmm, ik you messed up somewhere", "You should double check that part where you messed up", "Looks like the expert chose betray", "At least you've solved the other modules", "Did you even read the manual?", "The module's broken? No I'm not! What's 9+10? 18.9992", "When I shred, I shred using the entire bomb. But since you SUCK, you will only need this module, and zie key button", "ALT+F4", "Did you seriously mistake me for Forget Everything?", "I was kidding when I told you to Forget The Colors, I guess sarcasm didn't come through that time...", "The Defuser expired", "The Expert expired", "You just got bamboozl- ah, wrong module", "Module rain. Some stay solved and others feel the pain. Module rain. 3-digit displays will die before the sin()", "DEpvQ0klM93dC8GMWAo5TaYGeWCZfT8Vq1qNY6o     + // /", "mood", "This message should not appear. I'll be disappointed at the Defuser if it does", "Did you forget about the 0 solvable module unicorn?" };
+    readonly static private string[] _winPhrases = { "Hey, that's pretty good", "*intense cat noises*", "While you're at it, be sure to like, comment, favorite and subscribe", "This is oddly calming", "GG m8", "I just came back, where we again? Oh yeah", "Suprisingly, your 1/91 chance went successful", "Did Emik fix the module or are you just that good?", "Did Cooldoom fix the module or are you just that good?", "This looks like a NUT BUTTON to me", "Opposite of incorrect", "Damn, I should ban you from solving me", "You haven't forgotten the colors?", "Do you still think it's Very Hard?", "I think I'm supposed to Module.HandlePass()", "I really hope you didn't look at the logs", "I really hope you didn't use an auto-solver", "I should have just used Azure instead of White", "How many shrimps do I have to eat, before it makes my gears turn pink", "The key spun forwards", "THE ANSWER IS IN THE RIGHT POSITION", "keyCorrect.wav", "Module.HandlePass()", "Did you use a calculator?", "Did you enjoy it?", "Please rate us 5 stars in the ModuleStore at your KTaNEPhone", "Alexa, play the victory tune", "VICTORY", "Maybe I should've called myself \"Write Down Colors\"", "E", "bruh moment", "*happy music*", ":) good", "You passed the vibe check", "Looks like you passed your exam", "Successfully found USER_ANSWER in ACTUAL_ANSWER", "yes", "yesper", "non't", "This is the moment where you say \"LET'S GO!!\"", "You just won the game", "*key turned*", "opposite of bruh moment", "I was thinking about being generous this round, but you were correct anyway", ":joy: 99% IMPOSSIBLE :joy:", "Forget The Colors, is this where you want to be, I just don't get it, why do you want to stay?", "Mood", "!!", "Now go brag to your friends", "PogChamp", "Poggers", "You passed with flying colors", "Oh, you got it right? Report it as a bug because I'm too easy, y'know?", "I agree, I'm just as easy as The Simpleton right beside me!", "Forget The Colors says: uncringe", "That seemed to easy for you, was colorblind enabled?", "And now, Souvenir", "I hope you wrote down the edgework-based rule for the first stage", "Emmm, ik that's correct", "Can you really say you've disabled Colorblind mode when you have a transparent bomb casing?", "Looks like the expert chose ally", "At least it's solved", "Clip it! Somebody highlight that or somebody clip that!", "Was I designed to be solved? Can't remember", "SPIINNN", "*roll credits*", "Hey! Your buttons are sorted- wait wrong module", "Do you have 200IQ or something?", "How would you have felt if I decided to strike?", "The module expired", "Forget The Colors expired", "The bomb expired", "A winner is you!", "All your module are belong to us", "BOB STOLE MY KEY", "Defuser achieved rank #1 on Being Cool:tm:" };
 
     void Awake()
     {
+        //boss module handler
         string[] ignoredModules = Boss.GetIgnoredModules(Module, _ignore);
         if (ignoredModules != null)
             _ignore = ignoredModules;
 
+        //establish buttons
         _moduleId = _moduleIdCounter++;
         for (byte i = 0; i < Buttons.Length; i++)
         {
@@ -79,13 +87,16 @@ public class FTC : MonoBehaviour
             _rules = null;
         else
         {
+            //establishes new variable
             _rules = new Rule[2][];
             _rules[0] = new Rule[20];
             _rules[1] = new Rule[10];
 
+            //applies rule seeding for cylinders
             for (byte i = 0; i < 20; i++)
                 _rules[0][i] = new Rule { Cylinder = (byte)rnd.Next(10), Parameter = (byte)rnd.Next(5) };
 
+            //applies rule seeding for edgework
             for (byte i = 0; i < 10; i++)
                 _rules[1][i] = new Rule { Edgework = (byte)rnd.Next(21), Parameter = (byte)rnd.Next(5) };
         }
@@ -93,7 +104,8 @@ public class FTC : MonoBehaviour
         //if on unity, max stage should equal the initial value assigned, otherwise set it to the proper value
         if (!Application.isEditor)
             maxStage = Bomb.GetSolvableModuleNames().Where(a => !_ignore.Contains(a)).Count();
-
+        
+        //length needs to be as long as there are maximum stages
         _storedValues = new int[maxStage + 1];
 
         //proper grammar!!
@@ -103,12 +115,29 @@ public class FTC : MonoBehaviour
         else
             Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - On this bomb we will have {1} stage.", _moduleId, maxStage);
 
+        //notice in case if i accidentally make _winPhrases and _failPhrases unbalanced
+        if (_winPhrases.Length != _failPhrases.Length)
+            Debug.LogFormat("[Forget The Colors #{0}]: If you see this message, it means that there are an unbalanced amount of flavor text when you strike or solve! Length of strike: {1}. Length of solve: {2}", _moduleId, _failPhrases.Length, _winPhrases.Length);
+
+        //begin module
         Audio.PlaySoundAtTransform("start", Buttons[2].transform);
-        StartCoroutine(Generate());
+
+        if (!Application.isEditor)
+            StartCoroutine(Generate());
+
+        //show that it's debug mode
+        else
+        {
+            Number[1].fontSize = 35;
+            Number[1].text = "DEBUG";
+            SmallBackground.text = "";
+            Render();
+        }
     }
 
     void FixedUpdate()
     {
+        //spin to next destination, every solve will give a new angle clockwise to itself
         if (Gear.localRotation.y != _gearDir + _currentDir)
         {
             _easeGear += 0.025f;
@@ -131,6 +160,7 @@ public class FTC : MonoBehaviour
             _rotating = _easeGear <= 1;
         }
 
+        //when finished, spin counter-clockwise to the nearest neutral position
         if (solved)
         {
             if (_easeSolve <= 1)
@@ -153,6 +183,7 @@ public class FTC : MonoBehaviour
                 CylinderKey.localPosition = new Vector3(0, -0.2f, 0);
         }
 
+        //failed key spin
         else if (_strike)
         {
             _easeSolve += 0.04f;
@@ -196,14 +227,12 @@ public class FTC : MonoBehaviour
             //reset visuals
             _nixies[0] = 0;
             _nixies[1] = 0;
+            _gear = 0;
 
             for (byte i = 0; i < _colorNums.Length; i++)
                 _colorNums[i] = 10;
 
-            _gear = 0;
-
             Render();
-
             CalculateAnswer();
             StopAllCoroutines();
         }
@@ -214,21 +243,22 @@ public class FTC : MonoBehaviour
             //stage 0: runs 40 times, stage 1+: runs 10 times
             for (byte i = 0; i < 10 + ((Mathf.Clamp(stage, 0, 1) - 1) * -30); i++)
             {
+                _mainDisplays[0] = Rnd.Range(0, 991);
+                _mainDisplays[1] = Rnd.Range(0, 100);
+                _gear = Rnd.Range(0, 10);
+
                 for (byte j = 0; j < _nixies.Length; j++)
                     _nixies[j] = Rnd.Range(0, 10);
 
                 for (byte j = 0; j < _colorNums.Length; j++)
                     _colorNums[j] = Rnd.Range(0, 10);
 
-                _mainDisplays[0] = Rnd.Range(0, 991);
-                _mainDisplays[1] = Rnd.Range(0, 100);
-                _gear = Rnd.Range(0, 10);
-
                 Render();
 
                 yield return new WaitForSeconds(.06f);
             }
 
+            //set stage number to display
             _mainDisplays[1] = stage;
 
             //souvenir
@@ -249,6 +279,7 @@ public class FTC : MonoBehaviour
 
     void HandlePress(KMSelectable btn)
     {
+        //if solved, buttons and key should do nothing
         if (solved)
             return;
 
@@ -271,11 +302,8 @@ public class FTC : MonoBehaviour
             //complete debugging
             if (Application.isEditor && maxStage != stage)
             {
-                Number[1].fontSize = 35;
-
                 //right nixie changes value selected by one
                 if (c == 1)
-                {
                     switch (_debugSelect)
                     {
                         case 0: _mainDisplays[0] = (int)Modulo(_mainDisplays[0] + 100, 1000); break;
@@ -289,7 +317,6 @@ public class FTC : MonoBehaviour
                         case 8: _nixies[0] = (int)Modulo(_nixies[0] + 1, 10); break;
                         case 9: _nixies[1] = (int)Modulo(_nixies[1] + 1, 10); break;
                     }
-                }
 
                 //left nixie changes which value is selected
                 else
@@ -375,7 +402,8 @@ public class FTC : MonoBehaviour
         {
             //render initial displays
             Number[0].text = _mainDisplays[0].ToString();
-            Number[1].text = Modulo(_mainDisplays[1], 100).ToString();
+            if (!Application.isEditor)
+                Number[1].text = Modulo(_mainDisplays[1], 100).ToString();
         }
 
         //if the large display lacks 3 characters, add 0's
@@ -417,13 +445,14 @@ public class FTC : MonoBehaviour
     void CalculateAnswer()
     {
         Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> FINAL STAGE ~ ARCCOSINE <-------=------->", _moduleId);
+        //adds all of the values
         for (byte i = 0; i < stage; i++)
         {
             _answer += _storedValues[i];
             Debug.LogFormat("[Forget The Colors #{0}]: Adding stage {1}'s {2}, the total is now {3}.", _moduleId, i, _storedValues[i], _answer);
         }
 
-        //turns to decimal
+        //turns to decimal number
         _answer = (float)Modulo(Mathf.Abs(_answer) / Math.Pow(10, 5), 1);
 
         //allow inputs in the module
@@ -437,9 +466,7 @@ public class FTC : MonoBehaviour
         _nixieCorrect[1] = (int)Math.Truncate(Modulo(_answer, 10));
 
         Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> SOLUTION <-------=------->", _moduleId);
-
         Debug.LogFormat("[Forget The Colors #{0}]: The expected answer is {1}.", _moduleId, _answer);
-
         Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> LET'S SEE HOW THE USER DOES <-------=------->", _moduleId);
     }
 
@@ -521,7 +548,7 @@ public class FTC : MonoBehaviour
                     case 0: _tempStorage[3] += rule.Cylinder; break;
                     case 1: _tempStorage[3] -= rule.Cylinder; break;
                     case 2: _tempStorage[3] *= rule.Cylinder; break;
-                    case 3: if (_tempStorage[3] != 0) _tempStorage[3] = Mathf.Floor((float)(_tempStorage[3] / rule.Cylinder)); break;
+                    case 3: if (_tempStorage[3] != 0) _tempStorage[3] = Math.Truncate(_tempStorage[3] / rule.Cylinder); break;
                     case 4: if (rule.Cylinder != 0) _tempStorage[3] = Modulo(_tempStorage[3], rule.Cylinder); break;
                 }
 
@@ -532,7 +559,7 @@ public class FTC : MonoBehaviour
                     case 0: _tempStorage[4] += rule.Cylinder; break;
                     case 1: _tempStorage[4] -= rule.Cylinder; break;
                     case 2: _tempStorage[4] *= rule.Cylinder; break;
-                    case 3: if (_tempStorage[4] != 0) _tempStorage[4] = Mathf.Floor((float)(_tempStorage[4] / rule.Cylinder)); break;
+                    case 3: if (_tempStorage[4] != 0) _tempStorage[4] = Math.Truncate(_tempStorage[4] / rule.Cylinder); break;
                     case 4: if (rule.Cylinder != 0) _tempStorage[4] = Modulo(_tempStorage[4], rule.Cylinder); break;
                 }
                 
@@ -547,8 +574,9 @@ public class FTC : MonoBehaviour
         Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> STAGE {1} (CALCULATED GEAR NUMBER ~ SECOND TABLE) <-------=------->", _moduleId, stage);
 
         //new gear = calculated nixies + gear
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Combine the both nixies ({2}&{3}) as well as the gear number {4}. The sum of that whole number is {5}.", _moduleId, stage, _tempStorage[3], _tempStorage[4], _gear, _tempStorage[5]);
         _tempStorage[5] = _tempStorage[3] + _tempStorage[4] + _gear;
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of the total number {2} with 10, its value is {3}.", _moduleId, stage, _tempStorage[5], Modulo(_tempStorage[5], 10));
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of the number above {2} with 10, its value is {3}.", _moduleId, stage, _tempStorage[5], Modulo(_tempStorage[5], 10));
         _tempStorage[5] = Modulo(_tempStorage[5], 10);
 
         //move the index up and down according to calculated nixies
@@ -608,7 +636,7 @@ public class FTC : MonoBehaviour
         else
         {
             string[] ports = new string[Bomb.GetPorts().Count()];
-            for (int i = 0; i < Bomb.GetPorts().Count(); i++)
+            for (ushort i = 0; i < Bomb.GetPorts().Count(); i++)
                 ports[i] = Bomb.GetPorts().ElementAt(i);
                 
             int ignoredCount = 0;
@@ -624,14 +652,13 @@ public class FTC : MonoBehaviour
                 case 0: _tempStorage[5] += edgework[rule.Edgework]; break;
                 case 1: _tempStorage[5] -= edgework[rule.Edgework]; break;
                 case 2: _tempStorage[5] *= edgework[rule.Edgework]; break;
-                case 3: if (edgework[rule.Edgework] != 0) _tempStorage[5] = Mathf.Floor((float)(_tempStorage[4] / edgework[rule.Edgework])); break;
+                case 3: if (edgework[rule.Edgework] != 0) _tempStorage[5] = Math.Truncate(_tempStorage[4] / edgework[rule.Edgework]); break;
                 case 4: if (edgework[rule.Edgework] != 0) _tempStorage[5] = Modulo(_tempStorage[4], edgework[rule.Edgework]); break;
             }
         }
 
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Apply the color rule {2} to the sum {3} which was calculated from the first nixie ({4}) + the second nixie ({5}) + the gear number ({6}), giving us {7}.", _moduleId, stage, _colors[(int)_index], temp, _tempStorage[3], _tempStorage[4], _gear, _tempStorage[5]);
-
         ruleColor.Add(_colors[(int)_index]);
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Apply the color rule {2} to the sum {3} which was calculated from the first nixie ({4}) + the second nixie ({5}) + the gear number ({6}), giving us {7}.", _moduleId, stage, _colors[(int)_index], temp, _tempStorage[3], _tempStorage[4], _gear, _tempStorage[5]);
 
         //modulo
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of the sum {2}, its value is {3}. This is the number we need to construct a 3-digit number.", _moduleId, stage, _tempStorage[5], Modulo(_tempStorage[5], 10));
@@ -793,7 +820,7 @@ public class FTC : MonoBehaviour
 
     IEnumerator TwitchHandleForcedSolve()
     {
-        Debug.LogFormat("[Forget The Colors #{0}]: Thank you for attempting FTC. You gave up on stage {1}", _moduleId, stage);
+        Debug.LogFormat("[Forget The Colors #{0}]: Admin has initiated an auto-solve. Thank you for attempting FTC. You gave up on stage {1}.", _moduleId, stage);
 
         while (!_inputMode)
             yield return true;
