@@ -66,10 +66,10 @@ public class FTC : MonoBehaviour
         _moduleId = _moduleIdCounter++;
         for (byte i = 0; i < Buttons.Length; i++)
         {
-            KMSelectable btn = Buttons[i];
-            btn.OnInteract += delegate
+            byte j = i;
+            Buttons[j].OnInteract += delegate
             {
-                HandlePress(btn);
+                HandlePress(j);
                 return false;
             };
         }
@@ -77,6 +77,15 @@ public class FTC : MonoBehaviour
 
     void Start()
     {
+        //testing sin calculations
+
+        //var log = Math.Truncate(Math.Sin(int.Parse(string.Concat("2", "1", "0")) * Mathf.Deg2Rad) * Math.Pow(10, 5));
+
+        //if (Modulo(Math.Abs(log), 1000) == 999)
+        //    log = Modulo(Math.Abs(log) + 1, (int)Math.Pow(10, 5)) * ((Convert.ToByte(log > 0) - 0.5) * 2);
+
+        //Debug.Log(log);
+
         //enables colorblind mode if needed
         _colorblind = Colorblind.ColorblindModeActive;
 
@@ -142,6 +151,7 @@ public class FTC : MonoBehaviour
         {
             _easeGear += 0.025f;
 
+            //when finished generating stages, spin counter-clockwise to the nearest neutral position
             if (_inputMode)
             {
                 Gear.localRotation = Quaternion.Euler(0, _currentDir % 360 * Math.Abs(CubicOut(_easeGear) - 1), 0);
@@ -150,6 +160,7 @@ public class FTC : MonoBehaviour
                     Gear.localRotation = Quaternion.Euler(0, 0, 0);
             }
 
+            //when generating stages, spin clockwise randomly
             else
             {
                 Gear.localRotation = Quaternion.Euler(0, CubicOut(_easeGear) * _gearDir + _currentDir, 0);
@@ -160,9 +171,10 @@ public class FTC : MonoBehaviour
             _rotating = _easeGear <= 1;
         }
 
-        //when finished, spin counter-clockwise to the nearest neutral position
+        //when solved, do the cool solve animation
         if (solved)
         {
+            //expansion
             if (_easeSolve <= 1)
             {
                 _easeSolve += 0.02f;
@@ -171,6 +183,7 @@ public class FTC : MonoBehaviour
                 CylinderKey.localScale = new Vector3(ElasticOut(_easeSolve) * 0.5f, 1, ElasticOut(_easeSolve) * 0.5f);
             }
 
+            //retraction
             else if (_easeSolve <= 2)
             {
                 _easeSolve += 0.04f;
@@ -179,6 +192,7 @@ public class FTC : MonoBehaviour
                 CylinderKey.localScale = new Vector3((1 - ElasticIn(_easeSolve - 1)) / 2, 1, (1 - ElasticIn(_easeSolve - 1)) / 2);
             }
 
+            //last frame
             else
                 CylinderKey.localPosition = new Vector3(0, -0.2f, 0);
         }
@@ -277,33 +291,30 @@ public class FTC : MonoBehaviour
         }
     }
 
-    void HandlePress(KMSelectable btn)
+    void HandlePress(byte btn)
     {
         //if solved, buttons and key should do nothing
         if (solved)
             return;
 
-        //gets the specific button pushed
-        byte c = (byte)Array.IndexOf(Buttons, btn);
-
         //if it's not ready for input, strike
         if (!_inputMode && !Application.isEditor)
         {
             Audio.PlaySoundAtTransform("key", Buttons[2].transform);
-            GetComponent<KMBombModule>().HandleStrike();
-            if (c == 2)
+            Module.HandleStrike();
+            if (btn == 2)
                 _strike = true;
             return;
         }
 
         //NOT the key
-        if (c != 2)
+        if (btn != 2)
         {
             //complete debugging
             if (Application.isEditor && maxStage != stage)
             {
                 //right nixie changes value selected by one
-                if (c == 1)
+                if (btn == 1)
                     switch (_debugSelect)
                     {
                         case 0: _mainDisplays[0] = (int)Modulo(_mainDisplays[0] + 100, 1000); break;
@@ -316,11 +327,12 @@ public class FTC : MonoBehaviour
                         case 7: _colorNums[3] = (int)Modulo(_colorNums[3] + 1, 10); break;
                         case 8: _nixies[0] = (int)Modulo(_nixies[0] + 1, 10); break;
                         case 9: _nixies[1] = (int)Modulo(_nixies[1] + 1, 10); break;
+                        case 10: maxStage--; break;
                     }
 
                 //left nixie changes which value is selected
                 else
-                    _debugSelect = (byte)Modulo(_debugSelect + 1, 10);
+                    _debugSelect = (byte)Modulo(_debugSelect + 1, 11);
                 
                 Render();
 
@@ -336,15 +348,16 @@ public class FTC : MonoBehaviour
                     case 7: Number[1].text = "gearCol"; break;
                     case 8: Number[1].text = "nixieL"; break;
                     case 9: Number[1].text = "nixieR"; break;
+                    case 10: Number[1].text = "stage"; break;
                 }
             }
 
             else
             {
-                _nixies[c] = (int)Modulo(_nixies[c] + 1, 10);
+                _nixies[btn] = (int)Modulo(_nixies[btn] + 1, 10);
 
-                Buttons[c].AddInteractionPunch();
-                Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, Buttons[c].transform);
+                Buttons[btn].AddInteractionPunch();
+                Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, Buttons[btn].transform);
             }
         }
 
@@ -385,6 +398,7 @@ public class FTC : MonoBehaviour
             }
         }
 
+        //when debugging, don't update yet
         if (!Application.isEditor)
             Render();
     }
@@ -419,6 +433,7 @@ public class FTC : MonoBehaviour
         Number[4].text = _gear.ToString();
         Number[4].characterSize = 0.1f - (Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage) * 0.04f);
 
+        //render letter for colorblind
         if (_colorblind && maxStage != stage)
         {
             if (_colorNums[3] != 7)
@@ -486,53 +501,16 @@ public class FTC : MonoBehaviour
                 //each digit rule
                 switch (_colorNums[i])
                 {
-                    case 0:
-                        _tempStorage[3] += 5;
-                        _tempStorage[4] -= 1;
-                        break;
-
-                    case 1:
-                        _tempStorage[3] -= 1;
-                        _tempStorage[4] -= 6;
-                        break;
-
-                    case 2:
-                        _tempStorage[3] += 3;
-                        break;
-
-                    case 3:
-                        _tempStorage[3] += 7;
-                        _tempStorage[4] -= 4;
-                        break;
-
-                    case 4:
-                        _tempStorage[3] -= 7;
-                        _tempStorage[4] -= 5;
-                        break;
-
-                    case 5:
-                        _tempStorage[3] += 8;
-                        _tempStorage[4] += 9;
-                        break;
-
-                    case 6:
-                        _tempStorage[3] += 5;
-                        _tempStorage[4] -= 9;
-                        break;
-
-                    case 7:
-                        _tempStorage[3] -= 9;
-                        _tempStorage[4] += 4;
-                        break;
-
-                    case 8:
-                        _tempStorage[4] += 7;
-                        break;
-
-                    case 9:
-                        _tempStorage[3] -= 3;
-                        _tempStorage[4] += 5;
-                        break;
+                    case 0: _tempStorage[3] += 5; _tempStorage[4] -= 1; break;
+                    case 1: _tempStorage[3] -= 1; _tempStorage[4] -= 6; break;
+                    case 2: _tempStorage[3] += 3; break;
+                    case 3: _tempStorage[3] += 7; _tempStorage[4] -= 4; break;
+                    case 4: _tempStorage[3] -= 7; _tempStorage[4] -= 5; break;
+                    case 5: _tempStorage[3] += 8; _tempStorage[4] += 9; break;
+                    case 6: _tempStorage[3] += 5; _tempStorage[4] -= 9; break;
+                    case 7: _tempStorage[3] -= 9; _tempStorage[4] += 4; break;
+                    case 8: _tempStorage[4] += 7; break;
+                    case 9: _tempStorage[3] -= 3; _tempStorage[4] += 5; break;
                 }
                 Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Applying the {2}-colored cylinder on the first table, the nixies are now {3} and {4}.", _moduleId, stage, _colors[_colorNums[i]], _tempStorage[3], _tempStorage[4]);
             }
@@ -574,7 +552,7 @@ public class FTC : MonoBehaviour
         Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> STAGE {1} (CALCULATED GEAR NUMBER ~ SECOND TABLE) <-------=------->", _moduleId, stage);
 
         //new gear = calculated nixies + gear
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Combine the both nixies ({2}&{3}) as well as the gear number {4}. The sum of that whole number is {5}.", _moduleId, stage, _tempStorage[3], _tempStorage[4], _gear, _tempStorage[5]);
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Combine both nixies ({2}&{3}) as well as the gear number {4}. The sum of that whole number is {5}.", _moduleId, stage, _tempStorage[3], _tempStorage[4], _gear, _tempStorage[3] + _tempStorage[4] + _gear);
         _tempStorage[5] = _tempStorage[3] + _tempStorage[4] + _gear;
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of the number above {2} with 10, its value is {3}.", _moduleId, stage, _tempStorage[5], Modulo(_tempStorage[5], 10));
         _tempStorage[5] = Modulo(_tempStorage[5], 10);
@@ -592,45 +570,16 @@ public class FTC : MonoBehaviour
             //this will run through the changes applied to the gear during step 2 of second page on manual
             switch ((int)_index)
             {
-                case 0:
-                    _tempStorage[5] += Bomb.GetBatteryCount();
-                    break;
-
-                case 1:
-                    _tempStorage[5] -= Bomb.GetPortCount();
-                    break;
-
-                case 2:
-                    _tempStorage[5] += Bomb.GetSerialNumberNumbers().Last();
-                    break;
-
-                case 3:
-                    _tempStorage[5] -= Bomb.GetSolvedModuleNames().Count();
-                    break;
-
-                case 4:
-                    _tempStorage[5] += Bomb.GetPortPlateCount();
-                    break;
-
-                case 5:
-                    _tempStorage[5] -= Bomb.GetModuleNames().Count();
-                    break;
-
-                case 6:
-                    _tempStorage[5] += Bomb.GetBatteryHolderCount();
-                    break;
-
-                case 7:
-                    _tempStorage[5] -= Bomb.GetOnIndicators().Count();
-                    break;
-
-                case 8:
-                    _tempStorage[5] += Bomb.GetIndicators().Count();
-                    break;
-
-                case 9:
-                    _tempStorage[5] -= Bomb.GetOffIndicators().Count();
-                    break;
+                case 0: _tempStorage[5] += Bomb.GetBatteryCount(); break;
+                case 1: _tempStorage[5] -= Bomb.GetPortCount(); break;
+                case 2: _tempStorage[5] += Bomb.GetSerialNumberNumbers().Last(); break;
+                case 3: _tempStorage[5] -= Bomb.GetSolvedModuleNames().Count(); break;
+                case 4: _tempStorage[5] += Bomb.GetPortPlateCount(); break;
+                case 5: _tempStorage[5] -= Bomb.GetModuleNames().Count(); break;
+                case 6: _tempStorage[5] += Bomb.GetBatteryHolderCount(); break;
+                case 7: _tempStorage[5] -= Bomb.GetOnIndicators().Count(); break;
+                case 8: _tempStorage[5] += Bomb.GetIndicators().Count(); break;
+                case 9: _tempStorage[5] -= Bomb.GetOffIndicators().Count(); break;
             }
         }
         else
@@ -670,16 +619,17 @@ public class FTC : MonoBehaviour
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The nixies are {2} and {3}, and the number obtained before is {4}, combining all of them gives us {5}.", _moduleId, stage, _tempStorage[3], _tempStorage[4], _tempStorage[5], string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5]));
         _tempStorage[2] = Math.Truncate(Math.Sin(int.Parse(string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5])) * Mathf.Deg2Rad) * Math.Pow(10, 5));
 
-        //floating point rounding fix
+        //floating point rounding fix, ensuring that it adds/subtracts 1 depending if it's a positive or negative number
         if (Modulo(Math.Abs(_tempStorage[2]), 1000) == 999)
-            _tempStorage[2] = Modulo(_tempStorage[2] + 1, (int)Math.Pow(10, 5));
+            _tempStorage[2] = Modulo(Math.Abs(_tempStorage[2]) + 1, (int)Math.Pow(10, 5)) * ((Convert.ToByte(_tempStorage[2] > 0) - 0.5) * 2);
+
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The sine number is sin({2}), which gets us {3} after flooring all decimals.", _moduleId, stage, string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5]), _tempStorage[2]);
 
         //get stage number
         _tempStorage[0] = Math.Floor(Math.Abs(Math.Cos(_mainDisplays[0] * Mathf.Deg2Rad) * Math.Pow(10, 5)));
 
         //floating point rounding fix
-        if (Modulo(Math.Abs(_tempStorage[0]), 1000) == 999)
+        if (Modulo(_tempStorage[0], 1000) == 999)
             _tempStorage[0] = Modulo(_tempStorage[0] + 1, (int)Math.Pow(10, 5));
 
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Taking the stage display, get the absolute of the first five decimals of cos({2}), which is {3}.", _moduleId, stage, _mainDisplays[0], _tempStorage[0]);
@@ -715,6 +665,7 @@ public class FTC : MonoBehaviour
         }
     }
 
+    //eases
     private float ElasticIn(float k)
     {
         if (Modulo(k, 1) == 0)
@@ -746,6 +697,7 @@ public class FTC : MonoBehaviour
         return 1f + ((k -= 1f) * k * k);
     }
 
+    //twitch plays
     private bool IsValid(string par)
     {
         //if number is 00-99, return true, otherwise return false
@@ -755,7 +707,6 @@ public class FTC : MonoBehaviour
 
         return false;
     }
-
 
 #pragma warning disable 414
     private readonly string TwitchHelpMessage = @"!{0} submit <##> (Cycles through both nixies to match '##', then hits submit. | Valid numbers are from 0-99)";
@@ -844,6 +795,9 @@ public class FTC : MonoBehaviour
     }
 }
 
+/// <summary>
+/// Datatype for use in Ruleseed, containing 3 byte values.
+/// </summary>
 sealed class Rule
 {
     public byte Cylinder, Edgework, Parameter;
