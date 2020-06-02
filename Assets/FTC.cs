@@ -33,12 +33,14 @@ public class FTC : MonoBehaviour
     List<string> gearColor = new List<string>(0), ruleColor = new List<string>(0);
 
     //variables for solving
-    private bool _inputMode, _strike = false, _rotating = false, _colorblind;
+    private bool _inputMode, _strike = false, _rotating = false, _animating = false, _colorblind;
     private byte _debugSelect = 0;
     private int _gear, _gearDir = 0, _currentDir = 0, _moduleId = 0;
-    private int[] _nixies = new int[2], _colorNums = new int[4], _storedValues;
+    private int[] _nixie = new int[2], _colorNums = new int[4], _storedValues;
     private float _answer, _easeSolve = 0, _easeGear = 0;
     private double _index;
+    private List<byte> _cylinder = new List<byte>(0);
+    private List<byte> _nixies = new List<byte>(0);
 
     //temporary storage
     readonly private int[] _mainDisplays = new int[2], _nixieCorrect = new int[2];
@@ -55,7 +57,7 @@ public class FTC : MonoBehaviour
     readonly static private string[] _failPhrases = { "You did a goodn't", "Congratulations! You got a strike", "You have just won a free gift card containing 1 strike and no solve! In other words", "This is so sad", "This must be really embarrasing for you", "I just came back, where we again? Oh yeah", "Unsuprisingly, your 1/91 chance went unsuccessful", "Did Emik break the module or are you just bad?", "Did Cooldoom break the module or are you just bad?", "This looks like a WHITE ABORT to me", "Correct... your mistakes in the future", "?!", "‽", "The phrase \"It's just a module\" is such a weak mindset, you are okay with what happened, striking, imperfection of a solve", "Good for you", "Have fun doing the math again", "Was that MAROON or RED?", "Are you sure the experts wrote it down correctly?", "Are you sure the defuser said it correctly?", "The key spun backwards", "THE ANSWER IS IN THE WRONG POSITION", "key.wav", "Module.HandleStrike()", "Is your calculator broken?", "Is your KTANE broken?", "A wide-screen monitor would really help here", "VR would make this easier", "A mechanical keyboard would make this easier", "A \"gaming mouse\" would make this easier", "E", "bruh moment", "Failed executing external process for 'Bake Runtime' job", "Did Discord cut vital communication off?", "You failed the vibe check", "Looks like you failed your exam", "Could not find USER_ANSWER in ACTUAL_ANSWER", "nah", "noppen", "yesn't", "This is the moment where you quit out the bomb", "You just lost the game", "Noooo, why'd you do that?", "*pufferfish noises*", "I was thinking about being generous this round, it didn't change my mind though", "Have you tried turning this module on and off?", "It's been so long, since I last have seen an answer, lost to this monster", "Oof", "Yikes", "Good luck figuring out why you're wrong", "Oog", "Nice one buckaroo", ":̶.̶|̶:̶;̶  <--- Is this loss?", "Oh, you got it wrong? Report it as a bug because it's definitely not your fault", "I'm not rated \"Very Hard\" for no reason after all", "Forget The Colors be like: cringe", "The manual said I is Pink, are you colorblind?", "Not cool, meet your doom", "What were you thinking!?", "Emmm, ik you messed up somewhere", "You should double check that part where you messed up", "Looks like the expert chose betray", "At least you've solved the other modules", "Did you even read the manual?", "The module's broken? No I'm not! What's 9+10? 18.9992", "When I shred, I shred using the entire bomb. But since you SUCK, you will only need this module, and zie key button", "ALT+F4", "Did you seriously mistake me for Forget Everything?", "I was kidding when I told you to Forget The Colors, I guess sarcasm didn't come through that time...", "The Defuser expired", "The Expert expired", "You just got bamboozl- ah, wrong module", "Module rain. Some stay solved and others feel the pain. Module rain. 3-digit displays will die before the sin()", "DEpvQ0klM93dC8GMWAo5TaYGeWCZfT8Vq1qNY6o     + // /", "mood", "This message should not appear. I'll be disappointed at the Defuser if it does", "Did you forget about the 0 solvable module unicorn?" };
     readonly static private string[] _winPhrases = { "Hey, that's pretty good", "*intense cat noises*", "While you're at it, be sure to like, comment, favorite and subscribe", "This is oddly calming", "GG m8", "I just came back, where we again? Oh yeah", "Suprisingly, your 1/91 chance went successful", "Did Emik fix the module or are you just that good?", "Did Cooldoom fix the module or are you just that good?", "This looks like a NUT BUTTON to me", "Opposite of incorrect", "Damn, I should ban you from solving me", "You haven't forgotten the colors?", "Do you still think it's Very Hard?", "I think I'm supposed to Module.HandlePass()", "I really hope you didn't look at the logs", "I really hope you didn't use an auto-solver", "I should have just used Azure instead of White", "How many shrimps do I have to eat, before it makes my gears turn pink", "The key spun forwards", "THE ANSWER IS IN THE RIGHT POSITION", "keyCorrect.wav", "Module.HandlePass()", "Did you use a calculator?", "Did you enjoy it?", "Please rate us 5 stars in the ModuleStore at your KTaNEPhone", "Alexa, play the victory tune", "VICTORY", "Maybe I should've called myself \"Write Down Colors\"", "E", "bruh moment", "*happy music*", ":) good", "You passed the vibe check", "Looks like you passed your exam", "Successfully found USER_ANSWER in ACTUAL_ANSWER", "yes", "yesper", "non't", "This is the moment where you say \"LET'S GO!!\"", "You just won the game", "*key turned*", "opposite of bruh moment", "I was thinking about being generous this round, but you were correct anyway", ":joy: 99% IMPOSSIBLE :joy:", "Forget The Colors, is this where you want to be, I just don't get it, why do you want to stay?", "Mood", "!!", "Now go brag to your friends", "PogChamp", "Poggers", "You passed with flying colors", "Oh, you got it right? Report it as a bug because I'm too easy, y'know?", "I agree, I'm just as easy as The Simpleton right beside me!", "Forget The Colors says: uncringe", "That seemed to easy for you, was colorblind enabled?", "And now, Souvenir", "I hope you wrote down the edgework-based rule for the first stage", "Emmm, ik that's correct", "Can you really say you've disabled Colorblind mode when you have a transparent bomb casing?", "Looks like the expert chose ally", "At least it's solved", "Clip it! Somebody highlight that or somebody clip that!", "Was I designed to be solved? Can't remember", "SPIINNN", "*roll credits*", "Hey! Your buttons are sorted- wait wrong module", "Do you have 200IQ or something?", "How would you have felt if I decided to strike?", "The module expired", "Forget The Colors expired", "The bomb expired", "A winner is you!", "All your module are belong to us", "BOB STOLE MY KEY", "Defuser achieved rank #1 on Being Cool:tm:" };
 
-    void Awake()
+    private void Awake()
     {
         //boss module handler
         string[] ignoredModules = Boss.GetIgnoredModules(Module, _ignore);
@@ -75,7 +77,7 @@ public class FTC : MonoBehaviour
         }
     }
 
-    void Start()
+    private void Start()
     {
         //testing sin calculations
 
@@ -144,10 +146,10 @@ public class FTC : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         //spin to next destination, every solve will give a new angle clockwise to itself
-        if (Gear.localRotation.y != _gearDir + _currentDir)
+        if (Gear.localRotation.y != _gearDir + _currentDir && !_strike)
         {
             _easeGear += 0.025f;
 
@@ -198,20 +200,20 @@ public class FTC : MonoBehaviour
         }
 
         //failed key spin
-        else if (_strike)
+        else if (_animating)
         {
             _easeSolve += 0.04f;
             Buttons[2].transform.localRotation = Quaternion.Euler(0, (ElasticOut(_easeSolve) - _easeSolve) * 69, 0);
 
             if (_easeSolve >= 1)
             {
-                _strike = false;
+                _animating = false;
                 _easeSolve = 0;
             }
         }
 
         //if there are more stages left, generate new stage
-        else if (stage < Bomb.GetSolvedModuleNames().Where(a => !_ignore.Contains(a)).Count() && !solved)
+        else if (stage < Bomb.GetSolvedModuleNames().Where(a => !_ignore.Contains(a)).Count() && !solved && !_strike)
         {
             if (!_rotating)
             {
@@ -225,7 +227,7 @@ public class FTC : MonoBehaviour
         }
     }
 
-    IEnumerator Generate()
+    private IEnumerator Generate()
     {
         //if solved, don't generate
         if (solved)
@@ -239,8 +241,8 @@ public class FTC : MonoBehaviour
         if (stage == maxStage || _answer != 0)
         {
             //reset visuals
-            _nixies[0] = 0;
-            _nixies[1] = 0;
+            _nixie[0] = 0;
+            _nixie[1] = 0;
             _gear = 0;
 
             for (byte i = 0; i < _colorNums.Length; i++)
@@ -261,8 +263,8 @@ public class FTC : MonoBehaviour
                 _mainDisplays[1] = Rnd.Range(0, 100);
                 _gear = Rnd.Range(0, 10);
 
-                for (byte j = 0; j < _nixies.Length; j++)
-                    _nixies[j] = Rnd.Range(0, 10);
+                for (byte j = 0; j < _nixie.Length; j++)
+                    _nixie[j] = Rnd.Range(0, 10);
 
                 for (byte j = 0; j < _colorNums.Length; j++)
                     _colorNums[j] = Rnd.Range(0, 10);
@@ -277,8 +279,14 @@ public class FTC : MonoBehaviour
 
             //souvenir
             gear.Add((byte)_gear);
-            largeDisplay.Add((short)_mainDisplays[0]);
             gearColor.Add(_colors[_colorNums[3]]);
+            largeDisplay.Add((short)_mainDisplays[0]);
+
+            //in case of strikes
+            for (byte i = 0; i < 2; i++)
+                _nixies.Add((byte)_nixie[i]);
+            for (byte i = 0; i < 4; i++)
+                _cylinder.Add((byte)_colorNums[i]);
 
             Render();
 
@@ -291,24 +299,39 @@ public class FTC : MonoBehaviour
         }
     }
 
-    void HandlePress(byte btn)
+    private void HandlePress(byte btn)
     {
         //if solved, buttons and key should do nothing
         if (solved)
             return;
 
+        //adds interaction punch
+        if (btn != 2)
+            Buttons[btn].AddInteractionPunch();
+
+        if (_strike)
+            switch (btn)
+            {
+                case 0: stage = (int)Modulo(stage - 1, maxStage); break;
+                case 1: stage = (int)Modulo(stage + 1, maxStage); break;
+                case 2: _strike = false; stage = maxStage; Render(); break;
+            }
+
         //if it's not ready for input, strike
-        if (!_inputMode && !Application.isEditor)
+        else if (!_inputMode && !Application.isEditor)
         {
             Audio.PlaySoundAtTransform("key", Buttons[2].transform);
             Module.HandleStrike();
             if (btn == 2)
+            {
                 _strike = true;
+                _animating = true;
+            }
             return;
         }
 
         //NOT the key
-        if (btn != 2)
+        else if (btn != 2)
         {
             //complete debugging
             if (Application.isEditor && maxStage != stage)
@@ -325,8 +348,8 @@ public class FTC : MonoBehaviour
                         case 5: _colorNums[2] = (int)Modulo(_colorNums[2] + 1, 10); break;
                         case 6: _gear = (int)Modulo(_gear + 1, 10); break;
                         case 7: _colorNums[3] = (int)Modulo(_colorNums[3] + 1, 10); break;
-                        case 8: _nixies[0] = (int)Modulo(_nixies[0] + 1, 10); break;
-                        case 9: _nixies[1] = (int)Modulo(_nixies[1] + 1, 10); break;
+                        case 8: _nixie[0] = (int)Modulo(_nixie[0] + 1, 10); break;
+                        case 9: _nixie[1] = (int)Modulo(_nixie[1] + 1, 10); break;
                         case 10: maxStage--; break;
                     }
 
@@ -354,9 +377,8 @@ public class FTC : MonoBehaviour
 
             else
             {
-                _nixies[btn] = (int)Modulo(_nixies[btn] + 1, 10);
+                _nixie[btn] = (int)Modulo(_nixie[btn] + 1, 10);
 
-                Buttons[btn].AddInteractionPunch();
                 Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, Buttons[btn].transform);
             }
         }
@@ -378,7 +400,7 @@ public class FTC : MonoBehaviour
             }
 
             //if both correct
-            else if (_nixies[0] == _nixieCorrect[0] && _nixies[1] == _nixieCorrect[1])
+            else if (_nixie[0] == _nixieCorrect[0] && _nixie[1] == _nixieCorrect[1])
             {
                 Audio.PlaySoundAtTransform("keySuccess", Buttons[2].transform);
                 Audio.PlaySoundAtTransform("solved", Buttons[2].transform);
@@ -393,8 +415,9 @@ public class FTC : MonoBehaviour
             {
                 Audio.PlaySoundAtTransform("key", Buttons[2].transform);
                 _strike = true;
+                _animating = true;
                 Module.HandleStrike();
-                Debug.LogFormat("[Forget The Colors #{0}]: {1}; you submitted {2}{3} when I expected {4}{5}.", _moduleId, _failPhrases[Rnd.Range(0, _failPhrases.Length)], _nixies[0], _nixies[1], _nixieCorrect[0], _nixieCorrect[1]);
+                Debug.LogFormat("[Forget The Colors #{0}]: {1}; you submitted {2}{3} when I expected {4}{5}.", _moduleId, _failPhrases[Rnd.Range(0, _failPhrases.Length)], _nixie[0], _nixie[1], _nixieCorrect[0], _nixieCorrect[1]);
             }
         }
 
@@ -405,59 +428,102 @@ public class FTC : MonoBehaviour
 
     private void Render()
     {
-        if (maxStage == stage)
+        if (_strike)
         {
-            //render turned off displays
-            Number[0].text = "";
-            Number[1].text = "";
+            //render initial displays
+            Number[0].text = largeDisplay[stage].ToString();
+            if (!Application.isEditor)
+                Number[1].text = Modulo(stage, 100).ToString();
+
+            //if the large display lacks 3 characters, add 0's
+            for (byte i = 0; i < 2; i++)
+                while (Number[i].text.Length < 3 - i)
+                    Number[i].text = Number[i].text.Insert(0, "0");
+
+            //set nixies
+            for (byte i = 0; i < _nixie.Length; i++)
+                Number[i + 2].text = _nixies[i + (stage * 2)].ToString();
+
+            //set gear
+            Number[4].text = gear[stage].ToString();
+            Number[4].characterSize = 0.1f - (Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage) * 0.04f);
+
+            //render letter for colorblind
+            if (_colorblind && maxStage != stage)
+            {
+                if (gearColor[stage].First() != 'I')
+                    Number[4].text += gearColor[stage].First();
+                else
+                    Number[4].text += 'I';
+            }
+
+            //set colors
+            for (byte i = 0; i < ColorChanger.Length; i++)
+            {
+                ColorChanger[i].material.mainTexture = Texture[_cylinder[i + (stage * 4)]];
+                ColorChanger[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage), -0.04f));
+            }
+            ColorChanger[3].material.SetTextureScale("_MainTex", new Vector2(0, 0));
+
+            //deletes cylinders if needed
+            for (byte i = 0; i < ColorblindCylinder.Length; i++)
+                ColorblindCylinder[i].localRotation = new Quaternion(90 * Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage), -90, 0, 0);
         }
 
         else
         {
-            //render initial displays
-            Number[0].text = _mainDisplays[0].ToString();
-            if (!Application.isEditor)
-                Number[1].text = Modulo(_mainDisplays[1], 100).ToString();
-        }
+            if (maxStage == stage)
+            {
+                //render turned off displays
+                Number[0].text = "";
+                Number[1].text = "";
+            }
 
-        //if the large display lacks 3 characters, add 0's
-        for (byte i = 0; i < 2; i++)
-            while (Number[i].text.Length < 3 - i)
-                Number[i].text = Number[i].text.Insert(0, "0");
-
-        //set nixies
-        for (byte i = 0; i < _nixies.Length; i++)
-            Number[i + 2].text = _nixies[i].ToString();
-
-        //set gear
-        Number[4].text = _gear.ToString();
-        Number[4].characterSize = 0.1f - (Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage) * 0.04f);
-
-        //render letter for colorblind
-        if (_colorblind && maxStage != stage)
-        {
-            if (_colorNums[3] != 7)
-                Number[4].text += _colors[_colorNums[3]].First();
             else
-                Number[4].text += 'I';
-        }
+            {
+                //render initial displays
+                Number[0].text = _mainDisplays[0].ToString();
+                if (!Application.isEditor)
+                    Number[1].text = Modulo(_mainDisplays[1], 100).ToString();
+            }
 
-        //set colors
-        for (byte i = 0; i < ColorChanger.Length; i++)
-        {
-            ColorChanger[i].material.mainTexture = Texture[_colorNums[i]];
-            ColorChanger[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage), -0.04f));
-        }
-        ColorChanger[3].material.SetTextureScale("_MainTex", new Vector2(0, 0));
+            //if the large display lacks 3 characters, add 0's
+            for (byte i = 0; i < 2; i++)
+                while (Number[i].text.Length < 3 - i)
+                    Number[i].text = Number[i].text.Insert(0, "0");
 
-        //deletes cylinders if needed
-        for (byte i = 0; i < ColorblindCylinder.Length; i++)
-        {
-            ColorblindCylinder[i].localRotation = new Quaternion(90 * Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage), -90, 0, 0);
+            //set nixies
+            for (byte i = 0; i < _nixie.Length; i++)
+                Number[i + 2].text = _nixie[i].ToString();
+
+            //set gear
+            Number[4].text = _gear.ToString();
+            Number[4].characterSize = 0.1f - (Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage) * 0.04f);
+
+            //render letter for colorblind
+            if (_colorblind && maxStage != stage)
+            {
+                if (_colorNums[3] != 7)
+                    Number[4].text += _colors[_colorNums[3]].First();
+                else
+                    Number[4].text += 'I';
+            }
+
+            //set colors
+            for (byte i = 0; i < ColorChanger.Length; i++)
+            {
+                ColorChanger[i].material.mainTexture = Texture[_colorNums[i]];
+                ColorChanger[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage), -0.04f));
+            }
+            ColorChanger[3].material.SetTextureScale("_MainTex", new Vector2(0, 0));
+
+            //deletes cylinders if needed
+            for (byte i = 0; i < ColorblindCylinder.Length; i++)
+                ColorblindCylinder[i].localRotation = new Quaternion(90 * Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage), -90, 0, 0);
         }
     }
 
-    void CalculateAnswer()
+    private void CalculateAnswer()
     {
         Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> FINAL STAGE ~ ARCCOSINE <-------=------->", _moduleId);
         //adds all of the values
@@ -485,13 +551,13 @@ public class FTC : MonoBehaviour
         Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> LET'S SEE HOW THE USER DOES <-------=------->", _moduleId);
     }
 
-    void Calculate()
+    private void Calculate()
     {
         Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> STAGE {1} (CALCULATED NIXIES ~ FIRST TABLE) <-------=------->", _moduleId, stage);
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The large display is {2}. The colored cylinders (left-to-right) are {3}, {4}, and {5}. The nixie numbers are {6}{7}. The gear is numbered {8} and colored {9}.", _moduleId, stage, _mainDisplays[0], _colors[_colorNums[0]], _colors[_colorNums[1]], _colors[_colorNums[2]], _nixies[0], _nixies[1], _gear, _colors[_colorNums[3]]);
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The large display is {2}. The colored cylinders (left-to-right) are {3}, {4}, and {5}. The nixie numbers are {6}{7}. The gear is numbered {8} and colored {9}.", _moduleId, stage, _mainDisplays[0], _colors[_colorNums[0]], _colors[_colorNums[1]], _colors[_colorNums[2]], _nixie[0], _nixie[1], _gear, _colors[_colorNums[3]]);
 
-        for (byte i = 0; i < _nixies.Length; i++)
-            _tempStorage[i + 3] = _nixies[i];
+        for (byte i = 0; i < _nixie.Length; i++)
+            _tempStorage[i + 3] = _nixie[i];
 
         if (_rules == null)
         {
@@ -626,7 +692,7 @@ public class FTC : MonoBehaviour
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The sine number is sin({2}), which gets us {3} after flooring all decimals.", _moduleId, stage, string.Concat(_tempStorage[3], _tempStorage[4], _tempStorage[5]), _tempStorage[2]);
 
         //get stage number
-        _tempStorage[0] = Math.Floor(Math.Abs(Math.Cos(_mainDisplays[0] * Mathf.Deg2Rad) * Math.Pow(10, 5)));
+        _tempStorage[0] = Modulo(Math.Floor(Math.Abs(Math.Cos(_mainDisplays[0] * Mathf.Deg2Rad) * Math.Pow(10, 5))), (int)Math.Pow(10, 5));
 
         //floating point rounding fix
         if (Modulo(_tempStorage[0], 1000) == 999)
@@ -709,7 +775,7 @@ public class FTC : MonoBehaviour
     }
 
 #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!{0} submit <##> (Cycles through both nixies to match '##', then hits submit. | Valid numbers are from 0-99)";
+    private readonly string TwitchHelpMessage = @"!{0} submit <##> (Cycles through both nixies to match '##', then hits submit. If in strike mode, submitting will get you out of strike mode and back to submission. | Valid numbers are from 0-99) !{0} preview <#> (If the module has struck, you can make # any valid stage number, which will show you what it displayed on that stage.)";
 #pragma warning restore 414
 
     IEnumerator ProcessTwitchCommand(string command)
@@ -729,8 +795,12 @@ public class FTC : MonoBehaviour
         {
             yield return null;
 
+            //turn the key to turn off
+            if (_strike)
+                Buttons[2].OnInteract();
+
             //if command has no parameters
-            if (buttonPressed.Length < 2)
+            else if (buttonPressed.Length < 2)
                 yield return "sendtochaterror Please specify the value to submit! (Valid: 0-99)";
 
             //if command has too many parameters
@@ -755,16 +825,47 @@ public class FTC : MonoBehaviour
                     for (byte i = 0; i < Buttons.Length - 1; i++)
                     {
                         //keep pushing until button value is met by player
-                        while (_nixies[i] != values[i])
+                        while (_nixie[i] != values[i])
                         {
-                            yield return new WaitForSeconds(0.5f);
+                            yield return new WaitForSeconds(0.05f);
                             Buttons[i].OnInteract();
                         }
                     }
 
                 //key
-                yield return new WaitForSeconds(0.8f);
+                yield return new WaitForSeconds(0.1f);
                 Buttons[2].OnInteract();
+            }
+        }
+
+        else if (Regex.IsMatch(buttonPressed[0], @"^\s*preview\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            uint n;
+
+            //if command has no parameters
+            if (!_strike)
+                yield return "sendtochaterror This command can only be executed when the module is in strike mode!";
+
+            //if command has no parameters
+            else if (buttonPressed.Length < 2)
+                yield return "sendtochaterror Please specify the value to submit! (Valid: 0-<Max number of stages>)";
+
+            //if command has too many parameters
+            else if (buttonPressed.Length > 2)
+                yield return "sendtochaterror Too many parameters! Please submit only 1 number.";
+
+            //if command has an invalid parameter
+            else if (!uint.TryParse(buttonPressed[1], out n) || n > maxStage)
+                yield return "sendtochaterror Invalid number! Make sure you aren't exceeding the amount of stages!";
+
+            else
+            {
+                //keep pushing until button value is met by player
+                while (n != stage)
+                {
+                    yield return new WaitForSeconds(0.02f);
+                    Buttons[1].OnInteract();
+                }
             }
         }
     }
@@ -779,16 +880,16 @@ public class FTC : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         for (byte i = 0; i < 2; i++)
-            while (_nixieCorrect[i] != _nixies[i])
+            while (_nixieCorrect[i] != _nixie[i])
             {
                 Buttons[i].OnInteract();
-                yield return new WaitForSeconds(.1f);
+                yield return new WaitForSeconds(0.05f);
                 Render();
             }
 
-        if (_nixies[0] == _nixieCorrect[0] && _nixies[1] == _nixieCorrect[1])
+        if (_nixie[0] == _nixieCorrect[0] && _nixie[1] == _nixieCorrect[1])
         {
-            yield return new WaitForSeconds(.5f);
+            yield return new WaitForSeconds(0.1f);
             Buttons[2].OnInteract();
         }
         yield return null;
