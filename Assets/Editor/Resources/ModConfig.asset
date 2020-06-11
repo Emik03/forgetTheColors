@@ -13,18 +13,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: ForgetTheColors
   title: Forget The Colors
-  author: Cooldoom5
-  description: 'What does trigonometry have to do with colors?
-
-    Huge shanks to Emik and Katarina for helping me not die while making this thing
-
-
-    Module ID: ForgetTheColors
-
-
-    HTML: https://ktane.timwi.de/HTML/Forget%20The%20Colors.html
-
-    PDF: https://ktane.timwi.de/PDF/Forget%20The%20Colors.pdf'
-  version: 1.8
-  outputFolder: E:\Setam\steamapps\common\Keep Talking and Nobody Explodes\mods
-  previewImage: {fileID: 2800000, guid: fe35a5baafea97f4eaeb0ac174ab3ff7, type: 3}
+  author: Emik
+  description: "Another boss module to rip your hair out, including TwitchPlays, Colorblind,
+    RuleSeed, and Souvenir support.\r\n\r\nOriginally by Cooldoom5.\r\n\r\nPlease
+    unsubscribe to his mod to avoid conflicts between that and this mod. https://steamcommunity.com/sharedfiles/filedetails/?id=2026509440\r\n\r\nModule
+    ID: ForgetTheColors\r\n\r\nHTML: https://ktane.timwi.de/HTML/Forget%20The%20Colors.html\r\nPDF:
+    https://ktane.timwi.de/PDF/Forget%20The%20Colors.pdf\r\n\r\nIs there a bug? Do
+    you have a question? Discord: @Emik#0001"
+  version: 1
+  outputFolder: D:\Steam\steamapps\common\Keep Talking and Nobody Explodes\mods
+  previewImage: {fileID: 2800000, guid: df13411b667dda04e940bf03b6d6f41b, type: 3}
