@@ -16,9 +16,7 @@ public class FTC : MonoBehaviour
     public KMBombInfo Bomb;
     public KMColorblindMode Colorblind;
     public KMRuleSeedable Rule;
-    public KMSelectable Key;
     public KMSelectable[] Selectables;
-    public Renderer GearLED;
     public Renderer[] Colors;
     public Transform Gear, CylinderKey;
     public Transform[] Disks;
@@ -365,7 +363,7 @@ public class FTC : MonoBehaviour
 
                         case 11:
                             //souvenir
-                            gear[stage] = byte.Parse(GearNumber.text);
+                            gear[stage] = byte.Parse(GearNumber.text.Last().ToString());
                             gearColor[stage] = _colors[_colorValues[3]];
                             largeDisplay[stage] = short.Parse(Displays[0].text);
 
@@ -384,8 +382,6 @@ public class FTC : MonoBehaviour
                 else
                     _debugSelect = (byte)Modulo(_debugSelect + 1, 12);
 
-                Render();
-
                 switch (_debugSelect)
                 {
                     case 0: Displays[1].text = "largeH"; break;
@@ -401,6 +397,8 @@ public class FTC : MonoBehaviour
                     case 10: Displays[1].text = "stage" + stage; break;
                     case 11: Displays[1].text = "quit"; break;
                 }
+
+                Render();
             }
         }
 
@@ -467,6 +465,16 @@ public class FTC : MonoBehaviour
 
             for (byte i = 0; i < Colors.Length; i++)
                 Colors[i].material.mainTexture = Textures[10];
+
+            Colors[3].material.SetTextureScale("_MainTex", new Vector2(0, 0));
+
+            //reinstalls cylinders regardless of colorblind
+            for (byte i = 0; i < Disks.Length; i++)
+                Disks[i].localRotation = new Quaternion(0, -90, 0, 0);
+
+            //set gear
+            GearNumber.characterSize = 0.1f;
+            GearNumber.text = GearNumber.text.Last().ToString();
         }
 
         else
@@ -487,18 +495,19 @@ public class FTC : MonoBehaviour
 
             //deletes cylinders if needed
             for (byte i = 0; i < Disks.Length; i++)
-                Disks[i].localRotation = new Quaternion(90 * Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage), -90, 0, 0);
+                Disks[i].localRotation = new Quaternion(90 * Convert.ToByte(_colorblind) * Convert.ToByte(_canInteract || Application.isEditor), -90, 0, 0);
 
             //set gear size
-            GearNumber.characterSize = 0.1f - (Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage) * 0.04f);
+            GearNumber.characterSize = 0.1f - (Convert.ToByte(_colorblind) * Convert.ToByte(_canInteract || Application.isEditor) * 0.04f);
 
             //render letter for colorblind
-            if (_colorblind && maxStage != stage && GearNumber.text.Length == 1)
+            if (_colorblind)
             {
-                if (gearColor[stage].First() != 'I')
-                    GearNumber.text = gearColor[stage].First() + GearNumber.text;
+                //checks for pink, since pink and purple start with the same letter
+                if (_colorValues[3] != 7)
+                    GearNumber.text = _colors[_colorValues[3]].First() + GearNumber.text.Last().ToString();
                 else
-                    GearNumber.text = 'I' + GearNumber.text;
+                    GearNumber.text = 'I' + GearNumber.text.Last().ToString();
             }
         }
     }
@@ -523,12 +532,13 @@ public class FTC : MonoBehaviour
         GearNumber.characterSize = 0.1f - (Convert.ToByte(_colorblind) * Convert.ToByte(maxStage != stage) * 0.04f);
 
         //render letter for colorblind
-        if (_colorblind && maxStage != stage && GearNumber.text.Length == 1)
+        if (_colorblind)
         {
-            if (gearColor[stage].First() != 'I')
-                GearNumber.text = gearColor[stage].First() + GearNumber.text;
+            //checks for pink, since pink and purple start with the same letter
+            if (gearColor[stage] != "Pink")
+                GearNumber.text = gearColor[stage].First() + GearNumber.text.Last().ToString();
             else
-                GearNumber.text = 'I' + GearNumber.text;
+                GearNumber.text = 'I' + GearNumber.text.Last().ToString();
         }
 
         //set colors
@@ -703,7 +713,7 @@ public class FTC : MonoBehaviour
         }
 
         ruleColor[currentStage] = _colors[(int)_index];
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Apply the color rule {2} to the sum which was calculated from the first nixie ({3}) + the second nixie ({4}) + the gear number ({5}), giving us {6}.", _moduleId, currentStage, _colors[(int)_index], nixie1, nixie2, GearNumber.text, nixie1 + nixie2 + int.Parse(GearNumber.text));
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Apply the color rule {2} to the sum which was calculated from the first nixie ({3}) + the second nixie ({4}) + the gear number ({5}), giving us {6}.", _moduleId, currentStage, _colors[(int)_index], nixie1, nixie2, GearNumber.text, nixie1 + nixie2 + int.Parse(GearNumber.text.Last().ToString()));
 
         //modulo
         Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of the sum {2}, its value is {3}. This is the number we need to construct a 3-digit number.", _moduleId, currentStage, lsd, Modulo(lsd, 10));
