@@ -9,6 +9,9 @@ using Rnd = UnityEngine.Random;
 
 public class FTC : MonoBehaviour
 {
+    //change this number before releasing a build!
+    private static readonly string _version = "v1.0.2";
+
     //import assets
     public KMAudio Audio;
     public KMBombModule Module;
@@ -36,10 +39,9 @@ public class FTC : MonoBehaviour
     private bool _canInteract, _colorblind, _allowCycleStage, _isRotating, _isAnimating;
     private sbyte _solution = -1;
     private byte _debugSelect;
-    private int _gearAngle, _currentAngle, _moduleId;
+    private int _gearAngle, _currentAngle, _sum, _moduleId;
     private int[] _colorValues = new int[4];
-    private float _easeSolve, _gearEasing, _sum;
-    private double _index;
+    private float _easeSolve, _gearEasing;
     private List<byte> _cylinder = new List<byte>(0), _nixies = new List<byte>(0);
     private List<int> _calculatedValues = new List<int>(0);
 
@@ -81,9 +83,11 @@ public class FTC : MonoBehaviour
 
         //gets seed
         MonoRandom rnd = Rule.GetRNG();
-        Debug.LogFormat("[Forget The Colors #{0}]: Using rule seed: {1}", _moduleId, rnd.Seed);
+        Debug.LogFormat("[Forget The Colors #{0}]: Using version {1} with rule seed: {2}.", _moduleId, _version, rnd.Seed);
+
         if (rnd.Seed == 1)
             _rules = null;
+
         else
         {
             //establishes new variable
@@ -93,11 +97,11 @@ public class FTC : MonoBehaviour
 
             //applies rule seeding for cylinders
             for (byte i = 0; i < 20; i++)
-                _rules[0][i] = new Rule { Cylinder = (byte)rnd.Next(10), Parameter = (byte)rnd.Next(5) };
+                _rules[0][i] = new Rule { Cylinder = (byte)rnd.Next(10), Operator = (byte)rnd.Next(5) };
 
             //applies rule seeding for edgework
             for (byte i = 0; i < 10; i++)
-                _rules[1][i] = new Rule { Edgework = (byte)rnd.Next(21), Parameter = (byte)rnd.Next(5) };
+                _rules[1][i] = new Rule { Edgework = (byte)rnd.Next(21), Operator = (byte)rnd.Next(5) };
         }
 
         //if on unity, max stage should equal the initial value assigned, otherwise set it to the proper value
@@ -106,16 +110,16 @@ public class FTC : MonoBehaviour
 
         //proper grammar!!
         if (maxStage != 1)
-            Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - On this bomb we will have {1} stages.", _moduleId, maxStage);
+            Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - This bomb will have {1} stages.", _moduleId, maxStage);
 
         else
-            Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - On this bomb we will have {1} stage.", _moduleId, maxStage);
+            Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - This bomb will have a single stage.", _moduleId);
 
         //notice in case if i accidentally make _winPhrases and _failPhrases unbalanced
         if (_winPhrases.Length != _failPhrases.Length)
             Debug.LogFormat("[Forget The Colors #{0}]: If you see this message, it means that there are an unbalanced amount of flavor text when you strike or solve! Length of strike: {1}. Length of solve: {2}", _moduleId, _failPhrases.Length, _winPhrases.Length);
 
-        //establishes sizes
+        //initialization of previous stage variables
         for (ushort i = 0; i < maxStage; i++)
         {
             for (byte j = 0; j < 4; j++)
@@ -132,11 +136,10 @@ public class FTC : MonoBehaviour
         }
 
         //begin module
-        Audio.PlaySoundAtTransform("start", Module.transform);
-
         NixieValues[0].text = "0";
         NixieValues[1].text = "0";
         StartCoroutine(Generate(0));
+        Audio.PlaySoundAtTransform("start", Module.transform);
 
         //show that it's debug mode
         if (Application.isEditor)
@@ -556,7 +559,8 @@ public class FTC : MonoBehaviour
 
     private void CalculateAnswer()
     {
-        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> FINAL STAGE ~ ARCCOSINE <-------=------->", _moduleId);
+        Debug.LogFormat("[Forget The Colors #{0}]: FINAL STAGE", _moduleId);
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> ARCCOSINE <-------=------->", _moduleId);
 
         //prevents out of array exceptions in editor
         if (Application.isEditor)
@@ -569,29 +573,28 @@ public class FTC : MonoBehaviour
             Debug.LogFormat("[Forget The Colors #{0}]: Adding stage {1}'s {2}, the total is now {3}.", _moduleId, i, _calculatedValues[i], _sum);
         }
 
-        //turns to decimal number
-        _sum = (float)Modulo(Mathf.Abs(_sum) / 100000, 1);
-
         //allow inputs in the module
         NixieValues[0].text = "0";
         NixieValues[1].text = "0";
         _canInteract = true;
         Render();
 
-        Debug.LogFormat("[Forget The Colors #{0}]: After forcing the number to be 5 digits long, the arccosine is {1} which returns {2}.", _moduleId, _sum, Math.Truncate(Mathf.Acos(_sum) * Mathf.Rad2Deg));
-        _solution = (sbyte)(Mathf.Acos(_sum) * Mathf.Rad2Deg);
+        //turns into decimal number
+        Debug.LogFormat("[Forget The Colors #{0}]: First five digits of cos-1({1}) is {2}.", _moduleId, Modulo(Mathf.Abs(_sum) / 100000, 1), Math.Truncate(Mathf.Acos((float)Modulo(Mathf.Abs(_sum) / 100000, 1)) * Mathf.Rad2Deg));
+        _solution = (sbyte)(Mathf.Acos((int)Modulo(Mathf.Abs(_sum) / 100000, 1)) * Mathf.Rad2Deg);
 
-        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> SOLUTION <-------=------->", _moduleId);
         Debug.LogFormat("[Forget The Colors #{0}]: The expected answer is {1}.", _moduleId, _solution);
+        Debug.LogFormat("[Forget The Colors #{0}]: USER INPUT", _moduleId);
         Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> LET'S SEE HOW THE USER DOES <-------=------->", _moduleId);
     }
 
     private void Calculate(int currentStage)
     {
-        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> STAGE {1} (CALCULATED NIXIES ~ FIRST TABLE) <-------=------->", _moduleId, currentStage);
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The large display is {2}. The colored cylinders (left-to-right) are {3}, {4}, and {5}. The nixie numbers are {6}{7}. The gear is numbered {8} and colored {9}.", _moduleId, currentStage, Displays[0].text, _colors[_colorValues[0]], _colors[_colorValues[1]], _colors[_colorValues[2]], NixieValues[0].text, NixieValues[1].text, GearNumber.text[Convert.ToByte(_colorblind)], _colors[_colorValues[3]]);
-
-        sbyte nixie1 = sbyte.Parse(NixieValues[0].text), nixie2 = sbyte.Parse(NixieValues[1].text);
+        Debug.LogFormat("[Forget The Colors #{0}]: STAGE {1}", _moduleId, currentStage);
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> MODULE APPEARANCE <-------=------->", _moduleId);
+        Debug.LogFormat("[Forget The Colors #{0}]: Large Display: {1}. Cylinders (left-to-right): {2}, {3}, and {4}. Nixies: {5} and {6}. Gear: {7} and {8}.", _moduleId, Displays[0].text, _colors[_colorValues[0]], _colors[_colorValues[1]], _colors[_colorValues[2]], NixieValues[0].text, NixieValues[1].text, GearNumber.text[Convert.ToByte(_colorblind)], _colors[_colorValues[3]]);
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> NIXIES ~ FIRST TABLE <-------=------->", _moduleId);
+        short nixie1 = sbyte.Parse(NixieValues[0].text), nixie2 = sbyte.Parse(NixieValues[1].text);
 
         if (_rules == null)
         {
@@ -612,16 +615,17 @@ public class FTC : MonoBehaviour
                     case 8: nixie2 += 7; break;
                     case 9: nixie1 -= 3; nixie2 += 5; break;
                 }
-                Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Applying the {2}-colored cylinder on the first table, the nixies are now {3} and {4}.", _moduleId, currentStage, _colors[_colorValues[i]], nixie1, nixie2);
+                Debug.LogFormat("[Forget The Colors #{0}]: Applying the {1}-colored cylinder on the first table, the nixies are now {2} and {3}.", _moduleId, _colors[_colorValues[i]], nixie1, nixie2);
             }
         }
+
         else
         {
             for (byte i = 0; i < _colorValues.Length - 1; i++)
             {
                 Rule rule = _rules[0][_colorValues[i]];
 
-                switch (rule.Parameter)
+                switch (rule.Operator)
                 {
                     case 0: nixie1 += (sbyte)rule.Cylinder; break;
                     case 1: nixie1 -= (sbyte)rule.Cylinder; break;
@@ -632,7 +636,7 @@ public class FTC : MonoBehaviour
 
                 rule = _rules[0][_colorValues[i] + 10];
 
-                switch (rule.Parameter)
+                switch (rule.Operator)
                 {
                     case 0: nixie2 += (sbyte)rule.Cylinder; break;
                     case 1: nixie2 -= (sbyte)rule.Cylinder; break;
@@ -641,33 +645,28 @@ public class FTC : MonoBehaviour
                     case 4: if (rule.Cylinder != 0) nixie2 = (sbyte)Modulo(nixie2, rule.Cylinder); break;
                 }
                 
-                Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Applying the {2}-colored cylinder on the first table, the nixies are now {3} and {4}.", _moduleId, currentStage, _colors[_colorValues[i]], nixie1, nixie2);
+                Debug.LogFormat("[Forget The Colors #{0}]: Applying the {1}-colored cylinder on the first table, the nixies are now {2} and {3}.", _moduleId, _colors[_colorValues[i]], nixie1, nixie2);
             }
         }
+
         //modulo
         nixie1 = (sbyte)Modulo(nixie1, 10);
         nixie2 = (sbyte)Modulo(nixie2, 10);
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of both nixies by 10, their values are now {2} and {3}.", _moduleId, currentStage, nixie1, nixie2);
+        Debug.LogFormat("[Forget The Colors #{0}]: Modulo 10, their values are now {1} and {2}.", _moduleId, nixie1, nixie2);
 
-        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> STAGE {1} (CALCULATED GEAR NUMBER ~ SECOND TABLE) <-------=------->", _moduleId, currentStage);
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> GEAR NUMBER ~ SECOND TABLE <-------=------->", _moduleId);
 
         //new gear = calculated nixies + gear
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Combine both nixies ({2}&{3}) as well as the gear number {4}. The sum of that whole number is {5}.", _moduleId, currentStage, nixie1, nixie2, GearNumber.text[Convert.ToByte(_colorblind)], nixie1 + nixie2 + int.Parse(GearNumber.text[Convert.ToByte(_colorblind)].ToString()));
-
-        int lsd = (int)Modulo(nixie1 + nixie2 + int.Parse(GearNumber.text[Convert.ToByte(_colorblind)].ToString()), 10);
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of the number above {2} with 10, its value is {3}.", _moduleId, currentStage, nixie1 + nixie2 + int.Parse(GearNumber.text[Convert.ToByte(_colorblind)].ToString()), lsd);
+        int lsd = (byte)Modulo(nixie1 + nixie2 + int.Parse(GearNumber.text[Convert.ToByte(_colorblind)].ToString()), 10);
+        Debug.LogFormat("[Forget The Colors #{0}]: Combine both nixies ({1}&{2}) and the gear number {3}. The sum is {4}. Modulo 10, its value is {5}.", _moduleId, nixie1, nixie2, GearNumber.text[Convert.ToByte(_colorblind)], nixie1 + nixie2 + int.Parse(GearNumber.text[Convert.ToByte(_colorblind)].ToString()), lsd);
         
         //move the index up and down according to calculated nixies
-        _index = _colorValues[3] - nixie1 + nixie2;
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Starting on the color of the gear ({2}), move up the amount of squares equal to the left nixie tube ({3}) which lands on {4}, then move down the amount of squares equal to the right nixie tube ({5}) which lands us on {6}.", _moduleId, currentStage, _colors[_colorValues[3]], nixie1, _colors[(int)Modulo(_colorValues[3] - nixie1, 10)], nixie2, _colors[(int)Modulo(_colorValues[3] - nixie1 + nixie2, 10)]);
-
-        //modulo
-        _index = Modulo(_index, 10);
+        Debug.LogFormat("[Forget The Colors #{0}]: Start on gear color ({1}), move up left nixie ({2}) which lands on {3}, then move down right nixie ({4}) which lands us on {5}.", _moduleId, _colors[_colorValues[3]], nixie1, _colors[(int)Modulo(_colorValues[3] - nixie1, 10)], nixie2, _colors[(int)Modulo(_colorValues[3] - nixie1 + nixie2, 10)]);
 
         if (_rules == null)
         {
             //this will run through the changes applied to the gear during step 2 of second page on manual
-            switch ((int)Modulo(nixie1 + nixie2 + int.Parse(GearNumber.text[Convert.ToByte(_colorblind)].ToString()), 10))
+            switch ((int)Modulo(_colorValues[3] - nixie1 + nixie2, 10))
             {
                 case 0: lsd += Bomb.GetBatteryCount(); break;
                 case 1: lsd -= Bomb.GetPortCount(); break;
@@ -681,6 +680,7 @@ public class FTC : MonoBehaviour
                 case 9: lsd -= Bomb.GetOffIndicators().Count(); break;
             }
         }
+
         else
         {
             string[] ports = new string[Bomb.GetPorts().Count()];
@@ -692,37 +692,37 @@ public class FTC : MonoBehaviour
                 if (_ignore.Contains(module))
                     ignoredCount++;
 
-            Rule rule = _rules[0][(int)_index];
+            Rule rule = _rules[0][(int)Modulo(_colorValues[3] - nixie1 + nixie2, 10)];
 
             int[] edgework;
 
             //the smaller display is used as a debug displayer in the editor, which cannot be parsed
             if (!Application.isEditor)
                 edgework = new int[21] { Bomb.GetBatteryCount(), Bomb.GetBatteryCount(Battery.AA) + Bomb.GetBatteryCount(Battery.AAx3) + Bomb.GetBatteryCount(Battery.AAx4), Bomb.GetBatteryCount(Battery.D), Bomb.GetBatteryHolderCount(), Bomb.GetIndicators().Count(), Bomb.GetOnIndicators().Count(), Bomb.GetOffIndicators().Count(), Bomb.GetPortPlateCount(), Bomb.GetPorts().Distinct().Count(), Bomb.GetPorts().Count() - Bomb.GetPorts().Distinct().Count(), Bomb.GetPortCount(), Bomb.GetSerialNumberNumbers().First(), Bomb.GetSerialNumberNumbers().Last(), Bomb.GetSerialNumberNumbers().Count(), Bomb.GetSerialNumberLetters().Count(), Bomb.GetSolvedModuleNames().Count(), maxStage, Bomb.GetModuleNames().Count(), Bomb.GetSolvableModuleNames().Count() - Bomb.GetSolvedModuleNames().Count(), ignoredCount, int.Parse(Displays[1].text) };
+
             else
                 edgework = new int[21] { Bomb.GetBatteryCount(), Bomb.GetBatteryCount(Battery.AA) + Bomb.GetBatteryCount(Battery.AAx3) + Bomb.GetBatteryCount(Battery.AAx4), Bomb.GetBatteryCount(Battery.D), Bomb.GetBatteryHolderCount(), Bomb.GetIndicators().Count(), Bomb.GetOnIndicators().Count(), Bomb.GetOffIndicators().Count(), Bomb.GetPortPlateCount(), Bomb.GetPorts().Distinct().Count(), Bomb.GetPorts().Count() - Bomb.GetPorts().Distinct().Count(), Bomb.GetPortCount(), Bomb.GetSerialNumberNumbers().First(), Bomb.GetSerialNumberNumbers().Last(), Bomb.GetSerialNumberNumbers().Count(), Bomb.GetSerialNumberLetters().Count(), Bomb.GetSolvedModuleNames().Count(), maxStage, Bomb.GetModuleNames().Count(), Bomb.GetSolvableModuleNames().Count() - Bomb.GetSolvedModuleNames().Count(), ignoredCount, 0 };
 
-            switch (rule.Parameter)
+            switch (rule.Operator)
             {
                 case 0: lsd += edgework[rule.Edgework]; break;
                 case 1: lsd -= edgework[rule.Edgework]; break;
                 case 2: lsd *= edgework[rule.Edgework]; break;
-                case 3: if (edgework[rule.Edgework] != 0) lsd = (nixie2 / edgework[rule.Edgework]); break;
+                case 3: if (edgework[rule.Edgework] != 0) lsd = nixie2 / edgework[rule.Edgework]; break;
                 case 4: if (edgework[rule.Edgework] != 0) lsd = (int)Modulo(nixie2, edgework[rule.Edgework]); break;
             }
         }
 
-        ruleColor[currentStage] = _colors[(int)_index];
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Apply the color rule {2} to the sum which was calculated from the first nixie ({3}) + the second nixie ({4}) + the gear number ({5}), giving us {6}.", _moduleId, currentStage, _colors[(int)_index], nixie1, nixie2, GearNumber.text, nixie1 + nixie2 + int.Parse(GearNumber.text.Last().ToString()));
+        ruleColor[currentStage] = _colors[(int)Modulo(_colorValues[3] - nixie1 + nixie2, 10)];
+        Debug.LogFormat("[Forget The Colors #{0}]: Apply the color rule {1} to the sum of the first nixie ({2}) + the second nixie ({3}) + the gear number ({4}). This gives us {5}. Modulo 10, its value is {6}.", _moduleId, _colors[(int)Modulo(_colorValues[3] - nixie1 + nixie2, 10)], nixie1, nixie2, GearNumber.text, nixie1 + nixie2 + int.Parse(GearNumber.text.Last().ToString()), Modulo(lsd, 10));
 
         //modulo
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: After modulo of the sum {2}, its value is {3}. This is the number we need to construct a 3-digit number.", _moduleId, currentStage, lsd, Modulo(lsd, 10));
         lsd = (int)Modulo(lsd, 10);
 
-        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> STAGE {1} (CALCULATED STAGE NUMBER ~ SINE/COSINE) <-------=------->", _moduleId, currentStage);
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> STAGE VALUE ~ SINE/COSINE) <-------=------->", _moduleId);
 
         //get the sine degrees
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The nixies are {2} and {3}, and the number obtained before is {4}, combining all of them gives us {5}.", _moduleId, currentStage, nixie1, nixie2, lsd, string.Concat(nixie1, nixie2, lsd));
+        Debug.LogFormat("[Forget The Colors #{0}]: The nixies are {1} and {2}, and the number obtained before is {3}, combining all of them gives us {4}.", _moduleId, nixie1, nixie2, lsd, string.Concat(nixie1, nixie2, lsd));
         int sin = (int)(Math.Sin(int.Parse(string.Concat(nixie1, nixie2, lsd)) * Mathf.Deg2Rad) * 100000 % 100000);
 
         //floating point rounding fix, ensuring that it adds/subtracts 1 depending if it's a positive or negative number
@@ -732,8 +732,6 @@ public class FTC : MonoBehaviour
             else
                 sin = (sin - 1) % 100000;
 
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The sine number is sin({2}), which gets us {3} after flooring all decimals.", _moduleId, currentStage, string.Concat(nixie1, nixie2, lsd), sin);
-
         //get stage number
         int cos = (int)(Math.Abs(Math.Cos(int.Parse(Displays[0].text) * Mathf.Deg2Rad) * 100000) % 100000);
 
@@ -741,11 +739,11 @@ public class FTC : MonoBehaviour
         if (Modulo(cos, 1000) == 999)
             cos = (int)Modulo(cos + 1, 100000);
 
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: Taking the stage display, get the absolute of the first five decimals of cos({2}), which is {3}.", _moduleId, currentStage, Displays[0].text, cos);
+        Debug.LogFormat("[Forget The Colors #{0}]: The first five decimals of sin({1}) is {2}. The absolute of the first five decimals of cos({3}) is {4}.", _moduleId, string.Concat(nixie1, nixie2, lsd), sin, Displays[0].text, cos);
 
         //get final value for the stage
-        _calculatedValues[currentStage] = (cos + sin);
-        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}: The final value for this stage is the sum of the cosine number {2} and the sine number {3}, which gives the final value of {4}. This number will be important later.", _moduleId, currentStage, cos, sin, cos + sin);
+        _calculatedValues[currentStage] = cos + sin;
+        Debug.LogFormat("[Forget The Colors #{0}]: Stage {1}'s value is sine's {2} + cosine's {3} which is {4}.", _moduleId, currentStage, sin, cos, (cos + sin).ToString("F0"));
 
         sineNumber[currentStage] = sin;
     }
@@ -923,14 +921,14 @@ public class FTC : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         for (byte i = 0; i < 2; i++)
-            while (_sum.ToString().ToCharArray()[i].ToString() != NixieValues[i].text)
+            while (_solution.ToString().ToCharArray()[i].ToString() != NixieValues[i].text)
             {
                 Selectables[i].OnInteract();
                 yield return new WaitForSeconds(0.05f);
                 Render();
             }
 
-        if (int.Parse(string.Concat(NixieValues[0].text, NixieValues[1].text)) == _sum)
+        if (int.Parse(string.Concat(NixieValues[0].text, NixieValues[1].text)) == _solution)
         {
             yield return new WaitForSeconds(0.1f);
             Selectables[2].OnInteract();
@@ -944,5 +942,5 @@ public class FTC : MonoBehaviour
 /// </summary>
 sealed class Rule
 {
-    public byte Cylinder, Edgework, Parameter;
+    public byte Cylinder, Edgework, Operator;
 }
