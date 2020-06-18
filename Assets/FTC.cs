@@ -10,7 +10,7 @@ using Rnd = UnityEngine.Random;
 public class FTC : MonoBehaviour
 {
     //change this number before releasing a build!
-    private static readonly string _version = "v1.0.2";
+    private static readonly string _version = "v1.0.3";
 
     //import assets
     public KMAudio Audio;
@@ -39,9 +39,9 @@ public class FTC : MonoBehaviour
     private bool _canInteract, _colorblind, _allowCycleStage, _isRotating, _isAnimating;
     private sbyte _solution = -1;
     private byte _debugSelect;
-    private int _gearAngle, _currentAngle, _sum, _moduleId;
+    private int _gearAngle, _currentAngle, _moduleId;
     private int[] _colorValues = new int[4];
-    private float _easeSolve, _gearEasing;
+    private float _easeSolve, _gearEasing, _sum;
     private List<byte> _cylinder = new List<byte>(0), _nixies = new List<byte>(0);
     private List<int> _calculatedValues = new List<int>(0);
 
@@ -560,7 +560,7 @@ public class FTC : MonoBehaviour
     private void CalculateAnswer()
     {
         Debug.LogFormat("[Forget The Colors #{0}]: FINAL STAGE", _moduleId);
-        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> ARCCOSINE <-------=------->", _moduleId);
+        Debug.LogFormat("[Forget The Colors #{0}]: <-------=-------> FINALE ~ ARCCOSINE <-------=------->", _moduleId);
 
         //prevents out of array exceptions in editor
         if (Application.isEditor)
@@ -581,7 +581,7 @@ public class FTC : MonoBehaviour
 
         //turns into decimal number
         Debug.LogFormat("[Forget The Colors #{0}]: First five digits of cos-1({1}) is {2}.", _moduleId, Modulo(Mathf.Abs(_sum) / 100000, 1), Math.Truncate(Mathf.Acos((float)Modulo(Mathf.Abs(_sum) / 100000, 1)) * Mathf.Rad2Deg));
-        _solution = (sbyte)(Mathf.Acos((int)Modulo(Mathf.Abs(_sum) / 100000, 1)) * Mathf.Rad2Deg);
+        _solution = (sbyte)(Mathf.Acos((float)Modulo(Mathf.Abs(_sum) / 100000, 1)) * Mathf.Rad2Deg);
 
         Debug.LogFormat("[Forget The Colors #{0}]: The expected answer is {1}.", _moduleId, _solution);
         Debug.LogFormat("[Forget The Colors #{0}]: USER INPUT", _moduleId);
