@@ -10,7 +10,7 @@ using Rnd = UnityEngine.Random;
 public class FTC : MonoBehaviour
 {
     //change this number before releasing a build!
-    private static readonly string _version = "v1.0.3";
+    private static readonly string _version = "v1.0.4";
 
     //import assets
     public KMAudio Audio;
@@ -460,7 +460,7 @@ public class FTC : MonoBehaviour
     private void Render()
     {
         //set everything gray
-        if (_canInteract && !_allowCycleStage)
+        if (_canInteract)
         {
             Displays[0].text = "";
             Displays[1].text = "";
@@ -498,10 +498,10 @@ public class FTC : MonoBehaviour
 
             //deletes cylinders if needed
             for (byte i = 0; i < Disks.Length; i++)
-                Disks[i].localRotation = new Quaternion(90 * Convert.ToByte(_colorblind) * Convert.ToByte(_canInteract || Application.isEditor), -90, 0, 0);
+                Disks[i].localRotation = new Quaternion(90 * Convert.ToByte(_colorblind), -90, 0, 0);
 
             //set gear size
-            GearNumber.characterSize = 0.1f - (Convert.ToByte(_colorblind) * Convert.ToByte(_canInteract || Application.isEditor) * 0.04f);
+            GearNumber.characterSize = 0.1f - (Convert.ToByte(_colorblind) * 0.04f);
 
             //render letter for colorblind
             if (_colorblind)
