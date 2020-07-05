@@ -6047,38 +6047,36 @@ MonoBehaviour:
   Audio: {fileID: 114396047326254218}
   Module: {fileID: 114964294086372836}
   Boss: {fileID: 114251671337808786}
-  Bomb: {fileID: 114309516729204832}
+  BombInfo: {fileID: 114309516729204832}
   Colorblind: {fileID: 114328423036372880}
   Rule: {fileID: 114919301630483750}
-  Key: {fileID: 114354096239087402}
   Selectables:
   - {fileID: 114903851409541088}
   - {fileID: 114446697452860082}
   - {fileID: 114354096239087402}
-  GearLED: {fileID: 23007583038229428}
-  Colors:
+  ColoredObjects:
   - {fileID: 23842886074455280}
   - {fileID: 23101927162157764}
   - {fileID: 23015489923323826}
   - {fileID: 23007583038229428}
   Gear: {fileID: 4818769884782826}
-  CylinderKey: {fileID: 4652389237390718}
-  Disks:
+  Key: {fileID: 4652389237390718}
+  CylinderDisks:
   - {fileID: 4419501378639304}
   - {fileID: 4555310846207038}
   - {fileID: 4205094867644836}
   - {fileID: 4912865789887660}
   - {fileID: 4309173281427560}
   - {fileID: 4713134930578800}
-  GearNumber: {fileID: 102007420808681950}
-  NumberBackground: {fileID: 102455550554784276}
-  Displays:
+  GearText: {fileID: 102007420808681950}
+  DebugText: {fileID: 102455550554784276}
+  DisplayTexts:
   - {fileID: 102885566186531940}
   - {fileID: 102874183208032154}
-  NixieValues:
+  NixieTexts:
   - {fileID: 102055070775772700}
   - {fileID: 102224363382977726}
-  Textures:
+  ColorTextures:
   - {fileID: 2800000, guid: 4df57b143bd811848a3cb248c31d8923, type: 3}
   - {fileID: 2800000, guid: 74ac89d24f21b344ca122f0aaf46e4cc, type: 3}
   - {fileID: 2800000, guid: 9102fc0e3eadf8948aabaf9d4fe06c37, type: 3}
