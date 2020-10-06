@@ -124,7 +124,7 @@ public class FTC : MonoBehaviour
                 yield return "sendtochaterror Too many parameters! Please submit only a single 2-digit number.";
 
             //if command has an invalid parameter
-            else if (!byte.TryParse(buttonPressed[1], out n) || n > 100)
+            else if (!byte.TryParse(buttonPressed[1], out n) || n >= 100)
                 yield return "sendtochaterror Invalid number! Only values 0-99 are valid.";
 
             //if command is valid, push button accordingly

@@ -27,16 +27,16 @@ sealed class Init
         {
             //establishes new variable
             rules = new Rule[2][];
-            rules[0] = new Rule[20];
+            rules[0] = new Rule[21];
             rules[1] = new Rule[10];
 
             //applies rule seeding for cylinders
-            for (byte i = 0; i < 20; i++)
-                rules[0][i] = new Rule { Cylinder = (byte)rnd.Next(10), Operator = (byte)rnd.Next(5) };
+            for (byte i = 0; i < rules[0].Length; i++)
+                rules[0][i] = new Rule { Cylinder = (byte)rnd.Next(rules[0].Length), Operator = (byte)rnd.Next(5) };
 
             //applies rule seeding for edgework
-            for (byte i = 0; i < 10; i++)
-                rules[1][i] = new Rule { Edgework = (byte)rnd.Next(21), Operator = (byte)rnd.Next(5) };
+            for (byte i = 0; i < rules[1].Length; i++)
+                rules[1][i] = new Rule { Edgework = (byte)rnd.Next(rules[1].Length), Operator = (byte)rnd.Next(5) };
         }
 
         //if on unity, max stage should equal the initial value assigned, otherwise set it to the proper value

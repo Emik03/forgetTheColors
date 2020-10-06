@@ -145,14 +145,8 @@ sealed class Calculate
 
             Rule rule = rules[1][(int)Ease.Modulo(colorValues[3] - nixie1 + nixie2, 10)];
 
-            int[] edgework;
-
             //the smaller display is used as a debug displayer in the editor, which cannot be parsed
-            if (!Application.isEditor)
-                edgework = new int[21] { BombInfo.GetBatteryCount(), BombInfo.GetBatteryCount(Battery.AA) + BombInfo.GetBatteryCount(Battery.AAx3) + BombInfo.GetBatteryCount(Battery.AAx4), BombInfo.GetBatteryCount(Battery.D), BombInfo.GetBatteryHolderCount(), BombInfo.GetIndicators().Count(), BombInfo.GetOnIndicators().Count(), BombInfo.GetOffIndicators().Count(), BombInfo.GetPortPlateCount(), BombInfo.GetPorts().Distinct().Count(), BombInfo.GetPorts().Count() - BombInfo.GetPorts().Distinct().Count(), BombInfo.GetPortCount(), BombInfo.GetSerialNumberNumbers().First(), BombInfo.GetSerialNumberNumbers().Last(), BombInfo.GetSerialNumberNumbers().Count(), BombInfo.GetSerialNumberLetters().Count(), BombInfo.GetSolvedModuleNames().Count(), maxStage, BombInfo.GetModuleNames().Count(), BombInfo.GetSolvableModuleNames().Count() - BombInfo.GetSolvedModuleNames().Count(), ignoredCount, int.Parse(DisplayTexts[1].text) };
-
-            else
-                edgework = new int[21] { BombInfo.GetBatteryCount(), BombInfo.GetBatteryCount(Battery.AA) + BombInfo.GetBatteryCount(Battery.AAx3) + BombInfo.GetBatteryCount(Battery.AAx4), BombInfo.GetBatteryCount(Battery.D), BombInfo.GetBatteryHolderCount(), BombInfo.GetIndicators().Count(), BombInfo.GetOnIndicators().Count(), BombInfo.GetOffIndicators().Count(), BombInfo.GetPortPlateCount(), BombInfo.GetPorts().Distinct().Count(), BombInfo.GetPorts().Count() - BombInfo.GetPorts().Distinct().Count(), BombInfo.GetPortCount(), BombInfo.GetSerialNumberNumbers().First(), BombInfo.GetSerialNumberNumbers().Last(), BombInfo.GetSerialNumberNumbers().Count(), BombInfo.GetSerialNumberLetters().Count(), BombInfo.GetSolvedModuleNames().Count(), maxStage, BombInfo.GetModuleNames().Count(), BombInfo.GetSolvableModuleNames().Count() - BombInfo.GetSolvedModuleNames().Count(), ignoredCount, 0 };
+            int[] edgework = new int[22] { BombInfo.GetBatteryCount(), BombInfo.GetBatteryCount(Battery.AA) + BombInfo.GetBatteryCount(Battery.AAx3) + BombInfo.GetBatteryCount(Battery.AAx4), BombInfo.GetBatteryCount(Battery.D), BombInfo.GetBatteryHolderCount(), BombInfo.GetIndicators().Count(), BombInfo.GetOnIndicators().Count(), BombInfo.GetOffIndicators().Count(), BombInfo.GetPortPlateCount(), BombInfo.GetPorts().Distinct().Count(), BombInfo.GetPorts().Count() - BombInfo.GetPorts().Distinct().Count(), BombInfo.GetPortCount(), BombInfo.GetSerialNumberNumbers().First(), BombInfo.GetSerialNumberNumbers().Last(), BombInfo.GetSerialNumberNumbers().Count(), BombInfo.GetSerialNumberLetters().Count(), BombInfo.GetSolvedModuleNames().Count(), maxStage, BombInfo.GetModuleNames().Count(), BombInfo.GetSolvableModuleNames().Count() - BombInfo.GetSolvedModuleNames().Count(), ignoredCount, Application.isEditor ? 0 : int.Parse(DisplayTexts[1].text), int.Parse(DisplayTexts[0].text) };
 
             switch (rule.Operator)
             {
