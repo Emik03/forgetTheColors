@@ -2,14 +2,71 @@
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
     <title>Forget The Colors — Keep Talking and Nobody Explodes Module</title>
     <meta name="viewport" content="initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="css/font.css">
     <link rel="stylesheet" type="text/css" href="css/normalize.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/font.css">
     <script src="js/ktane-utils.js"></script>
-    <script src='js/ruleseed.js'></script>
+    <script src="js/ruleseed.js"></script>
 </head>
+<script>
+    let defaultRules = null;
+
+    function getDefaultRules() {
+        if (defaultRules !== null)
+            return;
+
+        defaultRules = {};
+        for (let instruction = 1; instruction <= 10; instruction++)
+            defaultRules[`rule-2-${instruction}`] = document.getElementById(`rule-2-${instruction}`).innerText;
+    }
+
+    function setDefaultRules() {
+        getDefaultRules();
+        document.getElementById(`rule-extra`).innerText = "";
+        for (let instruction = 1; instruction <= 10; instruction++)
+            document.getElementById(`rule-2-${instruction}`).innerText = defaultRules[`rule-2-${instruction}`];
+    }
+
+    function setRules(rnd) {
+        getDefaultRules();
+        ruleExtra.innerText = " from left to right. When using either table, don't record decimals and ignore divisions (/) or modulo (%) 0";
+        
+        const action = ['+', '-', '*', '/', "%"];
+        const edgework = ['batteries', 'AA batteries', 'D batteries', 'battery holders',
+                          'indicators', 'lit indicators', 'unlit indicators', 
+                          'port plates', 'unique ports', 'duplicate ports', 'ports', 
+                          "serial's first digit", "serial's last digit", "serial's # of digits", "serial's # of letters",
+                          'solved modules', 'non-ignored modules', 'modules', 'unsolved modules', 'ignored modules',
+                          '2-digit screen', '3-digit screen'];
+
+        for (let instruction = 0; instruction < 20; instruction++) {
+            const span = document.getElementById(`rule-1-${instruction + 1}`);
+            const rule = { type: rnd.nextMax(10), parameter: rnd.nextMax(5) };
+            span.innerText = `${action[rule.parameter]}${rule.type}`;
+        }
+
+        for (let instruction = 0; instruction < 10; instruction++) {
+            const span = document.getElementById(`rule-2-${instruction + 1}`);
+            const rule = { type: rnd.nextMax(22), parameter: rnd.nextMax(5) };
+            span.innerText = `${action[rule.parameter]} ${edgework[rule.type]}`
+        }
+
+        for (let instruction = 0; instruction < 24; instruction++) {
+            const span = document.getElementById(`rule-3-${instruction + 1}`);
+            const rule = { type: rnd.nextMax(9) };
+            span.innerText = `${[rule.type]}`
+        }
+
+        for (let instruction = 0; instruction < 8; instruction++) {
+            const span = document.getElementById(`rule-4-${instruction + 1}`);
+            const rule = { type: rnd.nextMax(22) };
+            span.innerText = `${edgework[rule.type]}`
+        }
+    }
+</script>
 <style>
     div > input {
         background-color:#AAA;
@@ -66,9 +123,33 @@
     }
 
     @media print {
+		td {
+            padding: 4px;
+        }
+
+        .right {
+            text-align: right;
+            float: right;
+        }
+
+        .column {
+        margin-top: -16px;
+        float: left;
+        width: 50%;
+        }
+
+        .short {
+            width: 50%;
+        }
+
+        .shorter {
+            width: 40%;
+        }
+		
         .showPDF {
             display: inline;
         }
+		
         .hidePDF {
             display: none;
         }
@@ -93,11 +174,15 @@
         .short {
             width: 50%;
         }
+
+        .shorter {
+            width: 40%;
+        }
     }
 </style>
 <body>
     <div class="section">
-        <div class="page page-bg-07">
+        <div class="page page-bg-06">
             <div class="page-header">
                 <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
                 <span class="page-header-section-title">Forget The Colors</span>
@@ -108,7 +193,134 @@
                 <p class="flavour-text">Since when was trigonometry relevant to colors?</p>
                 <p>
                     This module has 2 displays, a gear with an LED and number, 2 nixie tubes (bottom-left), 3 cylinders, and a key.
-                    Note down everything shown at the start, and after every solve. Colorblind mode uses 'I' as Pink and 'P' as Purple.
+                    Note down everything shown at the start, and after every solve.
+                </p>
+                <h4>For every stage on the module:</h4>
+                <ol>
+                    <li>Add the gear color's 'Edgework' condition below with the gear number, taking the last digit. Append it to the last digit in the 2-digit display.</li><br>
+                    <li><span class="showPDF">Take the number and obtain the first 5 decimals of sine if both nixies are both odd or even, and cosine otherwise.</span><span class="hidePDF">Input it in sine if both nixies are both odd or even, and cosine otherwise.</span></li><br>
+                    <p class="hidePDF">
+                        <div class="column">
+                            <img src="img/Forget The Colors/sin(.png" width="36" height="20" style="margin-left:-195px; vertical-align:top;">
+                            <input type="text" id="sin2" style="width:30px" oninput="update()">
+                            <img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:45px; vertical-align:top;">
+                            <input type="text" id="sin2Ans" style="width:70px;" readonly><br>
+                        </div>
+                        <div class="column">
+                            <img src="img/Forget The Colors/cos(.png" width="38" height="20" style="margin-left:-200px; vertical-align:top;">
+                            <input type="text" id="cos2" style="width:30px;" oninput="update()">
+                            <img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:48px; vertical-align:top;">
+                            <input type="text" id="cos2Ans" style="width:70px;" readonly><br>
+                        </div>
+                    </p><br>
+
+                    <li>Each cylinder has 1-3 digits from the 5 decimal number in 1 of the figures:</li>
+                    <table>
+                        <tr>
+                            <td>L L L M R</td>
+                            <td>L M M M R</td>
+                            <td>L M R R R</td>
+                            <td>L M M R R</td>
+                            <td>L L M R R</td>
+                            <td>L L M M R</td>
+                        </tr>
+                    </table><br>
+
+                    <li>To find which figure applies...</li>
+                    <ul>
+                        <li>Modify all 5 digits by adding the number from the table based on which cylinder they belong to. If then certain numbers share values with previous ones, add 1 until they aren't, wrapping around to 0 after 9.</li><br>
+                        <li>Combine all values in each cylinder. Subtract 10 until less than 10.</li><br>
+                        <li>If L, M, and R as a 3-digit number is equal to the display, note down the cylinder that had a unique length. Otherwise, try a different figure.</li>
+                    </ul>
+                </ol>
+                <table class="right">
+                    <tr>
+                        <th>Color</th>
+                        <th>L</th>
+                        <th>M</th>
+                        <th>R</th>
+                        <th>Edgework</th>
+                    </tr>
+                    <tr class="red">
+                        <td>Red</td>
+                        <td><span class='rule' id='rule-3-1'>1</span></td>
+                        <td><span class='rule' id='rule-3-9'>7</span></td>
+                        <td><span class='rule' id='rule-3-17'>3</span></td>
+                        <td><span class='rule' id='rule-4-1'>batteries</span></td>
+                    </tr>
+                    <tr class="orange">
+                        <td>Orange</td>
+                        <td><span class='rule' id='rule-3-2'>6</span></td>
+                        <td><span class='rule' id='rule-3-10'>2</span></td>
+                        <td><span class='rule' id='rule-3-18'>8</span></td>
+                        <td><span class='rule' id='rule-4-2'>indicators</span></td>
+                    </tr>
+                    <tr class="yellow">
+                        <td>Yellow</td>
+                        <td><span class='rule' id='rule-3-3'>8</span></td>
+                        <td><span class='rule' id='rule-3-11'>5</span></td>
+                        <td><span class='rule' id='rule-3-19'>1</span></td>
+                        <td><span class='rule' id='rule-4-3'>port plates</span></td>
+                    </tr>
+                    <tr class="green">
+                        <td>Green</td>
+                        <td><span class='rule' id='rule-3-4'>5</span></td>
+                        <td><span class='rule' id='rule-3-12'>4</span></td>
+                        <td><span class='rule' id='rule-3-20'>6</span></td>
+                        <td><span class='rule' id='rule-4-4'>serial's first digit</span></td>
+                    </tr>
+                    <tr class="cyan">
+                        <td>Cyan</td>
+                        <td><span class='rule' id='rule-3-5'>2</span></td>
+                        <td><span class='rule' id='rule-3-13'>6</span></td>
+                        <td><span class='rule' id='rule-3-21'>4</span></td>
+                        <td><span class='rule' id='rule-4-5'>battery holders</span></td>
+                    </tr>
+                    <tr class="blue">
+                        <td>Blue</td>
+                        <td><span class='rule' id='rule-3-6'>7</span></td>
+                        <td><span class='rule' id='rule-3-14'>3</span></td>
+                        <td><span class='rule' id='rule-3-22'>5</span></td>
+                        <td><span class='rule' id='rule-4-6'>unlit indicators</span></td>
+                    </tr>
+                    <tr class="purple">
+                        <td>Purple</td>
+                        <td><span class='rule' id='rule-3-7'>3</span></td>
+                        <td><span class='rule' id='rule-3-15'>1</span></td>
+                        <td><span class='rule' id='rule-3-23'>7</span></td>
+                        <td><span class='rule' id='rule-4-6'>ports</span></td>
+                    </tr>
+                    <tr class="white">
+                        <td>White</td>
+                        <td><span class='rule' id='rule-3-8'>4</span></td>
+                        <td><span class='rule' id='rule-3-16'>8</span></td>
+                        <td><span class='rule' id='rule-3-24'>2</span></td>
+                        <td><span class='rule' id='rule-4-6'>serial's # of letters</span></td>
+                    </tr>
+                </table>
+                <h4>When cylinders turn gray:</h4>
+                <p class="short">Input the sequence, with the opposite nixie if either in the stage were 0:</p>
+                <ul class="shorter">
+                    <li><strong>L</strong> = Left Nixie</li><br>
+                    <li><strong>M</strong> = Same as last (left if none)</li><br>
+                    <li><strong>R</strong> = Right Nixie</li>
+                </ul>
+                <p class="short">Turn the key. When struck, cycle stages with the nixies. Turn the key to retry.</p>
+            </div>
+            <div class="page-footer relative-footer">Page 1 of 2</div>
+        </div>
+        <div class="page page-bg-07">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title">Forget More Colors</span>
+            </div>
+            <div class="page-content">
+                <img src="img/Component/Forget The Colors.svg" class="diagram">
+                <h2>On the Subject of Forget More Colors</h2>
+                <p class="flavour-text">Since when was trigonometry relevant to colors?</p>
+                <p>
+                    To activate this module's hard mode, before any module is solved, submit the sum of minutes and seconds remaining on the bomb. 3-digit numbers are not possible to submit.
+                    Colorblind mode uses 'I' as Pink and 'P' as Purple.
                 </p>
                 <h4>For every stage on the module:</h4>
                 <ol>
@@ -117,18 +329,22 @@
                     <li>Create a 3-digit number with the left- then right nixie, and then the current 'Edgework' color plus both nixies plus the gear number modulo 10.</li><br>
                     <li>
                         <div class="column">
-                            <p><span class="showPDF">Get the Sine (sin) of that 3-digit number and take the first five digits of the sine past the decimal point. This number can be negative.</span><div class="hidePDF">Write this 3-digit number to get the first 5 decimals in sine.</p>
-                            <img src="img/Forget The Colors/sin(.png" width="36" height="20" style="margin-left:-195px; vertical-align:top;">
-                            <input type="text" id="sin" style="width:30px" oninput="update()">
-                            <img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:45px; vertical-align:top;">
-                            <input type="text" id="sinAns" style="width:70px;" readonly><br></div>
+                            <p><span class="showPDF">Get the Sine (sin) of that 3-digit number and take the first five digits of the sine past the decimal point. This number can be negative.</span><span class="hidePDF">Write this 3-digit number to get the first 5 decimals in sine.</span></p>
+                            <div class="hidePDF">
+                                <img src="img/Forget The Colors/sin(.png" width="36" height="20" style="margin-left:-195px; vertical-align:top;">
+                                <input type="text" id="sin" style="width:30px" oninput="update()">
+                                <img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:45px; vertical-align:top;">
+                                <input type="text" id="sinAns" style="width:70px;" readonly><br>
+                            </div>
                         </div>
                         <div class="column">
-                            <p><span class="showPDF">Take the 3-digit display and get the first five digits of Cosine (cos) past the decimal point. Drop any negative signs to maintain a positive value.</span><div class="hidePDF">Write the 3-digit display to get the first 5 decimals in absolute cosine.</p>
-                            <img src="img/Forget The Colors/cos(.png" width="38" height="20" style="margin-left:-200px; vertical-align:top;">
-                            <input type="text" id="cos" style="width:30px;" oninput="update()">
-                            <img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:48px; vertical-align:top;">
-                            <input type="text" id="cosAns" style="width:70px;" readonly><br></div>
+                            <p><span class="showPDF">Take the 3-digit display and get the first five digits of Cosine (cos) past the decimal point. Drop any negative signs to maintain a positive value.</span><span class="hidePDF">Write the 3-digit display to get the first 5 decimals in absolute cosine.</span></p>
+                            <div class="hidePDF">
+                                <img src="img/Forget The Colors/cos(.png" width="38" height="20" style="margin-left:-200px; vertical-align:top;">
+                                <input type="text" id="cos" style="width:30px;" oninput="update()">
+                                <img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:48px; vertical-align:top;">
+                                <input type="text" id="cosAns" style="width:70px;" readonly><br>
+                            </div>
                         </div>
                     </li><br><br><br>
                     <li>Get the sum of sine and cosine. <strong>This number is needed later.</strong></li>
@@ -150,7 +366,7 @@
                         <td>Orange</td>
                         <td><span class='rule' id='rule-1-2'>-1</span></td>
                         <td><span class='rule' id='rule-1-12'>-6</span></td>
-                        <td><span class='rule' id='rule-2-2'>- total ports</span></td>
+                        <td><span class='rule' id='rule-2-2'>- ports</span></td>
                     </tr>
                     <tr class="yellow">
                         <td>Yellow</td>
@@ -174,7 +390,7 @@
                         <td>Blue</td>
                         <td><span class='rule' id='rule-1-6'>+8</span></td>
                         <td><span class='rule' id='rule-1-16'>+9</span></td>
-                        <td><span class='rule' id='rule-2-6'>- total modules</span></td>
+                        <td><span class='rule' id='rule-2-6'>- modules</span></td>
                     </tr>
                     <tr class="purple">
                         <td>Purple</td>
@@ -192,7 +408,7 @@
                         <td>Maroon</td>
                         <td><span class='rule' id='rule-1-9'>+0</span></td>
                         <td><span class='rule' id='rule-1-19'>+7</span></td>
-                        <td><span class='rule' id='rule-2-9'>+ total indicators</span></td>
+                        <td><span class='rule' id='rule-2-9'>+ indicators</span></td>
                     </tr>
                     <tr class="white">
                         <td>White</td>
@@ -204,17 +420,15 @@
                 <div class="short">
                     <h4>When cylinders turn gray:</h4>
                     <p>Add up all of the stage numbers, taking only the decimals.</p>
-                    <p><span class="showPDF">Take this value and apply a Cos<sup>-1</sup> to it. This will require at least a scientific calculator. Floor the given value and drop all of the decimal values to get a number from 0 and 90.</span><div class="hidePDF">Keep it positive and use floored Cos<sup>-1</sup> below.</p>
+                    <p><span class="showPDF">Take this value and apply a Cos<sup>-1</sup> to it. This will require at least a scientific calculator. Floor the given value and drop all of the decimal values to get a number from 0 and 90.</span><span class="hidePDF">Keep it positive and use floored Cos<sup>-1</sup> below.</span></p>
                     <img src="img/Forget The Colors/cos-1(.png" width="44" height="20" style="margin-left:-216px; vertical-align:top;">
                     <input type="text" id="acos" class="top" style="width:70px" class="padding" align="left" oninput="update()">
                     <img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:108px; vertical-align:top;">
                     <input type="text" id="acosAns" class="top" style="width:30px" readonly class="padding" align="left"></br>
                     <p>Input the number in the 2 nixies, then turn the key. If there were 0 stages, submit 90.</p>
-                    <p>If the module strikes, use the nixies to cycle stages and turn the key again to submit once more.</p>
                 </div>
             </div>
-        </div>
-        <div class="page-footer relative-footer">Page 1 of 1</div>
+            <div class="page-footer relative-footer">Page 2 of 2</div>
         </div>
     </div>
 </body>
@@ -222,72 +436,41 @@
     const sinElement = document.getElementById("sin");
     const cosElement = document.getElementById("cos");
     const acosElement = document.getElementById("acos");
+    const sin2Element = document.getElementById("sin2");
+    const cos2Element = document.getElementById("cos2");
 
     const sinAnsElement = document.getElementById("sinAns");
     const cosAnsElement = document.getElementById("cosAns");
     const acosAnsElement = document.getElementById("acosAns");
-
-    const ruleExtra = document.getElementById(`rule-extra`);
-    
-    let defaultRules = null;
+    const sin2AnsElement = document.getElementById("sin2Ans");
+    const cos2AnsElement = document.getElementById("cos2Ans");
     
     function update() {
         const sin = parseInt(sinElement.value) ? parseInt(sinElement.value) : 0;
         const cos = parseInt(cosElement.value) ? parseInt(cosElement.value) : 0;
         const acos = parseFloat(acosElement.value) ? parseFloat(acosElement.value) : 0;
+        const sin2 = parseInt(sin2Element.value) ? parseInt(sin2Element.value) : 0;
+        const cos2 = parseInt(cos2Element.value) ? parseInt(cos2Element.value) : 0;
 
         const sinAns = parseFloat(sinAnsElement.value = (Math.trunc(Math.sin(sin * Math.PI / 180) * 100000) / 100000) % 1);
         const cosAns = parseFloat(cosAnsElement.value = (Math.trunc(Math.abs(Math.cos(cos * Math.PI / 180)) * 100000) / 100000) % 1);
         const acosAns = Math.trunc(Math.acos(acos) / Math.PI * 180);
+        const sin2Ans = parseFloat(sin2AnsElement.value = (Math.trunc(Math.sin(sin2 * Math.PI / 180) * 100000) / 100000) % 1);
+        const cos2Ans = parseFloat(cos2AnsElement.value = (Math.trunc(Math.cos(cos2 * Math.PI / 180) * 100000) / 100000) % 1);
         
         if ((Math.abs(sinAns) * 100000) % 1000 === 999)
             sinAnsElement.value = sinAns > 0 ? (sinAns + 0.00001) % 1 : (sinAns - 0.00001) % 1;
 
-        if ((Math.abs(cosAnsElement.value) * 100000) % 1000 === 999)
+        if ((Math.abs(cosAns) * 100000) % 1000 === 999)
             cosAnsElement.value = ((cosAns) + 0.00001) % 1;
 
+        if ((Math.abs(sin2Ans) * 100000) % 1000 === 999)
+            sin2AnsElement.value = sin2Ans > 0 ? (sin2Ans + 0.00001) % 1 : (sin2Ans - 0.00001) % 1;
+
+        if ((Math.abs(cos2Ans) * 100000) % 1000 === 999)
+            cos2AnsElement.value = cos2Ans > 0 ? (cos2Ans + 0.00001) % 1 : (cos2Ans - 0.00001) % 1;
+
         acosAnsElement.value = acosAns;
-    }
-
-    function getDefaultRules() {
-        if (defaultRules !== null)
-            return;
-
-        defaultRules = {};
-        for (let instruction = 1; instruction <= 10; instruction++)
-            defaultRules[`rule-2-${instruction}`] = document.getElementById(`rule-2-${instruction}`).innerText;
-    }
-
-    function setDefaultRules() {
-        getDefaultRules();
-        ruleExtra.innerText = "";
-        for (let instruction = 1; instruction <= 10; instruction++)
-            document.getElementById(`rule-2-${instruction}`).innerText = defaultRules[`rule-2-${instruction}`];
-    }
-
-    function setRules(rnd) {
-        getDefaultRules();
-        ruleExtra.innerText = " from left to right. When using either table, don't record decimals and ignore divisions (/) or modulo (%) 0";
-        
-        const action = ['+', '-', '*', '/', "%"];
-        const edgework = ['batteries', 'AA batteries', 'D batteries', 'battery holders',
-                          'indicators', 'lit indicators', 'unlit indicators', 
-                          'port plates', 'unique ports', 'duplicate ports', 'total ports', 
-                          "serial's first digit", "serial's last digit", "serial's # of digits", "serial's # of letters",
-                          'solved modules', 'non-ignored modules', 'total modules', 'unsolved modules', 'ignored modules',
-                          '2-digit screen', '3-digit screen'];
-
-        for (let instruction = 0; instruction < 20; instruction++) {
-            const span = document.getElementById(`rule-1-${instruction + 1}`);
-            const rule = { type: rnd.nextMax(10), parameter: rnd.nextMax(5) };
-            span.innerText = `${action[rule.parameter]}${rule.type}`;
-        }
-
-        for (let instruction = 0; instruction < 10; instruction++) {
-            const span = document.getElementById(`rule-2-${instruction + 1}`);
-            const rule = { type: rnd.nextMax(22), parameter: rnd.nextMax(5) };
-            span.innerText = `${action[rule.parameter]} ${edgework[rule.type]}`
-        }
     }
 </script>
 </html>
