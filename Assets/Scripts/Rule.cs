@@ -1,7 +1,7 @@
 ﻿/// <summary>
 /// Datatype for use in RuleSeed, containing 3 byte values.
 /// </summary>
-sealed class Rule
+internal class Rule
 {
-    public byte Cylinder, Edgework, Operator;
+    public int Value, Operator;
 }

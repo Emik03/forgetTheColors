@@ -1,81 +1,93 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-/// <summary>
-/// Initalizes Colorblind, RuleSeed, and all of the temporary lists to be the correct size.
-/// </summary>
-sealed class Init
+public class Init
 {
-    public void Start(ref KMBossModule Boss, ref bool colorblind, ref KMColorblindMode Colorblind, ref KMRuleSeedable Rule, ref int moduleId, ref Rule[][] rules, ref int maxStage, ref KMBombInfo BombInfo, ref List<byte> cylinder, ref List<byte> nixies, ref List<byte> gear, ref List<short> largeDisplay, ref List<int> calculatedValues, ref List<int> sineNumber, ref List<string> gearColor, ref List<string> ruleColor, ref TextMesh[] NixieTexts, ref KMAudio Audio, ref KMBombModule Module, ref TextMesh[] DisplayTexts, ref TextMesh DebugText)
+    public Init(CoroutineScript Coroutine, FTCScript FTC, TPScript TP)
     {
-        //boss module handler
-        if (Boss.GetIgnoredModules(Module, Strings.Ignore) != null)
-            Strings.Ignore = Boss.GetIgnoredModules(Module, Strings.Ignore);
+        this.Coroutine = Coroutine;
+        this.FTC = FTC;
+        this.TP = TP;
+    }
 
-        //enables colorblind mode if needed
-        colorblind = Colorblind.ColorblindModeActive;
+    internal CoroutineScript Coroutine;
+    internal FTCScript FTC;
+    internal static Rule[][] Rules;
+    internal TPScript TP;
 
-        //gets seed
-        MonoRandom rnd = Rule.GetRNG();
-        Debug.LogFormat("[Forget The Colors #{0}]: Using version {1} with rule seed: {2}.", moduleId, Strings.Version, rnd.Seed);
+    internal bool solved, legacy;
+    internal int moduleId, maxStage, stage;
 
-        if (rnd.Seed == 1)
-            rules = null;
+    internal byte[] cylinder, nixies, gear;
+    internal short[] largeDisplay;
+    internal int[] sineNumber, calculatedValues;
+    internal string[] gearColor, ruleColor;
 
-        else
-        {
-            //establishes new variable
-            rules = new Rule[2][];
-            rules[0] = new Rule[21];
-            rules[1] = new Rule[10];
+    private static int moduleIdCounter;
 
-            //applies rule seeding for cylinders
-            for (byte i = 0; i < rules[0].Length; i++)
-                rules[0][i] = new Rule { Cylinder = (byte)rnd.Next(rules[0].Length), Operator = (byte)rnd.Next(5) };
+    protected internal void Start()
+    {
+        moduleId = ++moduleIdCounter;
 
-            //applies rule seeding for edgework
-            for (byte i = 0; i < rules[1].Length; i++)
-                rules[1][i] = new Rule { Edgework = (byte)rnd.Next(rules[1].Length), Operator = (byte)rnd.Next(5) };
-        }
+        if (FTC.Boss.GetIgnoredModules(FTC.Module, Arrays.Ignore) != null)
+            Arrays.Ignore = FTC.Boss.GetIgnoredModules(FTC.Module, Arrays.Ignore);
 
-        //if on unity, max stage should equal the initial value assigned, otherwise set it to the proper value
         if (!Application.isEditor)
-            maxStage = BombInfo.GetSolvableModuleNames().Where(module => !Strings.Ignore.Contains(module)).Count();
+            maxStage = Math.Max(FTC.BombInfo.GetSolvableModuleNames().Where(module => !Arrays.Ignore.Contains(module)).Count(), 10000);
 
-        //proper grammar!!
-        if (maxStage != 1)
-            Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - This bomb will have {1} stages.", moduleId, maxStage);
+        MonoRandom rnd = FTC.Rule.GetRNG();
+        GenerateRules(rnd);
+        Debug.LogFormat("[Forget The Colors #{0}]: Version {1}, RuleSeed {2}.", moduleId, Arrays.Version, rnd.Seed);
 
-        else
-            Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - This bomb will have a single stage.", moduleId);
+        //Render.colorblind = FTC.Colorblind.ColorblindModeActive;
 
-        //initialization of previous stage variables
-        for (ushort i = 0; i < maxStage; i++)
-        {
-            for (byte j = 0; j < 4; j++)
-                cylinder.Add(0);
 
-            nixies.Add(0);
-            nixies.Add(0);
-            gear.Add(0);
-            largeDisplay.Add(0);
-            calculatedValues.Add(0);
-            sineNumber.Add(0);
-            gearColor.Add("Red");
-            ruleColor.Add("Red");
-        }
+        bool singleStage = maxStage == 1;
+        Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - This bomb will have {1} stage{2}.", moduleId, singleStage ? "a single" : maxStage.ToString(), singleStage ? "" : "s");
 
-        //begin module
-        NixieTexts[0].text = "0";
-        NixieTexts[1].text = "0";
-        Audio.PlaySoundAtTransform("start", Module.transform);
-
-        //show that it's debug mode
+        FTC.NixieTexts[0].text = FTC.NixieTexts[1].text = "0";
+        FTC.Audio.PlaySoundAtTransform("start", FTC.Module.transform);
+        
         if (Application.isEditor)
         {
-            DisplayTexts[1].fontSize = 35;
-            DebugText.text = "";
+            FTC.DisplayTexts[1].fontSize = 35;
+            FTC.DebugText.text = "";
         }
+
+        new Legacy(FTC, this).Start();
+    }
+
+    private static Rule[][] GenerateRules(MonoRandom rnd)
+    {
+        if (rnd.Seed == 1)
+            return null;
+
+        var rules = new Rule[4][] { new Rule[20], new Rule[10], new Rule[24], new Rule[8] };
+        int[] ranges = { 10, 22, 10, 22 };
+
+        for (byte i = 0; i < rules.Length; i++)
+        {
+            for (byte j = 0; j < rules[i].Length; j++)
+            {
+                rules[i][j] = new Rule
+                {
+                    Value = rnd.Next(ranges[i]),
+                    Operator = i < 2 ? rnd.Next(5) : 0
+                };
+            }
+        }
+
+        return rules;
+    }
+
+    private void ResetArrays()
+    {
+        cylinder = nixies = gear = new byte[maxStage];
+        largeDisplay = new short[maxStage];
+        sineNumber = calculatedValues = new int[maxStage];
+        gearColor = ruleColor = new string[maxStage];
     }
 }
+

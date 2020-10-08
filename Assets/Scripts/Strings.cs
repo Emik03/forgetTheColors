@@ -1,11 +1,11 @@
 ﻿/// <summary>
 /// Contains all the static strings used in FTC.
 /// </summary>
-sealed class Strings
+static class Arrays
 {
-    public const string Version = "v1.0.6";
+    public const string Version = "v1.0.7";
 
-    public static readonly string[] ColorLog =
+    public static readonly string[] colorLog =
     {
         "Red",
 		"Orange",
@@ -38,40 +38,45 @@ sealed class Strings
 
     public static string[] Ignore = 
     {
-		"14",
-        "A>N<D",
+		"14", 
+		"42", 
+		"501", 
+		"A>N<D", 
 		"Bamboozling Time Keeper",
-		"Brainf---",
-		"Forget Enigma",
-		"Forget Everything",
-		"Forget It Not",
-		"Forget Me Not",
-		"Forget Me Later",
-		"Forget Perspective",
-        "Forget The Colors",
-        "Forget Them All",
-		"Forget This",
-		"Forget Us Not",
-        "Iconic",
-        "Kugelblitz",
-        "Multitask",
-        "OmegaForget",
-        "Organization",
-        "Password Destroyer",
-        "Purgatory",
-        "RPS Judging",
-        "Simon Forgets",
-		"Simon's Stages",
-		"Souvenir",
-		"Tallordered Keys",
-		"The Time Keeper",
-		"The Troll",
-        "The Twin",
-        "The Very Annoying Button",
-		"Timing Is Everything",
-		"Turn The Key",
-		"Ultimate Custom Night",
-		"Übermodule"
+		"Brainf---", 
+		"Busy Beaver", 
+		"Don't Touch Anything", 
+		"Forget Enigma", 
+		"Forget Everything", 
+		"Forget It Not", 
+		"Forget Me Not", 
+		"Forget Me Later", 
+		"Forget Perspective", 
+		"Forget The Colors", 
+		"Forget Them All", 
+		"Forget This", 
+		"Forget Us Not", 
+		"Iconic", 
+		"Kugelblitz", 
+		"Multitask", 
+		"OmegaForget", 
+		"Organization", 
+		"Password Destroyer", 
+		"Purgatory", 
+		"RPS Judging", 
+		"Simon Forgets", 
+		"Simon's Stages", 
+		"Souvenir", 
+		"Tallordered Keys", 
+		"The Time Keeper", 
+		"The Troll", 
+		"The Twin", 
+		"The Very Annoying Button", 
+		"Timing Is Everything", 
+		"Turn The Key", 
+		"Ultimate Custom Night", 
+		"Übermodule", 
+		"Whiteout"
     };
 
     public static readonly string[] FailPhrases = 
