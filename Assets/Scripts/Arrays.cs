@@ -3,9 +3,16 @@
 /// </summary>
 static class Arrays
 {
-    public const string Version = "v1.0.7";
+    public const string Version = "v1.1";
 
-    public static readonly string[] colorLog =
+	public static readonly int[,] ColorTable = new int[3,8]
+	{
+		{ 1, 6, 8, 5, 2, 7, 3, 4 },
+		{ 7, 2, 5, 4, 6, 3, 1, 8 },
+		{ 3, 8, 1, 6, 4, 5, 7, 2 }
+	};
+
+    public static readonly string[] ColorLog =
     {
         "Red",
 		"Orange",

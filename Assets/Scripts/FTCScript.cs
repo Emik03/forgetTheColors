@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Forget The Colors
+/// </summary>
 public class FTCScript : MonoBehaviour
 {
     public CoroutineScript Coroutine;
     public KMAudio Audio;
     public KMBombModule Module;
     public KMBossModule Boss;
-    public KMBombInfo BombInfo;
+    public KMBombInfo Info;
     public KMColorblindMode Colorblind;
     public KMRuleSeedable Rule;
     public KMSelectable[] Selectables;
@@ -18,8 +21,10 @@ public class FTCScript : MonoBehaviour
     public TextMesh[] DisplayTexts, NixieTexts;
     public Texture[] ColorTextures;
 
-    private void Awake ()
+    internal Init init;
+
+    private void Awake()
     {
-        Module.OnActivate += new Init(Coroutine, this, TP).Start;
+        Module.OnActivate += (init = new Init(Coroutine, this, TP)).Start;
 	}
 }

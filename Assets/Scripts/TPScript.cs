@@ -7,8 +7,13 @@ public class TPScript : MonoBehaviour
     public CoroutineScript Coroutine;
     public FTCScript FTC;
 
+    private Init init;
+    private Render render;
+
     private void Start()
     {
+        init = FTC.init;
+        render = init.render;
     }
 
     IEnumerator ProcessTwitchCommand(string command)
@@ -19,7 +24,7 @@ public class TPScript : MonoBehaviour
         if (Regex.IsMatch(command, @"^\s*colorblind\s*$", RegexOptions.IgnoreCase))
         {
             yield return null;
-            //_colorblind = !_colorblind;
+            render.colorblind = !render.colorblind;
 
             //if (!_allowCycleStage)
             //    moduleRender.Update(ref _canSolve, ref DisplayTexts, ref GearText, ref ColoredObjects, ref ColorTextures, ref CylinderDisks, ref _colorValues, ref _colorblind, ref maxStage, ref stage);

@@ -11,9 +11,6 @@
     <script src="js/ktane-utils.js"></script>
     <script src="js/ruleseed.js"></script>
 </head>
-<script>
-    
-</script>
 <style>
     div > input {
         background-color:#AAA;
@@ -137,7 +134,7 @@
             <div class="page-content">
                 <img src="img/Component/Forget The Colors.svg" class="diagram">
                 <h2>On the Subject of Forget The Colors</h2>
-                <p class="flavour-text">Since when was trigonometry relevant to colors?</p>
+                <p class="flavour-text">In the midst of chaos, shining color on the situation figures... but not here, you'll have to figure some more.</p>
                 <p>
                     This module has 2 displays, a gear with an LED and number, 2 nixie tubes (bottom-left), 3 cylinders, and a key.
                     Note down everything shown at the start, and after every solve.
@@ -175,7 +172,7 @@
 
                     <li>To find which figure applies...</li>
                     <ul>
-                        <li>Modify all 5 digits by adding the number from the table based on which cylinder they belong to. If then certain numbers share values with previous ones, add 1 until they aren't, wrapping around to 0 after 9.</li><br>
+                        <li>Modify all 5 digits by adding the number from the table based on which cylinder they belong to.</li><br>
                         <li>Combine all values in each cylinder. Subtract 10 until less than 10.</li><br>
                         <li>If L, M, and R as a 3-digit number is equal to the display, note down the cylinder that had a unique length. Otherwise, try a different figure.</li>
                     </ul>
@@ -245,14 +242,14 @@
                         <td><span class='rule' id='rule-4-8'>serial's # of letters</span></td>
                     </tr>
                 </table>
-                <h4>When cylinders turn gray:</h4>
+                <h4>Submitting during or after a stage:</h4>
                 <p class="short">Input the sequence, with the opposite nixie if either in the stage were 0:</p>
                 <ul class="shorter">
                     <li><strong>L</strong> = Left Nixie</li><br>
                     <li><strong>M</strong> = Same as last (left if none)</li><br>
                     <li><strong>R</strong> = Right Nixie</li>
                 </ul>
-                <p class="short">Turn the key. When struck, cycle stages with the nixies. Turn the key to retry.</p>
+                <p class="short">Finally, turn the key.</p>
             </div>
             <div class="page-footer relative-footer">Page 1 of 2</div>
         </div>
@@ -345,20 +342,20 @@
                         <td><span class='rule' id='rule-1-17'>-9</span></td>
                         <td><span class='rule' id='rule-2-7'>+ battery holders</span></td>
                     </tr>
-                    <tr class="pink">
-                        <td>Pink</td>
+                    <tr class="white">
+                        <td>White</td>
                         <td><span class='rule' id='rule-1-8'>-9</span></td>
                         <td><span class='rule' id='rule-1-18'>+4</span></td>
                         <td><span class='rule' id='rule-2-8'>- lit indicators</span></td>
                     </tr>
-                    <tr class="maroon">
-                        <td>Maroon</td>
+                    <tr class="pink">
+                        <td>Pink</td>
                         <td><span class='rule' id='rule-1-9'>+0</span></td>
                         <td><span class='rule' id='rule-1-19'>+7</span></td>
                         <td><span class='rule' id='rule-2-9'>+ indicators</span></td>
                     </tr>
-                    <tr class="white">
-                        <td>White</td>
+                    <tr class="maroon">
+                        <td>Maroon</td>
                         <td><span class='rule' id='rule-1-10'>-3</span></td>
                         <td><span class='rule' id='rule-1-20'>+5</span></td>
                         <td><span class='rule' id='rule-2-10'>- unlit indicators</span></td>
@@ -372,7 +369,7 @@
                     <input type="text" id="acos" class="top" style="width:70px" class="padding" align="left" oninput="update()">
                     <img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:108px; vertical-align:top;">
                     <input type="text" id="acosAns" class="top" style="width:30px" readonly class="padding" align="left"></br>
-                    <p>Input the number in the 2 nixies, then turn the key. If there were 0 stages, submit 90.</p>
+                    <p>Input the number in the 2 nixies, then turn the key. When struck, cycle stages with the nixies. Turn the key to retry. Submit 90 if there were 0 stages.</p>
                 </div>
             </div>
             <div class="page-footer relative-footer">Page 2 of 2</div>
