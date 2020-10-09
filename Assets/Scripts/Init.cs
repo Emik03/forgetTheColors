@@ -13,7 +13,7 @@ public class Init
 
         calculate = new Calculate(FTC);
         render = new Render(FTC, this);
-        selectable = new Selectable(FTC, this, render);
+        selectable = new Selectable(calculate, FTC, this, render);
     }
 
     internal Calculate calculate;

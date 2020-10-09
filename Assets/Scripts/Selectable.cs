@@ -1,14 +1,14 @@
-﻿using System.Diagnostics;
-
-public class Selectable 
+﻿public class Selectable 
 {
-    public Selectable(FTCScript FTC, Init init, Render render)
+    public Selectable(Calculate calculate, FTCScript FTC, Init init, Render render)
     {
+        this.calculate = calculate;
         this.FTC = FTC;
         this.init = init;
         this.render = render;
     }
 
+    private readonly Calculate calculate;
     private readonly FTCScript FTC;
     private readonly Init init;
     private readonly Render render;
@@ -17,7 +17,6 @@ public class Selectable
     {
         return delegate ()
         {
-            UnityEngine.Debug.Log(index);
             switch (index)
             {
                 case 0:
@@ -28,6 +27,7 @@ public class Selectable
 
                 case 2:
                     render.AssignRandom(init.legacy);
+                    calculate.Current();
                     break;
             }
 
