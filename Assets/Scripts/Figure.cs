@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using UnityEngine;
 
 static class Figure
 {

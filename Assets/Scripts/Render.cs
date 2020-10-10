@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using UnityEngine;
-using Rnd = System.Random;
+using Rnd = UnityEngine.Random;
 
 public class Render 
 {
@@ -9,74 +9,67 @@ public class Render
     {
         this.FTC = FTC;
         this.init = init;
-
-        int seed = UnityEngine.Random.Range(0, int.MaxValue);
-        rnd = new Rnd(seed);
-        Debug.LogFormat("[Forget The Colors #{0}]: Seed is {1}.", init.moduleId, seed);
     }
 
-    internal bool colorblind;
+    internal bool colorblind, turnKey;
+    internal const int angleIncreasePerSolve = 2;
+    internal int currentAngle;
+    internal float ease;
 
     private readonly FTCScript FTC;
     private readonly Init init;
 
-    private bool isRotatingKey, isRotatingGear, allowCycleStage, canSolve;
-    private short currentAngle;
-    private const int angleIncreasePerSolve = 2;
-    private float ease;
-    private readonly Rnd rnd;
-
-    internal void Colorblind()
+    internal void AssignRandom()
     {
-        for (int i = 0; i < FTC.CylinderDisks.Length; i++)
-            FTC.CylinderDisks[i].localRotation = new Quaternion(90 * Convert.ToByte(colorblind), -90, 0, 0);
-
-        for (int i = 0; i < FTC.ColoredObjects.Length; i++)
-            FTC.ColoredObjects[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(colorblind) * Convert.ToByte(init.maxStage != init.stage), -0.04f));
-
-        FTC.GearText.characterSize = 0.1f - (Convert.ToByte(colorblind) * 0.04f);
-
-        FTC.ColoredObjects[3].material.SetTextureScale("_MainTex", new Vector2(0, 0));
-        int gearIndex = Functions.GetColorIndex(3, FTC);
-
-        if (colorblind)
-            FTC.GearText.text = gearIndex != 7 ? Arrays.ColorLog[gearIndex].First() + FTC.GearText.text.Last().ToString()
-                                               : FTC.GearText.text = 'I' + FTC.GearText.text.Last().ToString();
-    }
-    internal void AssignRandom(bool legacy)
-    {
-        if (legacy)
-            Assign(displays: new[] { rnd.Next(0, 1000), rnd.Next(0, 100) },
-                   gears: new[] { rnd.Next(0, 10), rnd.Next(0, 10) },
-                   nixies: new[] { rnd.Next(0, 10), rnd.Next(0, 10) },
-                   cylinders: new[] { rnd.Next(0, 10), rnd.Next(0, 10), rnd.Next(0, 10) });
+        if (init.legacy)
+            Assign(displays: new[] { Rnd.Range(0, 1000), Rnd.Range(0, 100) },
+                   gears: new[] { Rnd.Range(0, 10), Rnd.Range(0, 10) },
+                   nixies: new[] { Rnd.Range(0, 10), Rnd.Range(0, 10) },
+                   cylinders: new[] { Rnd.Range(0, 10), Rnd.Range(0, 10), Rnd.Range(0, 10) });
 
         else
-            Assign(displays: new[] { rnd.Next(0, 1000), rnd.Next(0, 100) },
-                   gears: new[] { rnd.Next(0, 10), rnd.Next(0, 8) },
-                   nixies: new[] { rnd.Next(0, 10), rnd.Next(0, 10) },
+            Assign(displays: new[] { Rnd.Range(0, 1000), Rnd.Range(0, 100) },
+                   gears: new[] { Rnd.Range(0, 10), Rnd.Range(0, 8) },
+                   nixies: new[] { Rnd.Range(0, 10), Rnd.Range(0, 10) },
                    cylinders: Functions.Random(3, 0, 8));
     }
 
     internal void Assign(int[] displays, int[] gears, int[] nixies, int[] cylinders)
     {
+        if (displays == null || gears == null || nixies == null || cylinders == null)
+        {
+            FTC.DisplayTexts[0].text = string.Empty;
+            FTC.DisplayTexts[1].text = string.Empty;
+
+            for (byte i = 0; i < FTC.ColoredObjects.Length; i++)
+                FTC.ColoredObjects[i].material.mainTexture = FTC.ColorTextures[10];
+
+            FTC.ColoredObjects[3].material.SetTextureScale("_MainTex", new Vector2(0, 0));
+
+            for (byte i = 0; i < FTC.CylinderDisks.Length; i++)
+                FTC.CylinderDisks[i].localRotation = new Quaternion(0, -90, 0, 0);
+
+            FTC.GearText.characterSize = 0.1f;
+            FTC.GearText.text = string.Empty;
+
+            return;
+        }
+
         if (displays.Length != FTC.DisplayTexts.Length || gears.Length != 2 || nixies.Length != FTC.NixieTexts.Length || cylinders.Length != FTC.ColoredObjects.Length - 1)
             throw new ArgumentOutOfRangeException("displays, gears, nixies, cylinders", "CoroutineScript.Render failed to run because the parameters provided had incorrect length!: " + displays.Length.ToString() + gears.Length.ToString() + nixies.Length.ToString() + cylinders.Length.ToString());
 
-        FTC.GearText.text = gears[0].ToString();
-        FTC.ColoredObjects[3].material.mainTexture = FTC.ColorTextures[gears[1]];
+        SetGear(gears[0].ToString());
 
         for (int i = 0; i < cylinders.Length; i++)
             FTC.ColoredObjects[i].material.mainTexture = FTC.ColorTextures[cylinders[i]];
+
+        FTC.ColoredObjects[3].material.mainTexture = FTC.ColorTextures[gears[1]];
 
         for (int i = 0; i < displays.Length; i++)
         {
             FTC.DisplayTexts[i].text = displays[i].ToString();
             FTC.NixieTexts[i].text = nixies[i].ToString();
-        }
 
-        for (int i = 0; i < FTC.DisplayTexts.Length; i++)
-        {
             while (FTC.DisplayTexts[i].text.Length < 3 - i)
             {
                 FTC.DisplayTexts[i].text = '0' + FTC.DisplayTexts[i].text;
@@ -84,7 +77,32 @@ public class Render
         }
     }
 
-    internal bool Animate()
+    internal void Colorblind(bool colorblind)
+    {
+        for (int i = 0; i < FTC.CylinderDisks.Length; i++)
+            FTC.CylinderDisks[i].localRotation = new Quaternion(90 * Convert.ToByte(colorblind), -90, 0, 0);
+
+        for (int i = 0; i < FTC.ColoredObjects.Length; i++)
+            FTC.ColoredObjects[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(colorblind) * Convert.ToByte(init.maxStage != init.stage), -0.05f));
+
+        FTC.GearText.characterSize = 0.05f - (Convert.ToByte(colorblind) * 0.025f);
+
+        FTC.ColoredObjects[3].material.SetTextureScale("_MainTex", new Vector2(0, 0));
+
+        SetGear(FTC.GearText.text.Last().ToString());
+    }
+
+    private void SetGear(string value)
+    {
+        FTC.GearText.text = value.ToString();
+        int gearIndex = Functions.GetColorIndex(3, FTC);
+
+        if (colorblind)
+            FTC.GearText.text = gearIndex != 9 ? Arrays.ColorLog[gearIndex].First() + FTC.GearText.text
+                                               : FTC.GearText.text = 'I' + FTC.GearText.text;
+    }
+
+    internal bool Animate(bool animating)
     {
         if (FTC.init.solved)
         {
@@ -112,46 +130,20 @@ public class Render
         }
 
         // Failed key spin.
-        else if (isRotatingKey)
+        else if (turnKey)
         {
             ease += 0.04f;
             FTC.Selectables[2].transform.localRotation = Quaternion.Euler(0, (Functions.ElasticOut(ease) - ease) * 69, 0);
 
             if (ease >= 1)
             {
-                isRotatingKey = false;
+                turnKey = false;
                 ease = 0;
             }
         }
 
-        //spin to next destination, every solve will give a new angle clockwise to itself
-        else if (FTC.Gear.localRotation.y != angleIncreasePerSolve + currentAngle && !allowCycleStage)
-        {
-            ease += 0.025f;
-            isRotatingGear = ease <= 1;
-
-            //when finished generating stages, spin counter-clockwise to the nearest neutral position
-            if (canSolve)
-            {
-                FTC.Gear.localRotation = Quaternion.Euler(0, currentAngle % 360 * Math.Abs(Functions.CubicOut(ease) - 1), 0);
-
-                if (ease > 1)
-                    FTC.Gear.localRotation = Quaternion.Euler(0, 0, 0);
-            }
-
-            //when generating stages, spin clockwise randomly
-            else
-            {
-                FTC.Gear.localRotation = Quaternion.Euler(0, Functions.CubicOut(ease) * angleIncreasePerSolve + currentAngle, 0);
-
-                if (ease > 1)
-                    FTC.Gear.localRotation = Quaternion.Euler(0, angleIncreasePerSolve + currentAngle, 0);
-            }
-        }
-
         else
-            return !init.solved && !allowCycleStage && !isRotatingGear && 
-                   init.stage < FTC.Info.GetSolvedModuleNames().Where(module => !Arrays.Ignore.Contains(module)).Count();
+            return init.stage < init.fakeStage + FTC.Info.GetSolvedModuleNames().Where(module => !Arrays.Ignore.Contains(module)).Count();
 
         return false;
     }

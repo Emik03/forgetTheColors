@@ -24,7 +24,7 @@ public class TPScript : MonoBehaviour
         if (Regex.IsMatch(command, @"^\s*colorblind\s*$", RegexOptions.IgnoreCase))
         {
             yield return null;
-            render.colorblind = !render.colorblind;
+            render.Colorblind(render.colorblind = !render.colorblind);
 
             //if (!_allowCycleStage)
             //    moduleRender.Update(ref _canSolve, ref DisplayTexts, ref GearText, ref ColoredObjects, ref ColorTextures, ref CylinderDisks, ref _colorValues, ref _colorblind, ref maxStage, ref stage);

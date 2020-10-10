@@ -20,11 +20,11 @@
     {
         init.ResetArrays();
 
-        render.Assign(displays: new[] { 420, 69 }, 
-                      gears: new[] { 5, 5 }, 
-                      nixies: new[] { 5, 5 }, 
-                      cylinders: new[] { 4, 5, 6 });
+        //render.Assign(displays: new[] { 420, 69 }, 
+        //              gears: new[] { 5, 5 }, 
+        //              nixies: new[] { 5, 5 }, 
+        //              cylinders: new[] { 4, 5, 6 });
 
-        calculate.Current();
+        //calculate.Current();
     }
 }

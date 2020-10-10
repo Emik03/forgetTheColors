@@ -1,4 +1,7 @@
-﻿public class Selectable 
+﻿using System;
+using UnityEngine;
+
+public class Selectable 
 {
     public Selectable(Calculate calculate, FTCScript FTC, Init init, Render render)
     {
@@ -17,17 +20,33 @@
     {
         return delegate ()
         {
+            var seq = calculate.modifiedSequence;
+
             switch (index)
             {
                 case 0:
-                    break;
-
                 case 1:
+                    FTC.Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, FTC.Selectables[index].transform);
+                    FTC.Selectables[index].AddInteractionPunch();
+
+                    if (seq.Count > 0)
+                        if (seq[0] == Convert.ToBoolean(index))
+                            seq.RemoveAt(0);
+                        else
+                            FTC.Module.HandleStrike();
                     break;
 
                 case 2:
-                    render.AssignRandom(init.legacy);
-                    calculate.Current();
+                    if (seq.Count == 0 && init.stage == init.maxStage)
+                        FTC.Module.HandlePass();
+                    else if (!render.turnKey)
+                    {
+                        render.turnKey = true;
+                        FTC.Audio.PlaySoundAtTransform("key", FTC.Module.transform);
+
+                        if (Application.isEditor)
+                            init.fakeStage++;
+                    }
                     break;
             }
 

@@ -3,7 +3,8 @@
 /// </summary>
 static class Arrays
 {
-    public const string Version = "v1.1";
+	public const int EditorMaxStage = 3;
+	public const string Version = "v1.1";
 
 	public static readonly int[,] ColorTable = new int[3,8]
 	{
@@ -21,9 +22,9 @@ static class Arrays
 		"Cyan",
 		"Blue",
 		"Purple",
+		"White",
 		"Pink",
 		"Maroon",
-		"White",
 		"Gray"
     };
 

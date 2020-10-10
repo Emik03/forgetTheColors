@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -7,7 +6,9 @@ public class Init
 {
     public Init(CoroutineScript Coroutine, FTCScript FTC, TPScript TP)
     {
-        this.Coroutine = Coroutine;
+        moduleId = ++moduleIdCounter;
+
+        this.coroutine = Coroutine;
         this.FTC = FTC;
         this.TP = TP;
 
@@ -17,28 +18,23 @@ public class Init
     }
 
     internal Calculate calculate;
-    internal CoroutineScript Coroutine;
+    internal CoroutineScript coroutine;
     internal FTCScript FTC;
     internal Render render;
-    internal static Rule[][] Rules;
+    internal static Rule[][] rules;
     internal Selectable selectable;
     internal TPScript TP;
 
     internal bool solved, legacy;
-    internal int moduleId, maxStage, stage;
-
+    internal static int moduleIdCounter;
+    internal int moduleId, stage, fakeStage, maxStage = Arrays.EditorMaxStage;
     internal int[] cylinder, nixies, gear, largeDisplay, sineNumber, calculatedValues;
     internal string[] gearColor, ruleColor;
-
-    private static int moduleIdCounter;
 
     internal void Start()
     {
         for (byte i = 0; i < FTC.Selectables.Length; i++)
             FTC.Selectables[i].OnInteract += selectable.Interact(i);
-
-        // Module ID assignment.
-        moduleId = ++moduleIdCounter;
 
         // Boss module handler assignment.
         if (FTC.Boss.GetIgnoredModules(FTC.Module, Arrays.Ignore) != null)
@@ -46,29 +42,28 @@ public class Init
 
         // Set maxStage to amount of modules.
         if (!Application.isEditor)
-            maxStage = Math.Max(FTC.Info.GetSolvableModuleNames().Where(module => !Arrays.Ignore.Contains(module)).Count(), 10000);
+            maxStage = Math.Min(FTC.Info.GetSolvableModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count(), 10000);
 
         // Initalize RuleSeed.
-        MonoRandom rnd = FTC.Rule.GetRNG();
-        GenerateRules(rnd);
-        Debug.LogFormat("[Forget The Colors #{0}]: Version {1}, RuleSeed {2}.", moduleId, Arrays.Version, rnd.Seed);
+        if (rules == null)
+            rules = GenerateRules(FTC.Rule.GetRNG(), ref FTC);
 
         // Initalize Colorblind.
         render.colorblind = FTC.Colorblind.ColorblindModeActive;
-        render.Colorblind();
-
-        // Log amount of stages.
-        bool singleStage = maxStage == 1;
-        Debug.LogFormat("[Forget The Colors #{0}]: Welcome to FTC - This bomb will have {1} stage{2}.", moduleId, singleStage ? "a single" : maxStage.ToString(), singleStage ? "" : "s");
+        render.Colorblind(render.colorblind);
 
         FTC.NixieTexts[0].text = FTC.NixieTexts[1].text = "0";
-        FTC.Audio.PlaySoundAtTransform("start", FTC.Module.transform);
-    
+
+        // Logs initalization.
+        bool singleStage = maxStage == 1;
+        Debug.LogFormat("[Forget The Colors #{0}]: {1} stage{2} using {3}.", moduleId, singleStage ? "a single" : maxStage.ToString(), singleStage ? "" : "s", Arrays.Version);
+
         // Initalizes the arrays.
         ResetArrays();
+        coroutine.StartNewStage();
 
         // Debug: Starts up OLD FTC.
-        new Legacy(Coroutine, FTC, this).Start();
+        new Legacy(coroutine, FTC, this).Start();
     }
 
     internal void ResetArrays()
@@ -77,10 +72,12 @@ public class Init
         gearColor = ruleColor = new string[maxStage];
     }
 
-    private static Rule[][] GenerateRules(MonoRandom rnd)
+    private static Rule[][] GenerateRules(MonoRandom rnd, ref FTCScript FTC)
     {
+        FTC.Audio.PlaySoundAtTransform("start", FTC.Module.transform);
+
         if (rnd.Seed == 1)
-            return null;
+            return new Rule[0][];
 
         var rules = new Rule[4][] { new Rule[20], new Rule[10], new Rule[24], new Rule[8] };
         int[] ranges = { 10, 22, 10, 22 };
@@ -91,8 +88,8 @@ public class Init
             {
                 rules[i][j] = new Rule
                 {
-                    Value = rnd.Next(ranges[i]),
-                    Operator = i < 2 ? rnd.Next(5) : 0
+                    Number = rnd.Next(ranges[i]),
+                    Function = i < 2 ? rnd.Next(5) : 0
                 };
             }
         }

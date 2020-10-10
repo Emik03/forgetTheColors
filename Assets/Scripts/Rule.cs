@@ -3,5 +3,6 @@
 /// </summary>
 internal class Rule
 {
-    public int Value, Operator;
+    public int Number { get; set; }
+    public int Function { get; set; }
 }

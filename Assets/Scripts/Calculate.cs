@@ -9,6 +9,7 @@ public class Calculate
     public Calculate(FTCScript FTC)
     {
         this.FTC = FTC;
+
         sequence = new List<bool?>();
         modifiedSequence = new List<bool>();
         legacySequence = new List<int>();
@@ -22,17 +23,15 @@ public class Calculate
 
     internal void Current()
     {
-        int trigNumber = int.Parse(string.Concat((int.Parse(FTC.GearText.text) + Edgework(Functions.GetColorIndex(3, FTC))) % 10, FTC.DisplayTexts[1].text));
-
-        int nixie1 = int.Parse(FTC.NixieTexts[0].text), nixie2 = int.Parse(FTC.NixieTexts[1].text);
-
-        bool parity = nixie1 % 2 == nixie1 % 2;
+        int trigNumber = int.Parse(string.Concat((int.Parse(FTC.GearText.text.Last().ToString()) + Edgework(Functions.GetColorIndex(3, FTC))) % 10, FTC.DisplayTexts[1].text)),
+            nixieL = int.Parse(FTC.NixieTexts[0].text), nixieR = int.Parse(FTC.NixieTexts[1].text);
+        bool parity = nixieL % 2 == nixieR % 2;
         int trigResult = parity ? (int)(Math.Abs(Math.Sin(trigNumber * Mathf.Deg2Rad)) * 100000 % 100000)
                                 : (int)(Math.Abs(Math.Cos(trigNumber * Mathf.Deg2Rad)) * 100000 % 100000);
 
         int[] decimals = new int[5], temp = Array.ConvertAll(trigResult.ToString().ToCharArray(), c => (int)char.GetNumericValue(c));
         Array.Copy(temp, decimals, temp.Length);
-        List<string> figure = new List<string>();
+        var figure = new List<string>();
 
         for (int i = 0; i < 6; i++)
         {
@@ -49,12 +48,10 @@ public class Calculate
         bool last = modifiedSequence.Count > 1 ? modifiedSequence[modifiedSequence.Count - 1] : false,
              modifiedInput = input == null ? last : (bool)input;
 
-        if (nixie1 == 0 || nixie2 == 0)
+        if (nixieL == 0 || nixieR == 0)
             modifiedInput = !modifiedInput;
 
         modifiedSequence.Add(modifiedInput);
-
-        Debug.Log(modifiedSequence.Join(", "));
     }
 
     internal void LegacyCurrent()
