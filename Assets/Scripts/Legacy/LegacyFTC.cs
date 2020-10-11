@@ -1,8 +1,6 @@
 ﻿using LegacyForgetTheColors;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class LegacyFTC : MonoBehaviour
@@ -38,24 +36,23 @@ public class LegacyFTC : MonoBehaviour
     private bool _isRotatingGear, _isRotatingKey, _colorblind;
     private sbyte _debugPointer;
     private const int _angleIncreasePerSolve = 2;
-    private static int _moduleIdCounter = 1;
     private int _moduleId, _currentAngle;
     private int[] _colorValues = new int[4];
     private float _ease, _sum;
     private List<byte> _cylinder = new List<byte>(0), _nixies = new List<byte>(0);
     private List<int> _calculatedValues = new List<int>(0);
 
-    private LegacyGenerate generate = new LegacyGenerate();
-    private LegacyHandleSelect handleSelect = new LegacyHandleSelect();
-    private LegacyInit init = new LegacyInit();
-    private LegacyRender moduleRender = new LegacyRender();
+    private readonly LegacyGenerate generate = new LegacyGenerate();
+    private readonly LegacyHandleSelect handleSelect = new LegacyHandleSelect();
+    private readonly LegacyInit init = new LegacyInit();
+    private readonly LegacyRender moduleRender = new LegacyRender();
     private static LegacyRule[][] _rules;
 
-    internal void Activate()
+    internal void Activate(ref int moduleId)
     {
         active = true;
         _isRotatingKey = true;
-        _moduleId = _moduleIdCounter++;
+        _moduleId = moduleId;
 
         //establish buttons
         for (byte i = 0; i < Selectables.Length; i++)

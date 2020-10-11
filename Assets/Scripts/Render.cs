@@ -94,7 +94,7 @@ namespace ForgetTheColors
 
             FTC.ColoredObjects[3].material.SetTextureScale("_MainTex", new Vector2(0, 0));
 
-            SetGear(GetGear(FTC));
+            SetGear(GetGear());
         }
 
         private void SetGear(int[] gears)
@@ -106,7 +106,7 @@ namespace ForgetTheColors
                                                                         : FTC.GearText.text = 'I' + FTC.GearText.text;
         }
 
-        private static int[] GetGear(FTCScript FTC)
+        internal int[] GetGear()
         {
             int number;
             int.TryParse(FTC.GearText.text.Last().ToString(), out number);

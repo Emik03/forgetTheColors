@@ -49,7 +49,7 @@ namespace ForgetTheColors
             bool? input = new bool?[] { false, null, true }[figureUsed % 3];
             sequence.Add(input);
 
-            bool last = modifiedSequence.Count > 1 ? modifiedSequence[modifiedSequence.Count - 1] : false,
+            bool last = modifiedSequence.Count > 1 && modifiedSequence[modifiedSequence.Count - 1],
                  modifiedInput = input == null ? last : (bool)input;
 
             if (nixieL == 0 || nixieR == 0)
@@ -61,13 +61,16 @@ namespace ForgetTheColors
 
         private int Edgework(int index)
         {
+            if (Init.rules.GetLength(0) == 4)
+                return Arrays.GetEdgework(Init.rules[3][init.render.GetGear()[1]].Number, FTC);
+
             switch (index)
             {
                 case 0: return FTC.Info.GetBatteryCount();
                 case 1: return FTC.Info.GetIndicators().Count();
                 case 2: return FTC.Info.GetPortPlateCount();
                 case 3: return FTC.Info.GetSerialNumberNumbers().First();
-                case 4: return FTC.Info.GetBatteryCount();
+                case 4: return FTC.Info.GetBatteryHolderCount();
                 case 5: return FTC.Info.GetOffIndicators().Count();
                 case 6: return FTC.Info.GetPorts().Count();
                 case 7: return FTC.Info.GetSerialNumberLetters().Count();

@@ -84,7 +84,7 @@ namespace ForgetTheColors
                             render.turnKey = true;
                             keyTurned++;
 
-                            if (keyTurned >= 10 && stagesCompleted == 0 && init.stage == 0)
+                            if (keyTurned >= 25 && stagesCompleted == 0 && init.stage == 0)
                                 init.LegacyFTC();
                         }
                         break;

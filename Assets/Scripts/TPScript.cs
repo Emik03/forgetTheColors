@@ -146,6 +146,9 @@ public class TPScript : MonoBehaviour
                     //splits values
                     byte[] values = new byte[2] { (byte)(byte.Parse(buttonPressed[1]) / 10), (byte)LegacyEase.Modulo(byte.Parse(buttonPressed[1]), 10) };
 
+                    if (string.Concat(Legacy.NixieTexts[0].text, Legacy.NixieTexts[1].text) == Legacy._solution.ToString())
+                        yield return "awardpointsonsolve " + Math.Floor(init.maxStage * Arrays.LegacyTPAwardPerStage);
+
                     //submit answer only if it's ready
                     if (Legacy.canSolve)
                         for (byte i = 0; i < Legacy.Selectables.Length - 1; i++)

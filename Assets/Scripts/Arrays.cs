@@ -1,4 +1,9 @@
-﻿namespace ForgetTheColors
+﻿using KModkit;
+using System;
+using System.Linq;
+using UnityEngine;
+
+namespace ForgetTheColors
 {
     /// <summary>
     /// Contains all the static strings used in FTC.
@@ -231,5 +236,34 @@
             "Übermodule",
             "Whiteout"
         };
+
+        public static int GetEdgework(int index, FTCScript FTC)
+        {
+            if (index > 22 || index < 0)
+                throw new IndexOutOfRangeException("Arrays.GetEdgework recieved an out-of-range number: " + index + ".");
+            return new[] { 
+                FTC.Info.GetBatteryCount(), 
+                FTC.Info.GetBatteryCount(Battery.AA) + FTC.Info.GetBatteryCount(Battery.AAx3) + FTC.Info.GetBatteryCount(Battery.AAx4), 
+                FTC.Info.GetBatteryCount(Battery.D), 
+                FTC.Info.GetBatteryHolderCount(), 
+                FTC.Info.GetIndicators().Count(),
+                FTC.Info.GetOnIndicators().Count(),
+                FTC.Info.GetOffIndicators().Count(), 
+                FTC.Info.GetPortPlateCount(), 
+                FTC.Info.GetPorts().Distinct().Count(), 
+                FTC.Info.GetPorts().Count() - FTC.Info.GetPorts().Distinct().Count(), 
+				FTC.Info.GetPortCount(), 
+				FTC.Info.GetSerialNumberNumbers().First(), 
+				FTC.Info.GetSerialNumberNumbers().Last(), 
+				FTC.Info.GetSerialNumberNumbers().Count(), 
+				FTC.Info.GetSerialNumberLetters().Count(), 
+				FTC.Info.GetSolvedModuleNames().Count(), 
+				FTC.init.maxStage, 
+				FTC.Info.GetModuleNames().Count(), 
+				FTC.Info.GetSolvableModuleNames().Count() - FTC.Info.GetSolvedModuleNames().Count(), 
+				FTC.init.maxStage - FTC.Info.GetSolvedModuleNames().Where(m => !Ignore.Contains(m)).Count(), 
+				Application.isEditor ? 0 : int.Parse(FTC.DisplayTexts[1].text), 
+				int.Parse(FTC.DisplayTexts[0].text) }[index]; ;
+        }
     }
 }

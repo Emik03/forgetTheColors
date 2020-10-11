@@ -63,7 +63,7 @@ namespace ForgetTheColors
 
             // Logs initalization.
             bool singleStage = maxStage == 1;
-            Debug.LogFormat("[Forget The Colors #{0}]: {1} stage{2} using {3}.", moduleId, singleStage ? "a single" : maxStage.ToString(), singleStage ? "" : "s", Arrays.Version);
+            Debug.LogFormat("[Forget The Colors #{0}]: {1} stage{2} using {3}.{4}", moduleId, singleStage ? "a single" : maxStage.ToString(), singleStage ? "" : "s", Arrays.Version, rules.GetLength(0) == 4 ? " Rule Seed " + FTC.Rule.GetRNG() : string.Empty);
 
             // Initalizes the arrays.
             ResetArrays();
@@ -78,7 +78,7 @@ namespace ForgetTheColors
             coroutine.enabled = FTC.enabled = false;
 
             legacy.enabled = true;
-            legacy.Activate();
+            legacy.Activate(ref moduleId);
         }
 
         internal void ResetArrays()

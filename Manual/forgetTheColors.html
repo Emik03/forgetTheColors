@@ -136,12 +136,13 @@
                 <h2>On the Subject of Forget The Colors</h2>
                 <p class="flavour-text">In the midst of chaos, shining color on the situation figures... but not here, you'll have to figure some more.</p>
                 <p>
-                    This module has 2 displays, a gear with an LED and number, 2 nixie tubes (bottom-left), 3 cylinders, and a key.
-                    Note down everything shown at the start, and after every solve.
+                    This module has 2 displays, a gear LED and number, 2 nixies, 3 cylinders, and a key.
+                    Note them down at the start, and after each solve. 
+                    Sequences can be executed whenever the defuser desires. After all inputs are made, turn the key to solve it.
                 </p>
                 <h4>For every stage on the module:</h4>
                 <ol>
-                    <li>Add the gear color's 'Edgework' condition with the gear number, taking the last digit. Prepend it before the first digit in the 2-digit display.</li><br>
+                    <li>Take the sum of the gear number and the gear color's "Edgework" from the table. Prepend its last digit before the first digit in the 2-digit display.</li><br>
                     <li><span class="showPDF">Take the number and obtain the first 5 decimals of sine if both nixies are both odd or even, and cosine otherwise. Treat the number as degrees.</span><span class="hidePDF">Input it in sine if both nixies are both odd or even, and cosine otherwise.</span></li><br>
                     <p class="hidePDF">
                         <div class="column">
@@ -158,22 +159,22 @@
                         </div>
                     </p><br>
 
-                    <li>Each cylinder has 1-3 digits from the 5 decimal number in 1 of the figures:</li>
+                    <li>All 5 decimals are arranged to 1 of the cylinders in the following figures:</li>
                     <table>
                         <tr>
-                            <td>L L L M R</td>
-                            <td>L M M M R</td>
-                            <td>L M R R R</td>
-                            <td>L M M R R</td>
-                            <td>L L M R R</td>
-                            <td>L L M M R</td>
+                            <td>(LLL) (M) (R)</td>
+                            <td>(L) (MMM) (R)</td>
+                            <td>(L) (M) (RRR)</td>
+                            <td>(L) (MM) (RR)</td>
+                            <td>(LL) (M) (RR)</td>
+                            <td>(LL) (MM) (R)</td>
                         </tr>
                     </table><br>
 
-                    <li>To find which figure applies...</li>
+                    <li>Take any figure, and determine if it applies to the current stage:</li>
                     <ul>
-                        <li>Modify all 5 digits by adding the number from the table based on which cylinder they belong to.</li><br>
-                        <li>Combine all values in each cylinder. Subtract 10 until less than 10.</li><br>
+                        <li>Use the table to get a digit from the color and position of each cylinder. Add it to each of their decimals they are arranged with.</li><br>
+                        <li>Combine all values within each cylinder, taking only the last digit.</li><br>
                         <li>If L, M, and R as a 3-digit number is equal to the display, note down the cylinder that had a unique length. Otherwise, try a different figure.</li>
                     </ul>
                 </ol>
@@ -242,14 +243,13 @@
                         <td><span class='rule' id='rule-4-8'>serial's # of letters</span></td>
                     </tr>
                 </table>
-                <h4>Submitting during or after a stage:</h4>
-                <p class="short">Input the sequence, with the opposite nixie if either in the stage were 0:</p>
+                <h4>Submitting the obtained sequence:</h4>
                 <ul class="shorter">
-                    <li><strong>L</strong> = Left Nixie</li><br>
-                    <li><strong>M</strong> = Same as last (left if none)</li><br>
-                    <li><strong>R</strong> = Right Nixie</li>
+                    <li><strong>L</strong> -> Left Nixie</li><br>
+                    <li><strong>M</strong> -> Same as last (left if none)</li><br>
+                    <li><strong>R</strong> -> Right Nixie</li>
                 </ul>
-                <p class="short">Finally, turn the key.</p>
+                <p class="short">Input the <strong>opposite</strong> nixie if either in that stage were 0.</p>
             </div>
             <div class="page-footer relative-footer">Page 1 of 2</div>
         </div>
