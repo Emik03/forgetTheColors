@@ -1,68 +1,71 @@
 ﻿using System.Linq;
 
-static class Figure
+namespace ForgetTheColors
 {
-	internal static int[][] Create(int[] decimals, ref int figure)
+    static class Figure
     {
-        int[][] cylinders = new int[3][];
-
-        switch (figure)
+        internal static int[] Apply(int[][] cylinders, FTCScript FTC)
         {
-            case 0:
-                cylinders[0] = new[] { decimals[0], decimals[1], decimals[2] };
-                cylinders[1] = new[] { decimals[3] };
-                cylinders[2] = new[] { decimals[4] };
-                break;
+            int[] cylinderValues = new int[3];
+            int[] sumValues = new int[3];
 
-            case 1:
-                cylinders[0] = new[] { decimals[0] };
-                cylinders[1] = new[] { decimals[1], decimals[2], decimals[3] };
-                cylinders[2] = new[] { decimals[4] };
-                break;
+            for (int i = 0; i < cylinderValues.Length; i++)
+            {
+                cylinderValues[i] = Arrays.ColorTable[i, Functions.GetColorIndex(i, FTC)];
 
-            case 2:
-                cylinders[0] = new[] { decimals[0] };
-                cylinders[1] = new[] { decimals[1] };
-                cylinders[2] = new[] { decimals[2], decimals[3], decimals[4] };
-                break;
+                for (int j = 0; j < cylinders[i].Length; j++)
+                    cylinders[i][j] += cylinderValues[i];
 
-            case 3:
-                cylinders[0] = new[] { decimals[0] };
-                cylinders[1] = new[] { decimals[1], decimals[2] };
-                cylinders[2] = new[] { decimals[3], decimals[4] };
-                break;
+                sumValues[i] = cylinders[i].Sum() % 10;
+            }
 
-            case 4:
-                cylinders[0] = new[] { decimals[0], decimals[1] };
-                cylinders[1] = new[] { decimals[2] };
-                cylinders[2] = new[] { decimals[3], decimals[4] };
-                break;
-
-            case 5:
-                cylinders[0] = new[] { decimals[0], decimals[1] };
-                cylinders[1] = new[] { decimals[2], decimals[3] };
-                cylinders[2] = new[] { decimals[4] };
-                break;
+            return sumValues;
         }
 
-        return cylinders;
-    }
-
-    internal static int[] Apply(int[][] cylinders, FTCScript FTC)
-    {
-        int[] cylinderValues = new int[3];
-        int[] sumValues = new int[3];
-
-        for (int i = 0; i < cylinderValues.Length; i++)
+        internal static int[][] Create(int[] decimals, ref int figure)
         {
-            cylinderValues[i] = Arrays.ColorTable[i, Functions.GetColorIndex(i, FTC)];
+            int[][] cylinders = new int[3][];
 
-            for (int j = 0; j < cylinders[i].Length; j++)
-                cylinders[i][j] += cylinderValues[i];
+            switch (figure)
+            {
+                case 0:
+                    cylinders[0] = new[] { decimals[0], decimals[1], decimals[2] };
+                    cylinders[1] = new[] { decimals[3] };
+                    cylinders[2] = new[] { decimals[4] };
+                    break;
 
-            sumValues[i] = cylinders[i].Sum() % 10;
+                case 1:
+                    cylinders[0] = new[] { decimals[0] };
+                    cylinders[1] = new[] { decimals[1], decimals[2], decimals[3] };
+                    cylinders[2] = new[] { decimals[4] };
+                    break;
+
+                case 2:
+                    cylinders[0] = new[] { decimals[0] };
+                    cylinders[1] = new[] { decimals[1] };
+                    cylinders[2] = new[] { decimals[2], decimals[3], decimals[4] };
+                    break;
+
+                case 3:
+                    cylinders[0] = new[] { decimals[0] };
+                    cylinders[1] = new[] { decimals[1], decimals[2] };
+                    cylinders[2] = new[] { decimals[3], decimals[4] };
+                    break;
+
+                case 4:
+                    cylinders[0] = new[] { decimals[0], decimals[1] };
+                    cylinders[1] = new[] { decimals[2] };
+                    cylinders[2] = new[] { decimals[3], decimals[4] };
+                    break;
+
+                case 5:
+                    cylinders[0] = new[] { decimals[0], decimals[1] };
+                    cylinders[1] = new[] { decimals[2], decimals[3] };
+                    cylinders[2] = new[] { decimals[4] };
+                    break;
+            }
+
+            return cylinders;
         }
-
-        return sumValues;
     }
 }
