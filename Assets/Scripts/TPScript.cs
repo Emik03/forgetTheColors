@@ -39,7 +39,7 @@ public class TPScript : MonoBehaviour
     {
         string[] buttonPressed = command.Split(' ');
 
-        if (!Legacy.enabled)
+        if (!Legacy.active)
         {
             // Debug command.
             if (Application.isEditor && Regex.IsMatch(command, @"^\s*next\s*$", RegexOptions.IgnoreCase))
@@ -204,7 +204,7 @@ public class TPScript : MonoBehaviour
     {
         Debug.LogFormat("[Forget The Colors #{0}]: An auto-solve has been issued. Thank you for attempting FTC. You gave up on stage {1}.", init.moduleId, init.stage + 1);
 
-        if (!Legacy.enabled)
+        if (!Legacy.active)
         {
             while (!Coroutine.animating && init.stage < init.maxStage && init.stage < init.fakeStage + FTC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count())
                 yield return true;

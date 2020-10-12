@@ -77,7 +77,6 @@ namespace ForgetTheColors
             FTC.BackingTexts[0].color = FTC.BackingTexts[1].color = FTC.DisplayTexts[0].color = FTC.DisplayTexts[1].color = new Color32(0, 255, 0, 255);
             coroutine.enabled = FTC.enabled = false;
 
-            legacy.enabled = true;
             legacy.Activate(ref moduleId);
         }
 

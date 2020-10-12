@@ -8,7 +8,7 @@ public class CoroutineScript : MonoBehaviour
     public FTCScript FTC;
     public TPScript TP;
 
-    internal bool animating;
+    internal bool animating, flashing;
 
     private Calculate calculate;
     private Init init;
@@ -35,15 +35,38 @@ public class CoroutineScript : MonoBehaviour
         }
     }
 
+    internal void StartFlash()
+    {
+        if (!flashing)
+            StartCoroutine(Flash());
+    }
+
     internal void StartNewStage()
     {
         animating = true;
         StartCoroutine(NewStage());
     }
 
+    private IEnumerator Flash()
+    {
+        flashing = true;
+
+        const int flash = 2;
+        for (int i = 0; i < flash; i++)
+        {
+            render.AssignRandom(false);
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        render.Assign(null, null, null, null, false);
+        render.SetNixieAsInputs();
+
+        flashing = false;
+    }
+
     private IEnumerator NewStage()
     {
-        const int nextStage = 10, specialStage = 55;
+        const int nextStage = 5, specialStage = 20;
         bool isSpecialStage = init.stage == 0 || init.stage == init.maxStage;
 
         render.Colorblind(render.colorblind);

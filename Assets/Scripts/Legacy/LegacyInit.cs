@@ -75,10 +75,7 @@ namespace LegacyForgetTheColors
 
             //show that it's debug mode
             if (Application.isEditor)
-            {
-                DisplayTexts[1].fontSize = 35;
-                DebugText.text = "";
-            }
+                DebugText.text = string.Empty;
         }
     }
 }

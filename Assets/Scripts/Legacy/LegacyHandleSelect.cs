@@ -11,8 +11,8 @@ namespace LegacyForgetTheColors
     /// </summary>
     sealed class LegacyHandleSelect
     {
-        private LegacyCalculate calculate = new LegacyCalculate();
-        private LegacyRender moduleRender = new LegacyRender();
+        private readonly LegacyCalculate calculate = new LegacyCalculate();
+        private readonly LegacyRender moduleRender = new LegacyRender();
 
         public void Press(byte btn, ref KMAudio Audio, ref KMSelectable[] Selectables, ref bool solved, ref bool canSolve, ref bool allowCycleStage, ref int stage, ref int maxStage, ref TextMesh[] DisplayTexts, ref List<short> largeDisplay, ref TextMesh[] NixieTexts, ref List<byte> nixies, ref TextMesh GearText, ref List<byte> gear, ref bool colorblind, ref List<string> gearColor, ref Renderer[] ColoredObjects, ref Texture[] ColorTextures, ref List<byte> cylinder, ref Transform[] CylinderDisks, ref int[] colorValues, ref sbyte debugPointer, ref int moduleId, ref LegacyRule[][] rules, ref KMBombInfo BombInfo, ref List<string> ruleColor, ref List<int> calculatedValues, ref List<int> sineNumber, ref float sum, ref sbyte solution, ref bool isRotatingGear, ref int currentAngle, int angleIncreasePerSolve, ref float ease, ref KMBombModule Module, ref bool isRotatingKey)
         {

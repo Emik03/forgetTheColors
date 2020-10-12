@@ -61,8 +61,7 @@ namespace ForgetTheColors
                                 FTC.Module.HandleStrike();
                             }
 
-                        render.Assign(null, null, null, null, false);
-                        render.SetNixieAsInputs();
+                        coroutine.StartFlash();
                         break;
 
                     case 2:

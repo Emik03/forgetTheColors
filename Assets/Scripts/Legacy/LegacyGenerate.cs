@@ -11,8 +11,8 @@ namespace LegacyForgetTheColors
     /// </summary>
     sealed class LegacyGenerate
     {
-        private LegacyCalculate calculate = new LegacyCalculate();
-        private LegacyRender moduleRender = new LegacyRender();
+        private readonly LegacyCalculate calculate = new LegacyCalculate();
+        private readonly LegacyRender moduleRender = new LegacyRender();
 
         public IEnumerator NewStage(bool solved, KMAudio Audio, KMBombModule Module, int[] colorValues, int currentStage, int maxStage, sbyte solution, TextMesh[] DisplayTexts, TextMesh GearText, TextMesh[] NixieTexts, bool canSolve, Renderer[] ColoredObjects, Texture[] ColorTextures, Transform[] CylinderDisks, bool colorblind, int moduleId, List<int> calculatedValues, float sum, List<byte> gear, List<string> gearColor, List<short> largeDisplay, List<byte> nixies, List<byte> cylinder, LegacyRule[][] rules, KMBombInfo BombInfo, List<string> ruleColor, List<int> sineNumber)
         {
