@@ -15,11 +15,11 @@
     div > input {
         background-color:#AAA;
         border: 0px;
-        float: left;
+		float: left;
         height: 15px;
         margin-left: 45px;
         text-align: center;
-        transform: scale(1.5);
+		transform: scale(1.25);
     }
 
     .red {
@@ -122,6 +122,10 @@
         .shorter {
             width: 40%;
         }
+		
+		div > input {
+			transform: scale(1.5);
+		}
     }
 </style>
 <body>
@@ -142,9 +146,9 @@
                 </p>
                 <h4>For every stage on the module:</h4>
                 <ol>
-                    <li>Take the sum of the gear number and the gear color's "Edgework" from the table. Prepend its last digit before the first digit in the 2-digit display.</li><br>
-                    <li><span class="showPDF">Take the number and obtain the first 5 decimals of sine if both nixies are both odd or even, and cosine otherwise. Treat the number as degrees.</span><span class="hidePDF">Input it in sine if both nixies are both odd or even, and cosine otherwise.</span></li><br>
-                    <p class="hidePDF">
+                    <li>Take the sum of the gear number and the gear color's "Edgework" from the table. Prepend its last digit before the first digit in the 2-digit display.<span class='short rule' id='rule-extra'> "Ignored modules" will not generate stages, and always include themselves.</li><br>
+                    <li><span class="showPDF">Take the number and obtain the first 5 decimals of sine if both nixies are both odd or even, and cosine otherwise. Treat the number as degrees.</span><span class="hidePDF">Input it in sine if the nixies are both odd <strong>or</strong> even, and cosine otherwise.</span></li><br>
+                    <span class="hidePDF">
                         <div class="column">
                             <img src="img/Forget The Colors/sin(.png" width="36" height="20" style="margin-left:-195px; vertical-align:top;">
                             <input type="text" id="sin2" style="width:30px" oninput="update()">
@@ -157,21 +161,25 @@
                             <img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:48px; vertical-align:top;">
                             <input type="text" id="cos2Ans" style="width:70px;" readonly><br>
                         </div>
-                    </p><br>
-
-                    <li>All 5 decimals are arranged to 1 of the cylinders in the following figures:</li>
-                    <table>
+                    </span>
+					
+                    <table class="right" style="margin-top:4px;">
                         <tr>
                             <td>(LLL) (M) (R)</td>
-                            <td>(L) (MMM) (R)</td>
-                            <td>(L) (M) (RRR)</td>
                             <td>(L) (MM) (RR)</td>
-                            <td>(LL) (M) (RR)</td>
-                            <td>(LL) (MM) (R)</td>
                         </tr>
+						<tr>
+                            <td>(L) (MMM) (R)</td>
+                            <td>(LL) (M) (RR)</td>
+						</tr>
+						<tr>
+                            <td>(L) (M) (RRR)</td>
+                            <td>(LL) (MM) (R)</td>
+						</tr>
                     </table><br>
+					
+					<li>All 5 decimals are arranged to 1 of the cylinders in the following figures. Take any figure, and determine if it applies to the current stage:</li>
 
-                    <li>Take any figure, and determine if it applies to the current stage:</li>
                     <ul>
                         <li>Use the table to get a digit from the color and position of each cylinder. Add it to each of their decimals they are arranged with. Combine all values within each cylinder, taking only the last digit.</li><br>
                         <li>If L, M, and R as a 3-digit number is equal to the display, note down the cylinder that had a unique length. Otherwise, try a different figure.</li>
@@ -268,10 +276,10 @@
                 </p>
                 <h4>For every stage on the module:</h4>
                 <ol>
-                    <li>Use the table to modify each nixie with their respective 'L'/'R' columns from every cylinder<span class='rule' id='rule-extra'> left to right. Don't record decimals and ignore divisions (/) or modulo (%) 0</span>. Modulo both nixies by 10.</li><br>
+                    <li>Use the table to modify each nixie with their respective 'L'/'R' columns from every cylinder<span class='rule' id='rule-extra-legacy'> left to right. Don't record decimals and ignore divisions (/) or modulo (%) 0</span>. Modulo both nixies by 10.</li><br>
                     <li>Within the table, start on the color of the LED on the gear. Move up <strong>left nixie</strong> and move down <strong>right nixie</strong>, wrapping if needed.</li><br>
                     <li>Create a 3-digit number with the left- then right nixie, and then the current 'Edgework' color plus both nixies plus the gear number modulo 10.</li><br>
-                    <li>
+                    <div class="hidePDF">
                         <div class="column">
                             <p><span class="showPDF">Get the Sine (sin) of that 3-digit number and take the first five digits of the sine past the decimal point. This number can be negative.</span><span class="hidePDF">Write this 3-digit number to get the first 5 decimals in sine.</span></p>
                             <div class="hidePDF">
@@ -290,7 +298,7 @@
                                 <input type="text" id="cosAns" style="width:70px;" readonly><br>
                             </div>
                         </div>
-                    </li><br><br><br>
+                    </div><br><br><br><br>
                     <li>Get the sum of sine and cosine. <strong>This number is needed later.</strong></li>
                 </ol>
                 <table class="right">
@@ -365,11 +373,13 @@
                     <h4>When cylinders turn gray:</h4>
                     <p>Add up all of the stage numbers, taking only the decimals.</p>
                     <p><span class="showPDF">Take this value and apply a Cos<sup>-1</sup> to it. This will require at least a scientific calculator. Floor the given value and drop all of the decimal values to get a number from 0 and 90.</span><span class="hidePDF">Keep it positive and use floored Cos<sup>-1</sup> below.</span></p>
-                    <img src="img/Forget The Colors/cos-1(.png" width="44" height="20" style="margin-left:-216px; vertical-align:top;">
-                    <input type="text" id="acos" class="top" style="width:70px" class="padding" align="left" oninput="update()">
-                    <img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:108px; vertical-align:top;">
-                    <input type="text" id="acosAns" class="top" style="width:30px" readonly class="padding" align="left"></br>
-                    <p>Input the number in the 2 nixies, then turn the key. When struck, cycle stages with the nixies. Turn the key to retry. Submit 90 if there were 0 stages.</p>
+                    <div class="hidePDF">
+						<img src="img/Forget The Colors/cos-1(.png" width="44" height="20" style="margin-left:-216px; vertical-align:top;">
+						<input type="text" id="acos" class="top" style="width:70px" class="padding" align="left" oninput="update()">
+						<img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:108px; vertical-align:top;">
+						<input type="text" id="acosAns" class="top" style="width:30px" readonly class="padding" align="left"></br>
+                    </div>
+					<p>Input the number in the 2 nixies, then turn the key. When struck, cycle stages with the nixies. Turn the key to retry. Submit 90 if there were 0 stages.</p>
                 </div>
             </div>
             <div class="page-footer relative-footer">Page 2 of 2</div>
@@ -390,8 +400,9 @@
     const cos2AnsElement = document.getElementById("cos2Ans");
 
     const ruleExtra = document.getElementById(`rule-extra`);
+	const ruleExtraLegacy = document.getElementById(`rule-extra-legacy`);
 
-    const tableLengths = [20, 10, 16, 8];
+    const tableLengths = [20, 10, 24, 8];
     
     function update() {
         const sin = parseInt(sinElement.value) ? parseInt(sinElement.value) : 0;
@@ -445,6 +456,7 @@
     function setDefaultRules() {
         getDefaultRules();
         ruleExtra.innerText = "";
+        ruleExtraLegacy.innerText = "";
 
         for (let instruction = 1; instruction <= tableLengths[0]; instruction++)
             document.getElementById(`rule-1-${instruction}`).innerText = defaultRules[`rule-1-${instruction}`];
@@ -461,7 +473,8 @@
 
     function setRules(rnd) {
         getDefaultRules();
-        ruleExtra.innerText = " from left to right. When using either table, don't record decimals and ignore divisions (/) or modulo (%) 0";
+        ruleExtra.innerText = ' "Ignored modules" will not generate stages, and always include themselves.';
+        ruleExtraLegacy.innerText = " from left to right. When using either table, don't record decimals and ignore divisions (/) or modulo (%) 0";
         
         const action = ['+', '-', '*', '/', "%"];
         const edgework = ['batteries', 'AA batteries', 'D batteries', 'battery holders',
@@ -486,13 +499,13 @@
         for (let instruction = 0; instruction < tableLengths[2]; instruction++) {
             const span = document.getElementById(`rule-3-${instruction + 1}`);
             const rule = { type: rnd.nextMax(10) };
-            span.innerText = `${[rule.type]}`
+            span.innerText = rule.type
         }
 
         for (let instruction = 0; instruction < tableLengths[3]; instruction++) {
             const span = document.getElementById(`rule-4-${instruction + 1}`);
             const rule = { type: rnd.nextMax(edgework.length) };
-            span.innerText = `${edgework[rule.type]}`
+            span.innerText = edgework[rule.type]
         }
     }
 </script>

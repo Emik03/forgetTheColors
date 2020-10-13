@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Analytics;
+using UnityEngineInternal;
 
 namespace ForgetTheColors
 {
@@ -26,8 +27,9 @@ namespace ForgetTheColors
 
         internal void Current()
         {
-            int trigNumber = int.Parse(string.Concat((int.Parse(FTC.GearText.text.Last().ToString()) + Edgework(Functions.GetColorIndex(3, FTC))) % 10, FTC.DisplayTexts[1].text)),
+            int trigNumber = int.Parse(string.Concat((int.Parse(FTC.GearText.text.Last().ToString()) + (Init.rules.GetLength(0) == 4 ? Arrays.GetEdgework(Init.rules[3][Functions.GetColorIndex(3, FTC)].Number, FTC) : Edgework(Functions.GetColorIndex(3, FTC)))) % 10, FTC.DisplayTexts[1].text)),
                 nixieL = int.Parse(FTC.NixieTexts[0].text), nixieR = int.Parse(FTC.NixieTexts[1].text);
+            
             bool parity = nixieL % 2 == nixieR % 2;
             int trigResult = parity ? (int)(Math.Abs(Math.Sin(trigNumber * Mathf.Deg2Rad)) * 100000 % 100000)
                                     : (int)(Math.Abs(Math.Cos(trigNumber * Mathf.Deg2Rad)) * 100000 % 100000);
