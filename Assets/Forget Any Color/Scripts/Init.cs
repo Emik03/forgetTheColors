@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace ForgetAColor
+namespace ForgetAnyColor
 {
     public class Init
     {
@@ -28,8 +28,8 @@ namespace ForgetAColor
         internal TPScript TP;
 
         internal bool solved;
-        internal static int moduleIdCounter, maxStage = Arrays.EditorMaxStage;
-        internal int fakeStage, moduleId, stage;
+        internal static int moduleIdCounter;
+        internal int fakeStage, moduleId, stage, maxStage = Arrays.EditorMaxStage;
         internal int[,] cylinders;
 
         internal void Start()
@@ -59,7 +59,7 @@ namespace ForgetAColor
 
             // Logs initalization.
             bool singleStage = maxStage == 1;
-            Debug.LogFormat("[Forget A Color #{0}]: {1} stage{2} using {3}.{4}", moduleId, singleStage ? "a single" : maxStage.ToString(), singleStage ? "" : "s", Arrays.Version, rules.GetLength(0) == 4 ? " Rule Seed " + FAC.Rule.GetRNG().Seed + '.' : string.Empty);
+            Debug.LogFormat("[Forget Any Color #{0}]: {1} stage{2} using {3}.{4}", moduleId, singleStage ? "A single" : maxStage.ToString(), singleStage ? "" : "s", Arrays.Version, rules.GetLength(0) == 4 ? " Rule Seed " + FAC.Rule.GetRNG().Seed + '.' : string.Empty);
 
             // Initalizes the arrays.
             cylinders = new int[maxStage + 1, 3];

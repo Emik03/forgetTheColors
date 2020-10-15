@@ -27,7 +27,7 @@ public class FTCScript : MonoBehaviour
 
     //large souvenir dump
     bool solved;
-    int stage, maxStage = ForgetAColor.Arrays.EditorMaxStage;
+    int stage, maxStage = ForgetAnyColor.Arrays.EditorMaxStage;
     List<byte> gear = new List<byte>(0);
     List<short> largeDisplay = new List<short>(0);
     List<int> sineNumber = new List<int>(0);

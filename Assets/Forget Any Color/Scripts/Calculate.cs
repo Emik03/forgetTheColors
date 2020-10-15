@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace ForgetAColor
+namespace ForgetAnyColor
 {
     public class Calculate
     {
@@ -13,12 +13,14 @@ namespace ForgetAColor
             this.FAC = FAC;
             this.init = init;
 
-            sequence = new List<bool?>();
-            modifiedSequence = new List<bool>();
+            figureSequences = new List<int>();
+            sequences = new List<bool?>();
+            modifiedSequences = new List<bool>();
         }
 
-        internal List<bool?> sequence;
-        internal List<bool> modifiedSequence;
+        internal List<int> figureSequences;
+        internal List<bool?> sequences;
+        internal List<bool> modifiedSequences;
 
         private readonly FACScript FAC;
         private readonly Init init;
@@ -46,17 +48,19 @@ namespace ForgetAColor
             FAC.DisplayTexts[0].text = figure.GroupBy(x => x).Where(g => g.Count() == 1).Select(y => y.Key).PickRandom();
 
             int figureUsed = figure.IndexOf(FAC.DisplayTexts[0].text);
-            bool? input = new bool?[] { false, null, true }[figureUsed % 3];
-            sequence.Add(input);
+            figureSequences.Add(figureUsed);
 
-            bool last = modifiedSequence.Count > 1 && modifiedSequence[modifiedSequence.Count - 1],
+            bool? input = new bool?[] { false, null, true }[figureUsed % 3];
+            sequences.Add(input);
+
+            bool last = modifiedSequences.Count > 1 && modifiedSequences[modifiedSequences.Count - 1],
                  modifiedInput = input == null ? last : (bool)input;
 
             if (nixieL == 0 || nixieR == 0)
                 modifiedInput = !modifiedInput;
 
-            modifiedSequence.Add(modifiedInput);
-            Debug.LogFormat("[Forget A Color #{0}]: Stage {1} > Nixies are {2}, function({3}) = {4}, using figure {5}. Press {6}.", init.moduleId, init.stage + 1, nixieL.ToString() + nixieR.ToString(), trigNumber, trigResult, figureUsed + 1, modifiedInput ? "Right" : "Left");
+            modifiedSequences.Add(modifiedInput);
+            Debug.LogFormat("[Forget Any Color #{0}]: Stage {1} > Nixies are {2}, function({3}) = {4}, using figure {5}. Press {6}.", init.moduleId, init.stage + 1, nixieL.ToString() + nixieR.ToString(), trigNumber, trigResult, new[] { "LLLMR", "LMMMR", "LMRRR", "LMMRR", "LLMRR", "LLMMR" }[figureUsed], modifiedInput ? "Right" : "Left");
         }
 
         private int Edgework(int index)

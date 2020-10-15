@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using UnityEngine;
 
-namespace ForgetAColor
+namespace ForgetAnyColor
 {
     /// <summary>
     /// Contains all the static strings used in FTC.
@@ -103,10 +103,10 @@ namespace ForgetAColor
 				FAC.Info.GetSerialNumberNumbers().Count(), 
 				FAC.Info.GetSerialNumberLetters().Count(), 
 				FAC.Info.GetSolvedModuleNames().Count(), 
-				Init.maxStage, 
+				FAC.init.maxStage, 
 				FAC.Info.GetModuleNames().Count(), 
 				FAC.Info.GetSolvableModuleNames().Count() - FAC.Info.GetSolvedModuleNames().Count(),
-                Init.maxStage - FAC.Info.GetSolvedModuleNames().Where(m => !Ignore.Contains(m)).Count(), 
+                FAC.init.maxStage - FAC.Info.GetSolvedModuleNames().Where(m => !Ignore.Contains(m)).Count(), 
 				Application.isEditor ? 0 : int.Parse(FAC.DisplayTexts[1].text), 
 				int.Parse(FAC.DisplayTexts[0].text) }[index];
         }

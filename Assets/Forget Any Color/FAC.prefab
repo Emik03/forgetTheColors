@@ -5462,7 +5462,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShaderNames:
-  - GUI/Text Shader
+  - GUI/KT 3D Text
 --- !u!114 &114007856777637012
 MonoBehaviour:
   m_ObjectHideFlags: 1

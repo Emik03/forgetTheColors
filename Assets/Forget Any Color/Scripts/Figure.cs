@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace ForgetAColor
+namespace ForgetAnyColor
 {
     static class Figure
     {

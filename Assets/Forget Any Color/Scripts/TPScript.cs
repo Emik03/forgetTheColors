@@ -1,4 +1,4 @@
-﻿using ForgetAColor;
+﻿using ForgetAnyColor;
 using System;
 using System.Collections;
 using System.Linq;
@@ -88,14 +88,14 @@ public class TPScript : MonoBehaviour
 
     private IEnumerator TwitchHandleForcedSolve()
     {
-        Debug.LogFormat("[Forget A Color #{0}]: An auto-solve has been issued. Thank you for attempting FAC. You gave up on stage {1}.", init.moduleId, init.stage + 1);
+        Debug.LogFormat("[Forget Any Color #{0}]: An auto-solve has been issued. Thank you for attempting FAC. You gave up on stage {1}.", init.moduleId, init.stage + 1);
 
-        while (!Coroutine.animating && init.stage < Init.maxStage)
+        while (!Coroutine.animating && init.stage < init.maxStage)
             yield return true;
 
-        while (calculate.modifiedSequence.Count > 0)
+        while (calculate.modifiedSequences.Count > 0)
         {
-            FAC.Selectables[Convert.ToByte(calculate.modifiedSequence[0])].OnInteract();
+            FAC.Selectables[Convert.ToByte(calculate.modifiedSequences[0])].OnInteract();
             yield return new WaitForSeconds(0.1f);
         }
 

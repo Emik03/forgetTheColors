@@ -1,8 +1,8 @@
-﻿using ForgetAColor;
+﻿using ForgetAnyColor;
 using UnityEngine;
 
 /// <summary>
-/// Forget A Color - A Keep Talking and Nobody Explodes Modded Module by Emik.
+/// Forget Any Color - A Keep Talking and Nobody Explodes Modded Module by Emik.
 /// </summary>
 public class FACScript : MonoBehaviour
 {

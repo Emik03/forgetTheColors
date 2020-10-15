@@ -1,4 +1,4 @@
-﻿using ForgetAColor;
+﻿using ForgetAnyColor;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
@@ -8,7 +8,7 @@ public class CoroutineScript : MonoBehaviour
     public FACScript FAC;
     public TPScript TP;
 
-    internal bool animating, flashing;
+    internal bool animating = true, flashing;
 
     private Calculate calculate;
     private Init init;
@@ -67,7 +67,7 @@ public class CoroutineScript : MonoBehaviour
     private IEnumerator NewStage()
     {
         const int nextStage = 5, specialStage = 20;
-        bool isSpecialStage = init.stage == 0 || init.stage == Init.maxStage;
+        bool isSpecialStage = init.stage == 0 || init.stage == init.maxStage;
 
         render.Colorblind(render.colorblind);
 
@@ -76,7 +76,7 @@ public class CoroutineScript : MonoBehaviour
             FAC.Audio.PlaySoundAtTransform("next" + (init.stage % 4), FAC.Module.transform);
             if (init.stage != 0)
                 FAC.Audio.PlaySoundAtTransform("nextStage", FAC.Module.transform);
-            if (init.stage == Init.maxStage)
+            if (init.stage == init.maxStage)
                 FAC.Audio.PlaySoundAtTransform("finalStage", FAC.Module.transform);
         }
 
@@ -88,9 +88,9 @@ public class CoroutineScript : MonoBehaviour
 
         render.AssignRandom(true);
 
-        if (init.stage == Init.maxStage)
+        if (init.stage == init.maxStage)
         {
-            Debug.LogFormat("[Forget A Color #{0}]: {1}{2}.", init.moduleId, calculate.modifiedSequence.Count > 0 ? "The remaining sequence is " : "There is no sequence. Turn the key", string.Join(", ", calculate.modifiedSequence.Select(x => x ? "Right" : "Left").ToArray()));
+            Debug.LogFormat("[Forget Any Color #{0}]: {1}{2}.", init.moduleId, calculate.modifiedSequences.Count > 0 ? "The remaining sequence is " : "There is no sequence. Turn the key", string.Join(", ", calculate.modifiedSequences.Select(x => x ? "Right" : "Left").ToArray()));
             render.Assign(null, null, null, null, false);
         }
 

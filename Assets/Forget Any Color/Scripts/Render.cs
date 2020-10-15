@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using Rnd = UnityEngine.Random;
 
-namespace ForgetAColor
+namespace ForgetAnyColor
 {
     public class Render
     {
@@ -88,7 +88,7 @@ namespace ForgetAColor
 
         internal void SetNixieAsInputs()
         {
-            int length = calculate.modifiedSequence.Count();
+            int length = calculate.modifiedSequences.Count();
             FAC.NixieTexts[0].text = (length / 10 % 10).ToString();
             FAC.NixieTexts[1].text = (length % 10).ToString();
         }
@@ -99,7 +99,7 @@ namespace ForgetAColor
                 FAC.CylinderDisks[i].localRotation = new Quaternion(90 * Convert.ToByte(colorblind), -90, 0, 0);
 
             for (int i = 0; i < FAC.ColoredObjects.Length; i++)
-                FAC.ColoredObjects[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(colorblind) * Convert.ToByte(Init.maxStage != init.stage), -0.05f));
+                FAC.ColoredObjects[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(colorblind) * Convert.ToByte(init.maxStage != init.stage), -0.05f));
 
             FAC.GearText.characterSize = 0.05f - (Convert.ToByte(colorblind) * 0.025f);
 
@@ -166,7 +166,7 @@ namespace ForgetAColor
             }
 
             else
-                return !animating && init.stage < Init.maxStage && init.stage < init.fakeStage + FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count();
+                return !animating && init.stage < init.maxStage && init.stage < init.fakeStage + FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count();
 
             return false;
         }

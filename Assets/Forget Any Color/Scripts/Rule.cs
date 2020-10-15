@@ -1,4 +1,4 @@
-﻿namespace ForgetAColor
+﻿namespace ForgetAnyColor
 {
     /// <summary>
     /// Datatype for use in RuleSeed, containing 2 integers.

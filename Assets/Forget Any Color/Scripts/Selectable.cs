@@ -2,7 +2,7 @@
 using UnityEngine;
 using Rnd = UnityEngine.Random;
 
-namespace ForgetAColor
+namespace ForgetAnyColor
 {
     public class Selectable
     {
@@ -31,7 +31,7 @@ namespace ForgetAColor
                 if (coroutine.animating)
                     return false;
 
-                var seq = calculate.modifiedSequence;
+                var seq = calculate.modifiedSequences;
 
                 switch (index)
                 {
@@ -49,10 +49,9 @@ namespace ForgetAColor
                             }
                             else
                             {
-                                Debug.LogFormat("[Forget A Color #{0}]: {1} was pushed during stage {2}. {3}.", init.moduleId, index == 1 ? "Right" : "Left", stagesCompleted + 1, Arrays.Lose[Rnd.Range(0, Arrays.Lose.Length)]);
+                                Debug.LogFormat("[Forget Any Color #{0}]: {1} was pushed during stage {2}. {3}.", init.moduleId, index == 1 ? "Right" : "Left", stagesCompleted + 1, Arrays.Lose[Rnd.Range(0, Arrays.Lose.Length)]);
                                 
                                 FAC.Audio.PlaySoundAtTransform("strike", FAC.Selectables[index].transform);
-                                
                                 strike = true;
                                 FAC.Module.HandleStrike();
                             }
@@ -61,9 +60,9 @@ namespace ForgetAColor
                         break;
 
                     case 2:
-                        if (seq.Count == 0 && init.stage == Init.maxStage && !init.solved)
+                        if (seq.Count == 0 && init.stage == init.maxStage && !init.solved)
                         {
-                            Debug.LogFormat("[Forget A Color #{0}]: {1}; Thanks for playing!", init.moduleId, Arrays.Win[Rnd.Range(0, Arrays.Win.Length)]);
+                            Debug.LogFormat("[Forget Any Color #{0}]: {1}; Thanks for playing!", init.moduleId, Arrays.Win[Rnd.Range(0, Arrays.Win.Length)]);
 
                             FAC.Audio.PlaySoundAtTransform("keySuccess", FAC.Module.transform);
                             FAC.Audio.PlaySoundAtTransform("solved", FAC.Module.transform);
