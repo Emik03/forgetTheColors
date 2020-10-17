@@ -7,7 +7,7 @@ using UnityEngine;
 namespace ForgetAnyColor
 {
     /// <summary>
-    /// Handles calculating and computing the module's appearance.
+    /// Handles calculating and computing the module's answer based on its appearance when it's called for.
     /// </summary>
     public class Calculate
     {
