@@ -7,7 +7,7 @@ using UnityEngine;
 namespace ForgetAnyColor
 {
     /// <summary>
-    /// Contains all the static strings used in FTC.
+    /// Contains all the unchanging static lists and information.
     /// </summary>
     static class Arrays
     {

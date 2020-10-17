@@ -5,6 +5,9 @@ using Rnd = UnityEngine.Random;
 
 namespace ForgetAnyColor
 {
+    /// <summary>
+    /// Handles rendering of the module's appearance.
+    /// </summary>
     public class Render
     {
         public Render(Calculate calculate, FACScript FAC, Init init)
@@ -28,7 +31,7 @@ namespace ForgetAnyColor
             Assign(displays: new[] { Rnd.Range(0, 1000), Rnd.Range(0, 100) },
                    gears: new[] { Rnd.Range(0, 10), Rnd.Range(0, 8) },
                    nixies: new[] { Rnd.Range(0, 10), Rnd.Range(0, 10) },
-                   cylinders: Functions.Random(3, 0, 8),
+                   cylinders: new[] { Rnd.Range(0, 8), Rnd.Range(0, 8), Rnd.Range(0, 8) },
                    log: log);
         }
 

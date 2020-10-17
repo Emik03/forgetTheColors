@@ -8,11 +8,11 @@
         /// <summary>
         /// This value is set from 0 through 9, for use in tables.
         /// </summary>
-        public int Number { get; set; }
+        internal int Number { get; set; }
 
         /// <summary>
-        /// This value is exclusive for legacy FTC, where operators are used alongside the numbers.
+        /// This value is exclusive for Forget The Colors, which while unused is still needed to be in-sync with the manual.
         /// </summary>
-        public int Function { get; set; }
+        internal int Function { get; set; }
     }
 }

@@ -4,6 +4,9 @@ using Rnd = UnityEngine.Random;
 
 namespace ForgetAnyColor
 {
+    /// <summary>
+    /// Handles the KMSelectables present in the module. This is where strike/solve logic exists.
+    /// </summary>
     public class Selectable
     {
         public Selectable(Calculate calculate, CoroutineScript coroutine, FACScript FAC, Init init, Render render)

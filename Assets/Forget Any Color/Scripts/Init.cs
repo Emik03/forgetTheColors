@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace ForgetAnyColor
 {
+    /// <summary>
+    /// Fires up everything else needed to start the module when this class is instantiated.
+    /// </summary>
     public class Init
     {
         public Init(CoroutineScript coroutine, FACScript FAC, TPScript TP)

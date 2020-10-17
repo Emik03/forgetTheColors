@@ -2,6 +2,9 @@
 
 namespace ForgetAnyColor
 {
+    /// <summary>
+    /// Handles initalization and modification of cylinder arrays, also known as 'Figures'.
+    /// </summary>
     static class Figure
     {
         internal static int[] Apply(int[][] cylinders, FACScript FAC)

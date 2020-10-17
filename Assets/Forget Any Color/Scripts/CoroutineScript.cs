@@ -3,6 +3,9 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// Handles running coroutines for Forget Any Color since Unity requires it to be a GameObject.
+/// </summary>
 public class CoroutineScript : MonoBehaviour
 {
     public FACScript FAC;
@@ -90,8 +93,12 @@ public class CoroutineScript : MonoBehaviour
 
         if (init.stage == init.maxStage)
         {
-            Debug.LogFormat("[Forget Any Color #{0}]: {1}{2}.", init.moduleId, calculate.modifiedSequences.Count > 0 ? "The remaining sequence is " : "There is no sequence. Turn the key", string.Join(", ", calculate.modifiedSequences.Select(x => x ? "Right" : "Left").ToArray()));
             render.Assign(null, null, null, null, false);
+
+            Debug.LogFormat("[Forget Any Color #{0}]: {1}{2}.",
+                init.moduleId,
+                calculate.modifiedSequences.Count > 0 ? "The remaining sequence is " : "There is no sequence. Turn the key",
+                string.Join(", ", calculate.modifiedSequences.Select(x => x ? "Right" : "Left").ToArray()));
         }
 
         else

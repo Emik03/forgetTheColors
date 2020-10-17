@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
+/// <summary>
+/// TwitchPlays script for Forget Any Color. This will award points based on the number of successful inputs multiplied by the constant in 'Arrays'.
+/// </summary>
 public class TPScript : MonoBehaviour
 {
     public CoroutineScript Coroutine;
@@ -88,7 +91,7 @@ public class TPScript : MonoBehaviour
 
     private IEnumerator TwitchHandleForcedSolve()
     {
-        Debug.LogFormat("[Forget Any Color #{0}]: An auto-solve has been issued. Thank you for attempting FAC. You gave up on stage {1}.", init.moduleId, init.stage + 1);
+        Debug.LogFormat("[Forget Any Color #{0}]: An auto-solve has been issued. This module resigned at stage {1}.", init.moduleId, init.stage + 1);
 
         while (!Coroutine.animating && init.stage < init.maxStage)
             yield return true;
