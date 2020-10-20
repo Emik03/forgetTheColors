@@ -76,7 +76,12 @@ namespace ForgetAnyColor
             trigOut = parity ? (int)(Math.Abs(Math.Sin(trigIn * Mathf.Deg2Rad)) * 100000 % 100000)
                              : (int)(Math.Abs(Math.Cos(trigIn * Mathf.Deg2Rad)) * 100000 % 100000);
 
-            int[] decimals = new int[5], temp = Array.ConvertAll(trigOut.ToString().ToCharArray(), c => (int)char.GetNumericValue(c));
+            string trigOutPrepended = trigOut.ToString();
+
+            while (trigOutPrepended.Length < 5)
+                trigOutPrepended = '0' + trigOutPrepended;
+
+            int[] decimals = new int[5], temp = Array.ConvertAll(trigOutPrepended.ToCharArray(), c => (int)char.GetNumericValue(c));
             Array.Copy(temp, decimals, temp.Length);
 
             figure = new string[6];
