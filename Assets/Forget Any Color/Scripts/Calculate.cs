@@ -76,6 +76,9 @@ namespace ForgetAnyColor
             trigOut = parity ? (int)(Math.Abs(Math.Sin(trigIn * Mathf.Deg2Rad)) * 100000 % 100000)
                              : (int)(Math.Abs(Math.Cos(trigIn * Mathf.Deg2Rad)) * 100000 % 100000);
 
+            if (trigOut % 1000 == 999)
+                trigOut++;
+
             string trigOutPrepended = trigOut.ToString();
 
             while (trigOutPrepended.Length < 5)
