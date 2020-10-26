@@ -83,7 +83,7 @@ public class TPScript : MonoBehaviour
                 }
 
                 // Awards points based on the multiplier and amount of stages complete.
-                yield return "awardpoints " + Math.Floor((stagesRewarded - selectable.stagesCompleted) * Arrays.TPAwardPerStage);
+                yield return "awardpoints " + Math.Floor((selectable.stagesCompleted - stagesRewarded) * Arrays.TPAwardPerStage);
                 stagesRewarded = selectable.stagesCompleted;
             }
         }
