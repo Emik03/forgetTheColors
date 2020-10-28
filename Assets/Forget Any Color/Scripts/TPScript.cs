@@ -74,6 +74,9 @@ public class TPScript : MonoBehaviour
             // Valid command.
             else
             {
+                // Resets the strike, since it only is meant to break the for-loop once.
+                selectable.strike = false;
+
                 // This for loop breaks when either the user runs out of inputs, or strikes.
                 for (int i = 0; i < buttonPressed[1].Length && !selectable.strike; i++)
                 {
@@ -85,7 +88,6 @@ public class TPScript : MonoBehaviour
                 // Awards points based on the multiplier and amount of stages complete.
                 yield return "awardpoints " + Math.Floor((selectable.stagesCompleted - stagesRewarded) * Arrays.TPAwardPerStage);
                 stagesRewarded = selectable.stagesCompleted;
-                selectable.strike = false;
             }
         }
     }
