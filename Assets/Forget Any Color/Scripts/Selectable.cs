@@ -52,7 +52,7 @@ namespace ForgetAnyColor
                             }
                             else
                             {
-                                Debug.LogFormat("[Forget Any Color #{0}]: {1} was pushed during stage {2}. {3}.", init.moduleId, index == 1 ? "Right" : "Left", stagesCompleted + 1, Arrays.Lose[Rnd.Range(0, Arrays.Lose.Length)]);
+                                Debug.LogFormat("[Forget Any Color #{0}]: {1} was incorrectly pushed during stage {2}.", init.moduleId, index == 1 ? "Right" : "Left", stagesCompleted + 1);
                                 
                                 FAC.Audio.PlaySoundAtTransform("strike", FAC.Selectables[index].transform);
                                 strike = true;
@@ -65,7 +65,7 @@ namespace ForgetAnyColor
                     case 2:
                         if (seq.Count == 0 && init.stage == init.maxStage && !init.solved)
                         {
-                            Debug.LogFormat("[Forget Any Color #{0}]: {1}; Thanks for playing!", init.moduleId, Arrays.Win[Rnd.Range(0, Arrays.Win.Length)]);
+                            Debug.LogFormat("[Forget Any Color #{0}]: Thanks for playing!", init.moduleId);
 
                             FAC.Audio.PlaySoundAtTransform("keySuccess", FAC.Module.transform);
                             FAC.Audio.PlaySoundAtTransform("solved", FAC.Module.transform);

@@ -13,7 +13,7 @@ namespace ForgetAnyColor
     {
         public const int EditorMaxStage = 2;
         public const float TPAwardPerStage = 2;
-        public const string Version = "v1.1.8";
+        public const string Version = "v1.1.9";
 
         public static readonly int[,] ColorTable = 
         {
@@ -33,9 +33,7 @@ namespace ForgetAnyColor
             "Purple",
             "White",
             "Gray"
-        },
-
-        Lose = Strings.FailPhrases, Win = Strings.WinPhrases;
+        };
 
         public static string[] Ignore =
         {

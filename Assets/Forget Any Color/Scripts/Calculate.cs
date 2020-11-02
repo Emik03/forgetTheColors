@@ -53,21 +53,21 @@ namespace ForgetAnyColor
             modifiedSequences.Add(modifiedInput);
             lastInput = modifiedInput;
 
-            Debug.LogFormat("[Forget Any Color #{0}]: Stage {1} > Nixies are {2}, function({3}) = {4}, using figure {5}. Press {6}.",
+            Debug.LogFormat("[Forget Any Color #{0}]: Stage {1} = {2}({3}) => {4} => figure {5}. {6}Press {7}.",
                 init.moduleId,
                 init.stage + 1,
-                string.Concat(nixieL, nixieR),
+                nixieL % 2 == nixieR % 2 ? "sin" : "cos",
                 trigIn,
                 trigOut,
                 new[] { "LLLMR", "LMMMR", "LMRRR", "LMMRR", "LLMRR", "LLMMR" }[figureUsed],
+                nixieL == 0 || nixieR == 0 ? "(OPPOSITE NIXIE) " : string.Empty,
                 modifiedInput ? "Right" : "Left");
         }
 
         private void GetFigures(ref int nixieL, ref int nixieR, out IEnumerable<string> unique, out string[] figure, out int trigIn, out int trigOut)
         {
         startOver:
-
-            int edgework = Init.rules.GetLength(0) == 4 ? Arrays.GetEdgework(Init.rules[3][Functions.GetColorIndex(3, FAC)].Number, FAC) 
+            int edgework = Init.rules.GetLength(0) == 4 ? Arrays.GetEdgework(Init.rules[3][Functions.GetColorIndex(3, FAC)].Number, FAC)
                                                         : Edgework(Functions.GetColorIndex(3, FAC));
 
             trigIn = int.Parse(string.Concat((int.Parse(FAC.GearText.text.Last().ToString()) + edgework) % 10, FAC.DisplayTexts[1].text));
@@ -78,7 +78,7 @@ namespace ForgetAnyColor
                              : (int)(Math.Abs(Math.Cos(trigIn * Mathf.Deg2Rad)) * 100000 % 100000);
 
             if (trigOut % 1000 == 999)
-                trigOut++;
+                trigOut = ++trigOut % 100000;
 
             string trigOutPrepended = trigOut.ToString();
 
