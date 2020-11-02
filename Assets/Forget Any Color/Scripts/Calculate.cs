@@ -27,6 +27,7 @@ namespace ForgetAnyColor
 
         private readonly FACScript FAC;
         private readonly Init init;
+        private bool lastInput;
 
         internal void Current()
         {
@@ -44,13 +45,13 @@ namespace ForgetAnyColor
             bool? input = new bool?[] { false, null, true }[figureUsed % 3];
             sequences.Add(input);
 
-            bool last = modifiedSequences.Count > 1 && modifiedSequences[modifiedSequences.Count - 1],
-                 modifiedInput = input == null ? last : (bool)input;
+            bool modifiedInput = input == null ? lastInput : (bool)input;
 
             if (nixieL == 0 || nixieR == 0)
                 modifiedInput = !modifiedInput;
 
             modifiedSequences.Add(modifiedInput);
+            lastInput = modifiedInput;
 
             Debug.LogFormat("[Forget Any Color #{0}]: Stage {1} > Nixies are {2}, function({3}) = {4}, using figure {5}. Press {6}.",
                 init.moduleId,
