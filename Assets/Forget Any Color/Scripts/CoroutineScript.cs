@@ -11,7 +11,7 @@ public class CoroutineScript : MonoBehaviour
     public FACScript FAC;
     public TPScript TP;
 
-    internal bool animating = true, flashing;
+    internal bool animating = true, flashing, reset;
 
     private Calculate calculate;
     private Init init;
@@ -33,8 +33,14 @@ public class CoroutineScript : MonoBehaviour
 
         if (render.Animate(animating))
         {
-            init.stage++;
+            init.stage += Init.modulesPerStage;
             StartNewStage();
+        }
+
+        else if (reset && FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count() % Init.modulesPerStage != 0)
+        {
+            reset = false;
+            StartFlash();
         }
     }
 
@@ -46,6 +52,7 @@ public class CoroutineScript : MonoBehaviour
 
     internal void StartNewStage()
     {
+        reset = true;
         animating = true;
         StartCoroutine(NewStage());
     }
@@ -70,16 +77,16 @@ public class CoroutineScript : MonoBehaviour
     private IEnumerator NewStage()
     {
         const int nextStage = 5, specialStage = 20;
-        bool isSpecialStage = init.stage == 0 || init.stage == init.maxStage;
+        bool isSpecialStage = init.stage / Init.modulesPerStage == 0 || init.stage / Init.modulesPerStage == init.maxStage / Init.modulesPerStage;
 
         render.Colorblind(render.colorblind);
 
         if (init.moduleId == Init.moduleIdCounter)
         {
-            FAC.Audio.PlaySoundAtTransform("next" + (init.stage % 4), FAC.Module.transform);
+            FAC.Audio.PlaySoundAtTransform("next" + (init.stage / Init.modulesPerStage % 4), FAC.Module.transform);
             if (init.stage != 0)
                 FAC.Audio.PlaySoundAtTransform("nextStage", FAC.Module.transform);
-            if (init.stage == init.maxStage)
+            if (init.stage / Init.modulesPerStage == init.maxStage / Init.modulesPerStage)
                 FAC.Audio.PlaySoundAtTransform("finalStage", FAC.Module.transform);
         }
 
@@ -91,7 +98,7 @@ public class CoroutineScript : MonoBehaviour
 
         render.AssignRandom(true);
 
-        if (init.stage == init.maxStage)
+        if (init.stage / Init.modulesPerStage == init.maxStage / Init.modulesPerStage)
         {
             render.Assign(null, null, null, null, false);
 

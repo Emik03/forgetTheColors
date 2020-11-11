@@ -28,7 +28,7 @@ namespace ForgetAnyColor
 
         internal void AssignRandom(bool log)
         {
-            Assign(displays: new[] { Rnd.Range(0, 1000), Rnd.Range(0, 100) },
+            Assign(displays: new[] { Rnd.Range(0, 1000000) },
                    gears: new[] { Rnd.Range(0, 10), Rnd.Range(0, 8) },
                    nixies: new[] { Rnd.Range(0, 10), Rnd.Range(0, 10) },
                    cylinders: new[] { Rnd.Range(0, 8), Rnd.Range(0, 8), Rnd.Range(0, 8) },
@@ -43,7 +43,7 @@ namespace ForgetAnyColor
                 return;
             }
 
-            if (displays.Length != FAC.DisplayTexts.Length || gears.Length != 2 || nixies.Length != FAC.NixieTexts.Length || cylinders.Length != FAC.ColoredObjects.Length - 1)
+            if (displays.Length != 1 || gears.Length != 2 || nixies.Length != 2 || cylinders.Length != 3)
                 throw new ArgumentOutOfRangeException("displays, gears, nixies, cylinders", "CoroutineScript.Render failed to run because the parameters provided had incorrect length!: " + displays.Length.ToString() + gears.Length.ToString() + nixies.Length.ToString() + cylinders.Length.ToString());
 
             SetGear(gears);
@@ -53,14 +53,13 @@ namespace ForgetAnyColor
 
             FAC.ColoredObjects[3].material.mainTexture = FAC.ColorTextures[gears[1]];
 
-            for (int i = 0; i < displays.Length; i++)
-            {
-                FAC.DisplayTexts[i].text = displays[i].ToString();
-                FAC.NixieTexts[i].text = nixies[i].ToString();
+            FAC.DisplayText.text = displays[0].ToString();
 
-                while (FAC.DisplayTexts[i].text.Length < 3 - i)
-                    FAC.DisplayTexts[i].text = '0' + FAC.DisplayTexts[i].text;
-            }
+            while (FAC.DisplayText.text.Length < 6)
+                FAC.DisplayText.text = '0' + FAC.DisplayText.text;
+
+            for (int i = 0; i < FAC.NixieTexts.Length; i++)
+                FAC.NixieTexts[i].text = nixies[i].ToString();
 
             // Stores the cylinder colors if logging is true.
             if (log)
@@ -72,7 +71,7 @@ namespace ForgetAnyColor
 
         private void AssignFinal()
         {
-            FAC.DisplayTexts[0].text = FAC.DisplayTexts[1].text = string.Empty;
+            FAC.DisplayText.text = string.Empty;
             FAC.NixieTexts[0].text = FAC.NixieTexts[1].text = string.Empty;
 
             for (byte i = 0; i < FAC.ColoredObjects.Length; i++)
@@ -102,7 +101,7 @@ namespace ForgetAnyColor
                 FAC.CylinderDisks[i].localRotation = new Quaternion(90 * Convert.ToByte(colorblind), -90, 0, 0);
 
             for (int i = 0; i < FAC.ColoredObjects.Length; i++)
-                FAC.ColoredObjects[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(colorblind) * Convert.ToByte(init.maxStage != init.stage), -0.05f));
+                FAC.ColoredObjects[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(colorblind) * Convert.ToByte(init.maxStage / Init.modulesPerStage != init.stage / Init.modulesPerStage), -0.05f));
 
             FAC.GearText.characterSize = 0.05f - (Convert.ToByte(colorblind) * 0.025f);
 
@@ -169,7 +168,7 @@ namespace ForgetAnyColor
             }
 
             else
-                return !animating && init.stage < init.maxStage && init.stage < init.fakeStage + FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count();
+                return !animating && init.stage < init.maxStage && init.stage / Init.modulesPerStage < init.fakeStage + (FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count() / Init.modulesPerStage);
 
             return false;
         }

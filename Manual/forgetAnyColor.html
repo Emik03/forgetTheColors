@@ -83,10 +83,6 @@
         }
 
         .short {
-            width: 50%;
-        }
-
-        .shorter {
             width: 40%;
         }
 		
@@ -136,34 +132,18 @@
                 <span class="page-header-section-title">Forget Any Color</span>
             </div>
             <div class="page-content">
-                <img src="img/Component/Forget The Colors.svg" class="diagram">
+                <img src="img/Component/Forget Any Color.svg" class="diagram">
                 <h2>On the Subject of Forget Any Color</h2>
                 <p class="flavour-text">In the midst of chaos, shining color on the situation figures... but not here, you'll have to figure some more.</p>
                 <p>
-                    This module has 2 displays, a gear LED and number, 2 nixies, 3 cylinders, and a key.
-                    Note them down at the start, and after each solve. 
-                    Sequences can be executed whenever the defuser desires. After all inputs are made, turn the key to solve it.
+                    This module has a display, 3 cylinders, 2 nixies, a gear LED and number, and a key.
+                    Note them down each time a sound is heard.
                     If the background is blue, refer to <a href="https://ktane.timwi.de/HTML/Forget%20The%20Colors.html">Forget The Colors</a>.
                 </p>
-                <h4>For every stage on the module:</h4>
+                <h3>Obtaining the sequence:</h3>
                 <ol>
-                    <li>Take the sum of the gear number and the gear color's "Edgework" from the table. Prepend its last digit before the first digit in the 2-digit display.<span class='short rule' id='rule-extra'> "Ignored modules" will not generate stages, and always include themselves.</li><br>
-                    <li><span class="showPDF">Take the number and obtain the first 5 decimals of sine if both nixies are both odd or even, and cosine otherwise. Treat the number as degrees.</span><span class="hidePDF">Input it in sine if the nixies are both odd <strong>or</strong> even, and cosine otherwise.</span></li><br>
-                    <span class="hidePDF">
-                        <div class="column">
-                            <img src="img/Forget The Colors/sin(.png" width="36" height="20" style="margin-left:-195px; vertical-align:top;">
-                            <input type="text" id="sin2" style="width:30px" oninput="update()">
-                            <img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:45px; vertical-align:top;">
-                            <input type="text" id="sin2Ans" style="width:70px;" readonly><br>
-                        </div>
-                        <div class="column">
-                            <img src="img/Forget The Colors/cos(.png" width="38" height="20" style="margin-left:-200px; vertical-align:top;">
-                            <input type="text" id="cos2" style="width:30px;" oninput="update()">
-                            <img src="img/Forget The Colors/)=.png" width="16" height="20" style="margin-left:48px; vertical-align:top;">
-                            <input type="text" id="cos2Ans" style="width:70px;" readonly><br>
-                        </div>
-                    </span>
-					
+                    <li>Obtain a digit from the table with the gear color. Take only the last digit, and subtract 6 if it is higher than 6, treating 0's as 6's.<span class='short rule' id='rule-extra'> "Ignored modules" will not generate stages, and always include themselves.</li><br>
+                    <li>Note down the display, but exclude the digit whose position matches step 1.</li>
                     <table class="right" style="margin-top:4px;">
                         <tr>
                             <td>(LLL) (M) (R)</td>
@@ -179,11 +159,11 @@
 						</tr>
                     </table><br>
 					
-					<li>All 5 decimals are arranged to 1 of the cylinders in the following figures. Take any figure, and determine if it applies to the current stage:</li>
+					<li>All 5 digits are arranged to 1 of the cylinders in the following figures. Take any figure, and determine if it applies to the current stage:</li>
 
                     <ul>
-                        <li>Use the table to get a digit from the color and position of each cylinder. Add it to <strong>each</strong> of their decimals they are arranged with. Combine all values within each cylinder, taking only the last digit.</li><br>
-                        <li>If L, M, and R as a 3-digit number is equal to the display, note down the position with a unique length. Otherwise, try a different figure.</li>
+                        <li>Use the table to get a digit from the color and position of each cylinder. Add it to <em>each</em> of their decimals they are arranged with. Combine all values within each cylinder, taking only the last digit.</li><br>
+                        <li>If the correct figure was used, L, M, and R will match left nixie, right nixie, and gear number. If so, note the position with a unique length.</li>
                     </ul>
                 </ol>
                 <table class="right">
@@ -192,7 +172,7 @@
                         <th>L</th>
                         <th>M</th>
                         <th>R</th>
-                        <th>Edgework</th>
+                        <th>Gear Color</th>
                     </tr>
                     <tr class="red">
                         <td>Red</td>
@@ -251,13 +231,15 @@
                         <td><span class='rule' id='rule-4-8'>serial's # of letters</span></td>
                     </tr>
                 </table>
-                <h4>Submitting the obtained sequence:</h4>
-                <ul class="shorter">
+                <h3>Submitting the sequence:</h3>
+                <p>The list of unique lengths can be translated to button presses.</p>
+                <ul class="short">
                     <li><strong>L</strong> -> Left Nixie</li><br>
                     <li><strong>M</strong> -> Same as last (left if none)</li><br>
                     <li><strong>R</strong> -> Right Nixie</li>
                 </ul>
-                <p class="short">Input the <strong>opposite</strong> nixie if either in that stage were 0.</p>
+                <p>The sequence can be done during, or after all stages have been engaged.</p>
+                <p><strong>NOTE: The module will generate more stages if the key is turned at stage 1.</strong></p>
             </div>
             <div class="page-footer relative-footer">Page 1 of 1</div>
         </div>
@@ -272,7 +254,7 @@
 
     const ruleExtra = document.getElementById(`rule-extra`);
 
-    const tableLengths = [20, 10, 24, 8];
+    const tableLengths = [24, 8];
     
     function update() {
         const sin2 = parseInt(sin2Element.value) ? parseInt(sin2Element.value) : 0;
@@ -327,29 +309,21 @@
         getDefaultRules();
         ruleExtra.innerText = ' "Ignored modules" will not generate stages, and always include themselves.';
         
-        const action = ['+', '-', '*', '/', "%"];
         const edgework = ['batteries', 'AA batteries', 'D batteries', 'battery holders',
                           'indicators', 'lit indicators', 'unlit indicators', 
                           'port plates', 'unique ports', 'duplicate ports', 'ports', 
                           "serial's first digit", "serial's last digit", "serial's # of digits", "serial's # of letters",
                           'solved modules', 'non-ignored modules', 'modules', 'unsolved modules', 'ignored modules',
-                          '2-digit screen', '3-digit screen'];
+                          'left nixie', 'right nixie', 'gear number',
+                          "display's 1st digit", "display's 2nd digit", "display's 3rd digit", "display's 4th digit", "display's 5th digit", "display's 6th digit"];
 
         for (let instruction = 0; instruction < tableLengths[0]; instruction++) {
-            const rule = { type: rnd.nextMax(10), parameter: rnd.nextMax(action.length) };
-        }
-
-        for (let instruction = 0; instruction < tableLengths[1]; instruction++) {
-            const rule = { type: rnd.nextMax(edgework.length), parameter: rnd.nextMax(action.length) };
-        }
-
-        for (let instruction = 0; instruction < tableLengths[2]; instruction++) {
             const span = document.getElementById(`rule-3-${instruction + 1}`);
             const rule = { type: rnd.nextMax(10) };
             span.innerText = rule.type
         }
 
-        for (let instruction = 0; instruction < tableLengths[3]; instruction++) {
+        for (let instruction = 0; instruction < tableLengths[1]; instruction++) {
             const span = document.getElementById(`rule-4-${instruction + 1}`);
             const rule = { type: rnd.nextMax(edgework.length) };
             span.innerText = edgework[rule.type]

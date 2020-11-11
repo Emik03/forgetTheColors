@@ -55,6 +55,9 @@ public class TPScript : MonoBehaviour
         {
             yield return null;
             FAC.Selectables[2].OnInteract();
+
+            if (init.stage == 0)
+                yield return "sendtochat Amount of modules required per stage is now " + Init.modulesPerStage + ".";
         }
 
         // Submit command.
@@ -96,7 +99,7 @@ public class TPScript : MonoBehaviour
     {
         Debug.LogFormat("[Forget Any Color #{0}]: An auto-solve has been issued. This module resigned at stage {1}.", init.moduleId, init.stage + 1);
 
-        while (!Coroutine.animating && init.stage < init.maxStage)
+        while (!Coroutine.animating && init.stage / Init.modulesPerStage < init.maxStage / Init.modulesPerStage)
             yield return true;
 
         while (calculate.modifiedSequences.Count > 0)

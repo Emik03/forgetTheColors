@@ -18,8 +18,8 @@ public class FACScript : MonoBehaviour
     public TPScript TP;
     public Transform Gear, Key;
     public Transform[] CylinderDisks;
-    public TextMesh GearText;
-    public TextMesh[] DisplayTexts, NixieTexts;
+    public TextMesh DisplayText, GearText;
+    public TextMesh[] NixieTexts;
     public Texture[] ColorTextures;
 
     internal Init init;

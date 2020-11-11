@@ -31,15 +31,22 @@ namespace ForgetAnyColor
 
         internal void Current()
         {
-            int trigIn, trigOut, nixieL = int.Parse(FAC.NixieTexts[0].text), nixieR = int.Parse(FAC.NixieTexts[1].text);
+            string display;
             string[] figure;
             IEnumerable<string> unique;
 
-            GetFigures(ref nixieL, ref nixieR, out unique, out figure, out trigIn, out trigOut);
+            GetFigures(out display, out unique, out figure);
 
-            FAC.DisplayTexts[0].text = unique.PickRandom();
+            string random = unique.PickRandom();
 
-            int figureUsed = figure.ToList().IndexOf(FAC.DisplayTexts[0].text);
+            if (random.Length != 3)
+                throw new ArgumentOutOfRangeException("random", random);
+
+            FAC.NixieTexts[0].text = random[0].ToString();
+            FAC.NixieTexts[1].text = random[1].ToString();
+            FAC.GearText.text = random[2].ToString();
+
+            int figureUsed = figure.ToList().IndexOf(random);
             figureSequences.Add(figureUsed);
 
             bool? input = new bool?[] { false, null, true }[figureUsed % 3];
@@ -47,45 +54,29 @@ namespace ForgetAnyColor
 
             bool modifiedInput = input == null ? lastInput : (bool)input;
 
-            if (nixieL == 0 || nixieR == 0)
-                modifiedInput = !modifiedInput;
-
             modifiedSequences.Add(modifiedInput);
             lastInput = modifiedInput;
 
-            Debug.LogFormat("[Forget Any Color #{0}]: Stage {1} = {2}({3}) => {4} => figure {5}. {6}Press {7}.",
+            Debug.LogFormat("[Forget Any Color #{0}]: Stage {1} = {2} => figure {3}. Press {4}.",
                 init.moduleId,
                 init.stage + 1,
-                nixieL % 2 == nixieR % 2 ? "sin" : "cos",
-                trigIn,
-                trigOut,
+                display,
                 new[] { "LLLMR", "LMMMR", "LMRRR", "LMMRR", "LLMRR", "LLMMR" }[figureUsed],
-                nixieL == 0 || nixieR == 0 ? "(OPPOSITE NIXIE) " : string.Empty,
                 modifiedInput ? "Right" : "Left");
         }
 
-        private void GetFigures(ref int nixieL, ref int nixieR, out IEnumerable<string> unique, out string[] figure, out int trigIn, out int trigOut)
+        private void GetFigures(out string display, out IEnumerable<string> unique, out string[] figure)
         {
         startOver:
-            int edgework = Init.rules.GetLength(0) == 4 ? Arrays.GetEdgework(Init.rules[3][Functions.GetColorIndex(3, FAC)].Number, FAC)
+            int edgework = Init.rules.GetLength(0) == 2 ? Arrays.GetEdgework(Init.rules[1][Functions.GetColorIndex(3, FAC)].Number, FAC)
                                                         : Edgework(Functions.GetColorIndex(3, FAC));
 
-            trigIn = int.Parse(string.Concat((int.Parse(FAC.GearText.text.Last().ToString()) + edgework) % 10, FAC.DisplayTexts[1].text));
+            display = FAC.DisplayText.text.Remove(edgework == 0 ? 5 : --edgework % 6, 1);
 
-            bool parity = nixieL % 2 == nixieR % 2;
+            if (display.Length != 5)
+                throw new ArgumentOutOfRangeException("display", display);
 
-            trigOut = parity ? (int)(Math.Abs(Math.Sin(trigIn * Mathf.Deg2Rad)) * 100000 % 100000)
-                             : (int)(Math.Abs(Math.Cos(trigIn * Mathf.Deg2Rad)) * 100000 % 100000);
-
-            if (trigOut % 1000 == 999)
-                trigOut = ++trigOut % 100000;
-
-            string trigOutPrepended = trigOut.ToString();
-
-            while (trigOutPrepended.Length < 5)
-                trigOutPrepended = '0' + trigOutPrepended;
-
-            int[] decimals = new int[5], temp = Array.ConvertAll(trigOutPrepended.ToCharArray(), c => (int)char.GetNumericValue(c));
+            int[] decimals = new int[5], temp = Array.ConvertAll(display.ToCharArray(), c => (int)char.GetNumericValue(c));
             Array.Copy(temp, decimals, temp.Length);
 
             figure = new string[6];
@@ -109,8 +100,8 @@ namespace ForgetAnyColor
 
         private int Edgework(int index)
         {
-            if (Init.rules.GetLength(0) == 4)
-                return Arrays.GetEdgework(Init.rules[3][init.render.GetGear()[1]].Number, FAC);
+            if (Init.rules.GetLength(0) == 2)
+                return Arrays.GetEdgework(Init.rules[1][init.render.GetGear()[1]].Number, FAC);
 
             switch (index)
             {

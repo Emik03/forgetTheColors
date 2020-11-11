@@ -31,12 +31,15 @@ namespace ForgetAnyColor
         internal TPScript TP;
 
         internal bool solved;
-        internal static int moduleIdCounter;
+        internal static int moduleIdCounter, modulesPerStage;
         internal int fakeStage, moduleId, stage, maxStage = Arrays.EditorMaxStage;
         internal int[,] cylinders;
 
         internal void Start()
         {
+            // Reset the static variable in case it got changed.
+            modulesPerStage = 5;
+
             // Add an event for each interactable element.
             for (byte i = 0; i < FAC.Selectables.Length; i++)
                 FAC.Selectables[i].OnInteract += selectable.Interact(i);
@@ -47,7 +50,7 @@ namespace ForgetAnyColor
 
             // Set maxStage to amount of modules.
             if (!Application.isEditor)
-                maxStage = Math.Min(FAC.Info.GetSolvableModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count(), 10000);
+                maxStage = Math.Min(FAC.Info.GetSolvableModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count(), ushort.MaxValue);
 
             // Initalize RuleSeed.
             if (rules == null)
@@ -60,12 +63,18 @@ namespace ForgetAnyColor
             render.colorblind = FAC.Colorblind.ColorblindModeActive;
             render.Colorblind(render.colorblind);
 
-            // Logs initalization.
-            bool singleStage = maxStage == 1;
-            Debug.LogFormat("[Forget Any Color #{0}]: {1} stage{2} using {3}.{4}", moduleId, singleStage ? "A single" : maxStage.ToString(), singleStage ? "" : "s", Arrays.Version, rules.GetLength(0) == 4 ? " Rule Seed " + FAC.Rule.GetRNG().Seed + '.' : string.Empty);
-
             // Initalizes the arrays.
             cylinders = new int[maxStage + 1, 3];
+
+            // Logs initalization.
+            bool singleStage = maxStage / modulesPerStage == 1;
+            Debug.LogFormat("[Forget Any Color #{0}]: {1} (max {2}) stage{3} using {4}.{5}",
+                moduleId,
+                singleStage ? "A single" : (maxStage / modulesPerStage).ToString(),
+                maxStage.ToString(),
+                singleStage ? "" : "s",
+                Arrays.Version,
+                rules.GetLength(0) == 2 ? " Rule Seed " + FAC.Rule.GetRNG().Seed + '.' : string.Empty);
 
             // Automatically start a new stage.
             coroutine.StartNewStage();
@@ -78,8 +87,8 @@ namespace ForgetAnyColor
             if (rnd.Seed == 1)
                 return new Rule[0][];
 
-            var rules = new Rule[4][] { new Rule[20], new Rule[10], new Rule[24], new Rule[8] };
-            int[] ranges = { 10, 22, 10, 22 };
+            var rules = new Rule[2][] { new Rule[24], new Rule[8] };
+            int[] ranges = { 10, 29 };
 
             for (int i = 0; i < rules.Length; i++)
             {
@@ -87,8 +96,7 @@ namespace ForgetAnyColor
                 {
                     rules[i][j] = new Rule
                     {
-                        Number = rnd.Next(ranges[i]),
-                        Function = i < 2 ? rnd.Next(5) : 0
+                        Number = rnd.Next(ranges[i])
                     };
                 }
             }

@@ -11,9 +11,9 @@ namespace ForgetAnyColor
     /// </summary>
     static class Arrays
     {
-        public const int EditorMaxStage = 2;
+        public const int EditorMaxStage = 10;
         public const float TPAwardPerStage = 2;
-        public const string Version = "v1.1.9";
+        public const string Version = "v1.2";
 
         public static readonly int[,] ColorTable = 
         {
@@ -81,7 +81,7 @@ namespace ForgetAnyColor
 
         public static int GetEdgework(int index, FACScript FAC)
         {
-            if (index > 22 || index < 0)
+            if (index > 29 || index < 0)
                 throw new IndexOutOfRangeException("Arrays.GetEdgework recieved an out-of-range number: " + index + ".");
             return new[] 
             { 
@@ -100,13 +100,21 @@ namespace ForgetAnyColor
 				FAC.Info.GetSerialNumberNumbers().Last(), 
 				FAC.Info.GetSerialNumberNumbers().Count(), 
 				FAC.Info.GetSerialNumberLetters().Count(), 
-				FAC.Info.GetSolvedModuleNames().Count(), 
-				FAC.init.maxStage, 
-				FAC.Info.GetModuleNames().Count(), 
+				FAC.Info.GetSolvedModuleNames().Count(),
+                FAC.Info.GetSolvedModuleNames().Where(m => !Ignore.Contains(m)).Count(),
+                FAC.Info.GetModuleNames().Count(), 
 				FAC.Info.GetSolvableModuleNames().Count() - FAC.Info.GetSolvedModuleNames().Count(),
-                FAC.init.maxStage - FAC.Info.GetSolvedModuleNames().Where(m => !Ignore.Contains(m)).Count(), 
-				Application.isEditor ? 0 : int.Parse(FAC.DisplayTexts[1].text), 
-				int.Parse(FAC.DisplayTexts[0].text) }[index];
+                FAC.Info.GetSolvedModuleNames().Where(m => Ignore.Contains(m)).Count(), 
+				int.Parse(FAC.NixieTexts[0].text),
+                int.Parse(FAC.NixieTexts[1].text),
+                int.Parse(FAC.GearText.text),
+                int.Parse(FAC.DisplayText.text[0].ToString()),
+                int.Parse(FAC.DisplayText.text[1].ToString()),
+                int.Parse(FAC.DisplayText.text[2].ToString()),
+                int.Parse(FAC.DisplayText.text[3].ToString()),
+                int.Parse(FAC.DisplayText.text[4].ToString()),
+                int.Parse(FAC.DisplayText.text[5].ToString())
+            }[index];
         }
     }
 }
