@@ -18,7 +18,7 @@ namespace ForgetAnyColor
             this.render = render;
         }
 
-        internal bool strike;
+        internal bool strike, hasInteracted;
         internal int stagesCompleted;
 
         private readonly Calculate calculate;
@@ -42,6 +42,8 @@ namespace ForgetAnyColor
                     case 1:
                         FAC.Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, FAC.Selectables[index].transform);
                         FAC.Selectables[index].AddInteractionPunch();
+
+                        hasInteracted = true;
 
                         if (seq.Count > 0)
                             if (seq[0] == Convert.ToBoolean(index))
@@ -77,7 +79,7 @@ namespace ForgetAnyColor
 
                         else if (!render.turnKey)
                         {
-                            if (init.currentStage == 0)
+                            if (!hasInteracted)
                                 Init.modulesPerStage = Math.Max(--Init.modulesPerStage, 1);
 
                             FAC.Audio.PlaySoundAtTransform("key", FAC.Module.transform);

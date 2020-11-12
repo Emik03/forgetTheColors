@@ -96,7 +96,7 @@
             <div class="page-content">
                 <img src="img/Component/Forget Any Color.svg" class="diagram">
                 <h2>On the Subject of Forget Any Color</h2>
-                <p class="flavour-text">In the midst of chaos, shining color on the situation figures... but not here, you'll have to figure some more.</p>
+                <p class="flavour-text">Now requiring no calculator! I bet you'll use one anyway...</p>
                 <p>
                     This module has a display, 3 cylinders, 2 nixies, a gear LED and number, and a key.
                     Note them down each time a sound is heard.
@@ -104,29 +104,69 @@
                 </p>
                 <h3>Obtaining the sequence:</h3>
                 <ol>
-                    <li>Obtain a digit from the table with the gear color. Take only the last digit, and subtract 6 if it is higher than 6, treating 0's as 6's.<span class='short rule' id='rule-extra'> "Ignored modules" will not generate stages, and always include themselves.</li><br>
+                    <li>Get a number from the colored table with the gear color. Take only the last digit, and subtract 6 if it's 7, 8 or 9. Treat 0 as 6.</li><br>
                     <li>Note down the display, but exclude the digit whose position matches step 1.</li>
-                    <table class="right" style="margin-top:4px;">
+                    
+                    <table class="right" style="text-align:center;">
                         <tr>
-                            <td>(LLL) (M) (R)</td>
-                            <td>(L) (MM) (RR)</td>
+                            <th rowspan="2" style="border-left-style:hidden;border-top-style:hidden;"></th>
+                            <th colspan="5">5-digit number</th>
                         </tr>
-						<tr>
-                            <td>(L) (MMM) (R)</td>
-                            <td>(LL) (M) (RR)</td>
-						</tr>
-						<tr>
-                            <td>(L) (M) (RRR)</td>
-                            <td>(LL) (MM) (R)</td>
-						</tr>
+                        <tr>
+                            <th>1</th>
+                            <th>2</th>
+                            <th>3</th>
+                            <th>4</th>
+                            <th>5</th>
+                        </tr>
+                        <tr>
+                            <th>A</th>
+                            <td colspan="3">L</td>
+                            <td>M</td>
+                            <td>R</td>
+                        </tr>
+                        <tr>
+                            <th>B</th>
+                            <td>L</td>
+                            <td colspan="3">M</td>
+                            <td>R</td>
+                        </tr>
+                        <tr>
+                            <th>C</th>
+                            <td>L</td>
+                            <td>M</td>
+                            <td colspan="3">R</td>
+                        </tr>
+                        <tr>
+                            <th>D</th>
+                            <td>L</td>
+                            <td colspan="2">M</td>
+                            <td colspan="2">R</td>
+                        </tr>
+                        <tr>
+                            <th>E</th>
+                            <td colspan="2">L</td>
+                            <td>M</td>
+                            <td colspan="2">R</td>
+                        </tr>
+                        <tr>
+                            <th>F</th>
+                            <td colspan="2">L</td>
+                            <td colspan="2">M</td>
+                            <td>R</td>
+                        </tr>
                     </table><br>
 					
-					<li>All 5 digits are arranged to 1 of the cylinders in the following figures. Take any figure, and determine if it applies to the current stage:</li>
+					<li>Find the correct figure (A-F) by testing each one:</li>
 
                     <ul>
-                        <li>Use the table to get a digit from the color and position of each cylinder. Add it to <em>each</em> of their decimals they are arranged with. Combine all values within each cylinder, taking only the last digit.</li><br>
-                        <li>If the correct figure was used, L, M, and R will match left nixie, right nixie, and gear number. If so, note the position with a unique length.</li>
+                        <li>Get the cylinders' values from the colored table.</li><br>
+                        <li>Add it to <em>each</em> of the attached digits.</li><br>
+                        <li>Sum up each individual cylinder's digits.</li><br>
+                        <li>If the correct figure is used, L, M, and R's last digits will match the bottom 3 numbers shown.</li>
                     </ul>
+
+                    <li>With the correct figure, write down which position had a unique length.</li>
                 </ol>
                 <table class="right">
                     <tr>
@@ -194,14 +234,13 @@
                     </tr>
                 </table>
                 <h3>Submitting the sequence:</h3>
-                <p>The list of unique lengths can be translated to button presses.</p>
+                <p>The list of unique lengths can be translated to button presses, and the module is interactable at all times.</p>
                 <ul class="short">
-                    <li><strong>L</strong> -> Left Nixie</li><br>
-                    <li><strong>M</strong> -> Opposite of the last stage (right if on first stage)</li><br>
-                    <li><strong>R</strong> -> Right Nixie</li>
+                    <li><strong>L -></strong> Press the left nixie.</li><br>
+                    <li><strong>M -></strong> Press the opposite nixie of the last stage, or the right nixie if no such stage exists.</li><br>
+                    <li><strong>R -></strong> Press the right nixie.</li>
                 </ul>
-                <p>The sequence can be done during, or after all stages have been engaged.</p>
-                <p><strong>NOTE: The module will generate more stages if the key is turned at stage 1.</strong></p>
+                <p><strong>NOTE: Using the key before the nixies generates more stages.</strong> <span class="right"><a href="https://ktane.timwi.de/JSON/Forget%20Any%20Color.json">Ignored modules</a></span></p>
             </div>
             <div class="page-footer relative-footer">Page 1 of 1</div>
         </div>
@@ -213,8 +252,6 @@
 
     const sin2AnsElement = document.getElementById("sin2Ans");
     const cos2AnsElement = document.getElementById("cos2Ans");
-
-    const ruleExtra = document.getElementById(`rule-extra`);
 
     const tableLengths = [24, 8];
     
@@ -258,7 +295,6 @@
 
     function setDefaultRules() {
         getDefaultRules();
-        ruleExtra.innerText = "";
             
         for (let instruction = 1; instruction <= tableLengths[2]; instruction++)
             document.getElementById(`rule-3-${instruction}`).innerText = defaultRules[`rule-3-${instruction}`];
@@ -269,7 +305,6 @@
 
     function setRules(rnd) {
         getDefaultRules();
-        ruleExtra.innerText = ' "Ignored modules" will not generate stages, and always include themselves.';
         
         const edgework = ['batteries', 'AA batteries', 'D batteries', 'battery holders',
                           'indicators', 'lit indicators', 'unlit indicators', 
