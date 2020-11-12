@@ -81,33 +81,34 @@ namespace ForgetAnyColor
 
         public static int GetEdgework(int index, FACScript FAC)
         {
-            if (index > 29 || index < 0)
+            if (index > 30 || index < 0)
                 throw new IndexOutOfRangeException("Arrays.GetEdgework recieved an out-of-range number: " + index + ".");
-            return new[] 
-            { 
+            return new[]
+            {
                 FAC.Info.GetBatteryCount(),
                 FAC.Info.GetBatteryCount(Battery.AA) + FAC.Info.GetBatteryCount(Battery.AAx3) + FAC.Info.GetBatteryCount(Battery.AAx4),
-                FAC.Info.GetBatteryCount(Battery.D), 
-                FAC.Info.GetBatteryHolderCount(), 
+                FAC.Info.GetBatteryCount(Battery.D),
+                FAC.Info.GetBatteryHolderCount(),
                 FAC.Info.GetIndicators().Count(),
                 FAC.Info.GetOnIndicators().Count(),
-                FAC.Info.GetOffIndicators().Count(), 
-                FAC.Info.GetPortPlateCount(), 
-                FAC.Info.GetPorts().Distinct().Count(), 
-                FAC.Info.GetPorts().Count() - FAC.Info.GetPorts().Distinct().Count(), 
-				FAC.Info.GetPortCount(), 
-				FAC.Info.GetSerialNumberNumbers().First(), 
-				FAC.Info.GetSerialNumberNumbers().Last(), 
-				FAC.Info.GetSerialNumberNumbers().Count(), 
-				FAC.Info.GetSerialNumberLetters().Count(), 
-				FAC.Info.GetSolvedModuleNames().Count(),
+                FAC.Info.GetOffIndicators().Count(),
+                FAC.Info.GetPortPlateCount(),
+                FAC.Info.GetPorts().Distinct().Count(),
+                FAC.Info.GetPorts().Count() - FAC.Info.GetPorts().Distinct().Count(),
+                FAC.Info.GetPortCount(),
+                FAC.Info.GetSerialNumberNumbers().First(),
+                FAC.Info.GetSerialNumberNumbers().Last(),
+                FAC.Info.GetSerialNumberNumbers().Count(),
+                FAC.Info.GetSerialNumberLetters().Count(),
+                FAC.Info.GetSolvedModuleNames().Count(),
                 FAC.Info.GetSolvedModuleNames().Where(m => !Ignore.Contains(m)).Count(),
-                FAC.Info.GetModuleNames().Count(), 
-				FAC.Info.GetSolvableModuleNames().Count() - FAC.Info.GetSolvedModuleNames().Count(),
-                FAC.Info.GetSolvedModuleNames().Where(m => Ignore.Contains(m)).Count(), 
-				int.Parse(FAC.NixieTexts[0].text),
+                FAC.Info.GetModuleNames().Count(),
+                FAC.Info.GetSolvableModuleNames().Count() - FAC.Info.GetSolvedModuleNames().Count(),
+                FAC.Info.GetSolvedModuleNames().Where(m => Ignore.Contains(m)).Count(),
+                int.Parse(FAC.NixieTexts[0].text),
                 int.Parse(FAC.NixieTexts[1].text),
                 int.Parse(FAC.GearText.text),
+                FAC.init.currentStage + 1,
                 int.Parse(FAC.DisplayText.text[0].ToString()),
                 int.Parse(FAC.DisplayText.text[1].ToString()),
                 int.Parse(FAC.DisplayText.text[2].ToString()),

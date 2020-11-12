@@ -12,16 +12,6 @@
     <script src="js/ruleseed.js"></script>
 </head>
 <style>
-    div > input {
-        background-color:#AAA;
-        border: 0px;
-		float: left;
-        height: 15px;
-        margin-left: 45px;
-        text-align: center;
-		transform: scale(1.25);
-    }
-
     .red {
         background-color: #FAA;
     }
@@ -50,20 +40,8 @@
         background-color: #CAF;
     }
 
-    .pink {
-        background-color: #FCF;
-    }
-
-    .maroon {
-        background-color: #CAA;
-    }
-
     .white {
         background-color: #EEE;
-    }
-
-    .showPDF {
-        display: none;
     }
 
     @media print {
@@ -85,14 +63,6 @@
         .short {
             width: 40%;
         }
-		
-        .showPDF {
-            display: inline;
-        }
-		
-        .hidePDF {
-            display: none;
-        }
     }
 
     @media screen and (min-width: 725px) {
@@ -112,16 +82,8 @@
         }
 
         .short {
-            width: 50%;
-        }
-
-        .shorter {
             width: 40%;
         }
-		
-		div > input {
-			transform: scale(1.5);
-		}
     }
 </style>
 <body>
@@ -235,7 +197,7 @@
                 <p>The list of unique lengths can be translated to button presses.</p>
                 <ul class="short">
                     <li><strong>L</strong> -> Left Nixie</li><br>
-                    <li><strong>M</strong> -> Same as last (left if none)</li><br>
+                    <li><strong>M</strong> -> Opposite of the last stage (right if on first stage)</li><br>
                     <li><strong>R</strong> -> Right Nixie</li>
                 </ul>
                 <p>The sequence can be done during, or after all stages have been engaged.</p>
@@ -314,7 +276,7 @@
                           'port plates', 'unique ports', 'duplicate ports', 'ports', 
                           "serial's first digit", "serial's last digit", "serial's # of digits", "serial's # of letters",
                           'solved modules', 'non-ignored modules', 'modules', 'unsolved modules', 'ignored modules',
-                          'left nixie', 'right nixie', 'gear number',
+                          'left nixie', 'right nixie', 'gear number', 'current stage',
                           "display's 1st digit", "display's 2nd digit", "display's 3rd digit", "display's 4th digit", "display's 5th digit", "display's 6th digit"];
 
         for (let instruction = 0; instruction < tableLengths[0]; instruction++) {

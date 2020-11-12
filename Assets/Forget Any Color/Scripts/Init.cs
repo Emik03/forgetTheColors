@@ -32,13 +32,17 @@ namespace ForgetAnyColor
 
         internal bool solved;
         internal static int moduleIdCounter, modulesPerStage;
-        internal int fakeStage, moduleId, stage, maxStage = Arrays.EditorMaxStage;
+        internal int fakeStage, moduleId, stage, currentStage, maxStage, finalStage = Arrays.EditorMaxStage;
         internal int[,] cylinders;
 
         internal void Start()
         {
             // Reset the static variable in case it got changed.
-            modulesPerStage = 5;
+            modulesPerStage = Math.Min(FAC.Info.GetSolvableModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count(), 4);
+
+            // In the event there are no other solvable modules, this prevents a division by zero exception.
+            if (modulesPerStage == 0)
+                modulesPerStage = 1;
 
             // Add an event for each interactable element.
             for (byte i = 0; i < FAC.Selectables.Length; i++)
@@ -48,9 +52,12 @@ namespace ForgetAnyColor
             if (FAC.Boss.GetIgnoredModules(FAC.Module, Arrays.Ignore) != null)
                 Arrays.Ignore = FAC.Boss.GetIgnoredModules(FAC.Module, Arrays.Ignore);
 
-            // Set maxStage to amount of modules.
+            // Set the final stage to the amount of modules.
             if (!Application.isEditor)
-                maxStage = Math.Min(FAC.Info.GetSolvableModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count(), ushort.MaxValue);
+                finalStage = Math.Min(FAC.Info.GetSolvableModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count(), ushort.MaxValue);
+
+            // maxStage is used by Souvenir, this grabs the latest guaranteed stage.
+            maxStage = finalStage / modulesPerStage;
 
             // Initalize RuleSeed.
             if (rules == null)
@@ -67,14 +74,14 @@ namespace ForgetAnyColor
             cylinders = new int[maxStage + 1, 3];
 
             // Logs initalization.
-            bool singleStage = maxStage / modulesPerStage == 1;
+            bool singleStage = finalStage / modulesPerStage == 1;
             Debug.LogFormat("[Forget Any Color #{0}]: {1} (max {2}) stage{3} using {4}.{5}",
                 moduleId,
-                singleStage ? "A single" : (maxStage / modulesPerStage).ToString(),
-                maxStage.ToString(),
+                singleStage ? "A single" : (finalStage / modulesPerStage).ToString(),
+                finalStage.ToString(),
                 singleStage ? "" : "s",
                 Arrays.Version,
-                rules.GetLength(0) == 2 ? " Rule Seed " + FAC.Rule.GetRNG().Seed + '.' : string.Empty);
+                rules.GetLength(0) != 0 ? " Rule Seed " + FAC.Rule.GetRNG().Seed + '.' : string.Empty);
 
             // Automatically start a new stage.
             coroutine.StartNewStage();
@@ -88,7 +95,7 @@ namespace ForgetAnyColor
                 return new Rule[0][];
 
             var rules = new Rule[2][] { new Rule[24], new Rule[8] };
-            int[] ranges = { 10, 29 };
+            int[] ranges = { 10, 30 };
 
             for (int i = 0; i < rules.Length; i++)
             {

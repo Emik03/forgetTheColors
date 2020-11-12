@@ -63,7 +63,7 @@ namespace ForgetAnyColor
                         break;
 
                     case 2:
-                        if (seq.Count == 0 && init.stage / Init.modulesPerStage == init.maxStage / Init.modulesPerStage && !init.solved)
+                        if (seq.Count == 0 && init.currentStage / Init.modulesPerStage == init.finalStage / Init.modulesPerStage && !init.solved)
                         {
                             Debug.LogFormat("[Forget Any Color #{0}]: Thanks for playing!", init.moduleId);
 
@@ -77,7 +77,7 @@ namespace ForgetAnyColor
 
                         else if (!render.turnKey)
                         {
-                            if (init.stage == 0)
+                            if (init.currentStage == 0)
                                 Init.modulesPerStage = Math.Max(--Init.modulesPerStage, 1);
 
                             FAC.Audio.PlaySoundAtTransform("key", FAC.Module.transform);

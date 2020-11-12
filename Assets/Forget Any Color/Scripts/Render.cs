@@ -62,10 +62,10 @@ namespace ForgetAnyColor
                 FAC.NixieTexts[i].text = nixies[i].ToString();
 
             // Stores the cylinder colors if logging is true.
-            if (log)
+            if (log && init.currentStage / Init.modulesPerStage < init.maxStage)
             {
                 for (int i = 0; i < init.cylinders.GetLength(1); i++)
-                    init.cylinders[init.stage, i] = cylinders[i];
+                    init.cylinders[init.currentStage / Init.modulesPerStage, i] = cylinders[i];
             }
         }
 
@@ -101,7 +101,7 @@ namespace ForgetAnyColor
                 FAC.CylinderDisks[i].localRotation = new Quaternion(90 * Convert.ToByte(colorblind), -90, 0, 0);
 
             for (int i = 0; i < FAC.ColoredObjects.Length; i++)
-                FAC.ColoredObjects[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(colorblind) * Convert.ToByte(init.maxStage / Init.modulesPerStage != init.stage / Init.modulesPerStage), -0.05f));
+                FAC.ColoredObjects[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(colorblind) * Convert.ToByte(init.finalStage / Init.modulesPerStage != init.currentStage / Init.modulesPerStage), -0.05f));
 
             FAC.GearText.characterSize = 0.05f - (Convert.ToByte(colorblind) * 0.025f);
 
@@ -168,7 +168,7 @@ namespace ForgetAnyColor
             }
 
             else
-                return !animating && init.stage < init.maxStage && init.stage / Init.modulesPerStage < init.fakeStage + (FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count() / Init.modulesPerStage);
+                return !animating && init.currentStage < init.finalStage && init.currentStage / Init.modulesPerStage < init.fakeStage + (FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count() / Init.modulesPerStage);
 
             return false;
         }

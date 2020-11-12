@@ -11,11 +11,13 @@ public class CoroutineScript : MonoBehaviour
     public FACScript FAC;
     public TPScript TP;
 
-    internal bool animating = true, flashing, reset;
+    internal bool animating = true, flashing;
 
     private Calculate calculate;
     private Init init;
     private Render render;
+
+    private int amountOfSolved;
 
     private void Start()
     {
@@ -33,13 +35,14 @@ public class CoroutineScript : MonoBehaviour
 
         if (render.Animate(animating))
         {
-            init.stage += Init.modulesPerStage;
+            init.currentStage += Init.modulesPerStage;
+            init.stage = init.currentStage / Init.modulesPerStage;
             StartNewStage();
         }
 
-        else if (reset && FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count() % Init.modulesPerStage != 0)
+        else if (amountOfSolved != FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count())
         {
-            reset = false;
+            amountOfSolved = FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count();
             StartFlash();
         }
     }
@@ -52,7 +55,6 @@ public class CoroutineScript : MonoBehaviour
 
     internal void StartNewStage()
     {
-        reset = true;
         animating = true;
         StartCoroutine(NewStage());
     }
@@ -77,16 +79,16 @@ public class CoroutineScript : MonoBehaviour
     private IEnumerator NewStage()
     {
         const int nextStage = 5, specialStage = 20;
-        bool isSpecialStage = init.stage / Init.modulesPerStage == 0 || init.stage / Init.modulesPerStage == init.maxStage / Init.modulesPerStage;
+        bool isSpecialStage = init.currentStage / Init.modulesPerStage == 0 || init.currentStage / Init.modulesPerStage == init.finalStage / Init.modulesPerStage;
 
         render.Colorblind(render.colorblind);
 
         if (init.moduleId == Init.moduleIdCounter)
         {
-            FAC.Audio.PlaySoundAtTransform("next" + (init.stage / Init.modulesPerStage % 4), FAC.Module.transform);
-            if (init.stage != 0)
+            FAC.Audio.PlaySoundAtTransform("next" + (init.currentStage / Init.modulesPerStage % 4), FAC.Module.transform);
+            if (init.currentStage != 0)
                 FAC.Audio.PlaySoundAtTransform("nextStage", FAC.Module.transform);
-            if (init.stage / Init.modulesPerStage == init.maxStage / Init.modulesPerStage)
+            if (init.currentStage / Init.modulesPerStage == init.finalStage / Init.modulesPerStage)
                 FAC.Audio.PlaySoundAtTransform("finalStage", FAC.Module.transform);
         }
 
@@ -98,7 +100,7 @@ public class CoroutineScript : MonoBehaviour
 
         render.AssignRandom(true);
 
-        if (init.stage / Init.modulesPerStage == init.maxStage / Init.modulesPerStage)
+        if (init.currentStage / Init.modulesPerStage == init.finalStage / Init.modulesPerStage)
         {
             render.Assign(null, null, null, null, false);
 

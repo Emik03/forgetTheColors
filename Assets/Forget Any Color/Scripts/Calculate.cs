@@ -52,14 +52,13 @@ namespace ForgetAnyColor
             bool? input = new bool?[] { false, null, true }[figureUsed % 3];
             sequences.Add(input);
 
-            bool modifiedInput = input == null ? lastInput : (bool)input;
+            bool modifiedInput = input == null ? !lastInput : (bool)input;
 
-            modifiedSequences.Add(modifiedInput);
-            lastInput = modifiedInput;
+            modifiedSequences.Add(lastInput = modifiedInput);
 
-            Debug.LogFormat("[Forget Any Color #{0}]: Stage {1} = {2} => figure {3}. Press {4}.",
+            Debug.LogFormat("[Forget Any Color #{0}]: Stage {1} = {2} => {3}. Press {4}.",
                 init.moduleId,
-                init.stage + 1,
+                init.currentStage + 1,
                 display,
                 new[] { "LLLMR", "LMMMR", "LMRRR", "LMMRR", "LLMRR", "LLMMR" }[figureUsed],
                 modifiedInput ? "Right" : "Left");
@@ -68,7 +67,7 @@ namespace ForgetAnyColor
         private void GetFigures(out string display, out IEnumerable<string> unique, out string[] figure)
         {
         startOver:
-            int edgework = Init.rules.GetLength(0) == 2 ? Arrays.GetEdgework(Init.rules[1][Functions.GetColorIndex(3, FAC)].Number, FAC)
+            int edgework = Init.rules.GetLength(0) != 0 ? Arrays.GetEdgework(Init.rules[1][Functions.GetColorIndex(3, FAC)].Number, FAC)
                                                         : Edgework(Functions.GetColorIndex(3, FAC));
 
             display = FAC.DisplayText.text.Remove(edgework == 0 ? 5 : --edgework % 6, 1);
@@ -100,7 +99,7 @@ namespace ForgetAnyColor
 
         private int Edgework(int index)
         {
-            if (Init.rules.GetLength(0) == 2)
+            if (Init.rules.GetLength(0) != 0)
                 return Arrays.GetEdgework(Init.rules[1][init.render.GetGear()[1]].Number, FAC);
 
             switch (index)
