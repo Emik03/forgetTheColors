@@ -97,9 +97,9 @@ public class TPScript : MonoBehaviour
 
     private IEnumerator TwitchHandleForcedSolve()
     {
-        Debug.LogFormat("[Forget Any Color #{0}]: An auto-solve has been issued. This module resigned at stage {1}.", init.moduleId, init.currentStage + 1);
+        Debug.LogFormat("[Forget Any Color #{0}]: An auto-solve has been issued. This module resigned at stage {1}.", init.moduleId, init.stage + 1);
 
-        while (!Coroutine.animating && init.currentStage / Init.modulesPerStage < init.finalStage / Init.modulesPerStage)
+        while (!Coroutine.animating || init.currentStage / Init.modulesPerStage < init.finalStage / Init.modulesPerStage)
             yield return true;
 
         while (calculate.modifiedSequences.Count > 0)

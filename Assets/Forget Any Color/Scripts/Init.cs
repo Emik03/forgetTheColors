@@ -31,14 +31,18 @@ namespace ForgetAnyColor
         internal TPScript TP;
 
         internal bool solved;
-        internal static int moduleIdCounter, modulesPerStage;
-        internal int fakeStage, moduleId, stage, currentStage, maxStage, finalStage = Arrays.EditorMaxStage;
+        internal static int moduleIdCounter, modulesPerStage = 1;
+        internal int fakeStage, moduleId, stage, maxStage, finalStage = Arrays.EditorMaxStage, currentStage;
         internal int[,] cylinders;
 
         internal void Start()
         {
+            // Set the final stage to the amount of modules.
+            if (!Application.isEditor)
+                finalStage = Math.Min(FAC.Info.GetSolvableModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count(), ushort.MaxValue);
+
             // Reset the static variable in case it got changed.
-            modulesPerStage = Math.Min(FAC.Info.GetSolvableModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count(), 4);
+            modulesPerStage = Math.Min((int)Math.Ceiling((double)finalStage / 4), 4);
 
             // In the event there are no other solvable modules, this prevents a division by zero exception.
             if (modulesPerStage == 0)
@@ -51,10 +55,6 @@ namespace ForgetAnyColor
             // Boss module handler assignment.
             if (FAC.Boss.GetIgnoredModules(FAC.Module, Arrays.Ignore) != null)
                 Arrays.Ignore = FAC.Boss.GetIgnoredModules(FAC.Module, Arrays.Ignore);
-
-            // Set the final stage to the amount of modules.
-            if (!Application.isEditor)
-                finalStage = Math.Min(FAC.Info.GetSolvableModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count(), ushort.MaxValue);
 
             // maxStage is used by Souvenir, this grabs the latest guaranteed stage.
             maxStage = finalStage / modulesPerStage;

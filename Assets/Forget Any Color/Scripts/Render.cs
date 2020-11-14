@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 using Rnd = UnityEngine.Random;
@@ -65,7 +66,7 @@ namespace ForgetAnyColor
             if (log && init.currentStage / Init.modulesPerStage < init.maxStage)
             {
                 for (int i = 0; i < init.cylinders.GetLength(1); i++)
-                    init.cylinders[init.currentStage / Init.modulesPerStage, i] = cylinders[i];
+                    init.cylinders[(int)(init.currentStage / Init.modulesPerStage), i] = cylinders[i];
             }
         }
 
@@ -93,6 +94,54 @@ namespace ForgetAnyColor
             int length = calculate.modifiedSequences.Count();
             FAC.NixieTexts[0].text = (length / 10 % 10).ToString();
             FAC.NixieTexts[1].text = (length % 10).ToString();
+        }
+
+        internal IEnumerator SolveAnimation()
+        {
+            Debug.LogFormat("[Forget Any Color #{0}]: Thanks for playing!", init.moduleId);
+
+            FAC.Audio.PlaySoundAtTransform("keySuccess", FAC.Module.transform);
+            FAC.Audio.PlaySoundAtTransform("solved", FAC.Module.transform);
+
+            init.solved = true;
+            FAC.Module.HandlePass();
+
+            const string message =
+                "f0rget------" +
+                "---any------" +
+                "-color------" +
+                "50lved------" +
+                "------";
+
+            char[] current = new[] { '-', '-', '-', '-', '-', '-' };
+            int i = 0;
+
+            while (true)
+            {
+                FAC.DisplayText.text = current.Join("");
+
+                yield return new WaitForSeconds(0.1f);
+                current[i % 6] = message[i];
+                i = ++i % message.Length;
+            }
+        }
+
+        internal IEnumerator SetDisplayAsStages()
+        {
+            string temp = FAC.DisplayText.text;
+
+            FAC.DisplayText.text = string.Empty;
+            yield return new WaitForSeconds(0.05f);
+
+            FAC.DisplayText.text = Init.modulesPerStage.ToString();
+            while (FAC.DisplayText.text.Length < 6)
+                FAC.DisplayText.text += FAC.DisplayText.text.First();
+            yield return new WaitForSeconds(0.3f);
+
+            FAC.DisplayText.text = string.Empty;
+            yield return new WaitForSeconds(0.05f);
+
+            FAC.DisplayText.text = temp;
         }
 
         internal void Colorblind(bool colorblind)

@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using Rnd = UnityEngine.Random;
 
 namespace ForgetAnyColor
 {
@@ -43,6 +42,9 @@ namespace ForgetAnyColor
                         FAC.Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, FAC.Selectables[index].transform);
                         FAC.Selectables[index].AddInteractionPunch();
 
+                        if (init.solved)
+                            return false;
+
                         hasInteracted = true;
 
                         if (seq.Count > 0)
@@ -67,20 +69,17 @@ namespace ForgetAnyColor
                     case 2:
                         if (seq.Count == 0 && init.currentStage / Init.modulesPerStage == init.finalStage / Init.modulesPerStage && !init.solved)
                         {
-                            Debug.LogFormat("[Forget Any Color #{0}]: Thanks for playing!", init.moduleId);
-
-                            FAC.Audio.PlaySoundAtTransform("keySuccess", FAC.Module.transform);
-                            FAC.Audio.PlaySoundAtTransform("solved", FAC.Module.transform);
-                            
-                            init.solved = true;
-                            FAC.Module.HandlePass();
+                            FAC.StartCoroutine(render.SolveAnimation());
                             break;
                         }
 
                         else if (!render.turnKey)
                         {
                             if (!hasInteracted)
+                            {
                                 Init.modulesPerStage = Math.Max(--Init.modulesPerStage, 1);
+                                FAC.StartCoroutine(render.SetDisplayAsStages());
+                            }
 
                             FAC.Audio.PlaySoundAtTransform("key", FAC.Module.transform);
                             render.turnKey = true;

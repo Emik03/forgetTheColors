@@ -17,7 +17,8 @@ public class CoroutineScript : MonoBehaviour
     private Init init;
     private Render render;
 
-    private int amountOfSolved;
+    private int amountOfSolved, gearRot;
+    private float gearPos = 0.025f;
 
     private void Start()
     {
@@ -33,16 +34,27 @@ public class CoroutineScript : MonoBehaviour
               z = Mathf.Cos(Time.time) * intensity;
         FAC.Gear.localRotation = Quaternion.Euler(x, 0, z);
 
+        if (gearPos < 100 && init.currentStage / Init.modulesPerStage == init.finalStage / Init.modulesPerStage)
+        {
+            gearPos += (gearPos / 20) + 0.0001f;
+            gearRot += (gearRot / 10) + 1;
+            FAC.Gear.localPosition = new Vector3(FAC.Gear.localPosition.x, gearPos, FAC.Gear.localPosition.z);
+            FAC.Gear.localRotation = Quaternion.Euler(FAC.Gear.localRotation.x, gearRot, FAC.Gear.localRotation.z);
+        }
+
+        int amountOfSolves = FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count();
+
         if (render.Animate(animating))
         {
+            amountOfSolved = amountOfSolves;
             init.currentStage += Init.modulesPerStage;
-            init.stage = init.currentStage / Init.modulesPerStage;
+            init.stage++;
             StartNewStage();
         }
 
-        else if (amountOfSolved != FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count())
+        else if (amountOfSolved != amountOfSolves)
         {
-            amountOfSolved = FAC.Info.GetSolvedModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count();
+            amountOfSolved = amountOfSolves;
             StartFlash();
         }
     }

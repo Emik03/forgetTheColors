@@ -108,7 +108,7 @@ namespace ForgetAnyColor
                 int.Parse(FAC.NixieTexts[0].text),
                 int.Parse(FAC.NixieTexts[1].text),
                 int.Parse(FAC.GearText.text),
-                FAC.init.currentStage + 1,
+                FAC.init.stage + 1,
                 int.Parse(FAC.DisplayText.text[0].ToString()),
                 int.Parse(FAC.DisplayText.text[1].ToString()),
                 int.Parse(FAC.DisplayText.text[2].ToString()),
