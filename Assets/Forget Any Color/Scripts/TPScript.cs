@@ -85,7 +85,7 @@ public class TPScript : MonoBehaviour
                 {
                     // Presses the left button if the string matches L/l, otherwise right.
                     FAC.Selectables["Ll".Contains(buttonPressed[1][i]) ? 0 : 1].OnInteract();
-                    yield return new WaitForSeconds(0.1f);
+                    yield return new WaitForSecondsRealtime(0.1f);
                 }
 
                 // Awards points based on the multiplier and amount of stages complete.
@@ -105,7 +105,7 @@ public class TPScript : MonoBehaviour
         while (calculate.modifiedSequences.Count > 0)
         {
             FAC.Selectables[Convert.ToByte(calculate.modifiedSequences[0])].OnInteract();
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
         }
 
         FAC.Selectables[2].OnInteract();

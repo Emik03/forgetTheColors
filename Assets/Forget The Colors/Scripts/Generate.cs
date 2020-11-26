@@ -42,7 +42,7 @@ namespace ForgetTheColors
 
                     moduleRender.Update(ref canSolve, ref DisplayTexts, ref GearText, ref ColoredObjects, ref ColorTextures, ref CylinderDisks, ref colorValues, ref colorblind, ref maxStage, ref currentStage);
 
-                    yield return new WaitForSeconds(0.07f);
+                    yield return new WaitForSecondsRealtime(0.07f);
                 }
 
                 //reset visuals
@@ -74,7 +74,7 @@ namespace ForgetTheColors
 
                     moduleRender.Update(ref canSolve, ref DisplayTexts, ref GearText, ref ColoredObjects, ref ColorTextures, ref CylinderDisks, ref colorValues, ref colorblind, ref maxStage, ref currentStage);
 
-                    yield return new WaitForSeconds(0.07f);
+                    yield return new WaitForSecondsRealtime(0.07f);
                 }
 
                 //set stage number to display

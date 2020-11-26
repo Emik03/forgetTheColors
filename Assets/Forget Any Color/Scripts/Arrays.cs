@@ -1,8 +1,6 @@
-﻿using ForgetTheColors;
-using KModkit;
+﻿using KModkit;
 using System;
 using System.Linq;
-using UnityEngine;
 
 namespace ForgetAnyColor
 {
@@ -13,7 +11,7 @@ namespace ForgetAnyColor
     {
         public const int EditorMaxStage = 10;
         public const float TPAwardPerStage = 2;
-        public const string Version = "v1.2";
+        public const string Version = "v1.2.1";
 
         public static readonly int[,] ColorTable = 
         {

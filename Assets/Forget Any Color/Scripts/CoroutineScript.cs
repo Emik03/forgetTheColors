@@ -79,7 +79,7 @@ public class CoroutineScript : MonoBehaviour
         for (int i = 0; i < flash; i++)
         {
             render.AssignRandom(false);
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
         }
 
         render.Assign(null, null, null, null, false);
@@ -107,7 +107,7 @@ public class CoroutineScript : MonoBehaviour
         for (int i = 0; i < (isSpecialStage ? specialStage : nextStage); i++)
         {
             render.AssignRandom(false);
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
         }
 
         render.AssignRandom(true);

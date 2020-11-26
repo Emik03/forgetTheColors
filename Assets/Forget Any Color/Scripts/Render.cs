@@ -120,7 +120,7 @@ namespace ForgetAnyColor
             {
                 FAC.DisplayText.text = current.Join("");
 
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSecondsRealtime(0.1f);
                 current[i % 6] = message[i];
                 i = ++i % message.Length;
             }
@@ -131,15 +131,15 @@ namespace ForgetAnyColor
             string temp = FAC.DisplayText.text;
 
             FAC.DisplayText.text = string.Empty;
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSecondsRealtime(0.05f);
 
             FAC.DisplayText.text = Init.modulesPerStage.ToString();
             while (FAC.DisplayText.text.Length < 6)
                 FAC.DisplayText.text += FAC.DisplayText.text.First();
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSecondsRealtime(0.3f);
 
             FAC.DisplayText.text = string.Empty;
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSecondsRealtime(0.05f);
 
             FAC.DisplayText.text = temp;
         }

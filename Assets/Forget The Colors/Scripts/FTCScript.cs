@@ -145,13 +145,13 @@ public class FTCScript : MonoBehaviour
                         //keep pushing until button value is met by player
                         while (int.Parse(NixieTexts[i].text) != values[i])
                         {
-                            yield return new WaitForSeconds(0.05f);
+                            yield return new WaitForSecondsRealtime(0.05f);
                             Selectables[i].OnInteract();
                         }
                     }
 
                 //key
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSecondsRealtime(0.1f);
                 Selectables[2].OnInteract();
             }
         }
@@ -181,7 +181,7 @@ public class FTCScript : MonoBehaviour
                 //keep pushing until button value is met by player
                 do
                 {
-                    yield return new WaitForSeconds(0.02f);
+                    yield return new WaitForSecondsRealtime(0.02f);
                     Selectables[1].OnInteract();
                 } while (n != stage);
             }
@@ -195,19 +195,19 @@ public class FTCScript : MonoBehaviour
         while (!_canSolve)
             yield return true;
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSecondsRealtime(1f);
 
         for (byte i = 0; i < 2; i++)
             while (_solution.ToString().ToCharArray()[i].ToString() != NixieTexts[i].text)
             {
                 Selectables[i].OnInteract();
-                yield return new WaitForSeconds(0.05f);
+                yield return new WaitForSecondsRealtime(0.05f);
                 moduleRender.Update(ref _canSolve, ref DisplayTexts, ref GearText, ref ColoredObjects, ref ColorTextures, ref CylinderDisks, ref _colorValues, ref _colorblind, ref maxStage, ref stage);
             }
 
         if (int.Parse(string.Concat(NixieTexts[0].text, NixieTexts[1].text)) == _solution)
         {
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
             Selectables[2].OnInteract();
         }
     }

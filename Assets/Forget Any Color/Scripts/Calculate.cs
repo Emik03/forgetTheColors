@@ -58,7 +58,7 @@ namespace ForgetAnyColor
 
             Debug.LogFormat("[Forget Any Color #{0}]: Stage {1} = {2} => {3}. Press {4}.",
                 init.moduleId,
-                init.currentStage + 1,
+                init.stage + 1,
                 display,
                 new[] { "LLLMR", "LMMMR", "LMRRR", "LMMRR", "LLMRR", "LLMMR" }[figureUsed],
                 modifiedInput ? "Right" : "Left");
