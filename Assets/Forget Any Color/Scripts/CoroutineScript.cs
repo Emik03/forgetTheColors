@@ -126,5 +126,7 @@ public class CoroutineScript : MonoBehaviour
             calculate.Current();
 
         animating = false;
+
+        render.Colorblind(render.colorblind);
     }
 }

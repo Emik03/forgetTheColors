@@ -47,8 +47,6 @@ namespace ForgetAnyColor
             if (displays.Length != 1 || gears.Length != 2 || nixies.Length != 2 || cylinders.Length != 3)
                 throw new ArgumentOutOfRangeException("displays, gears, nixies, cylinders", "CoroutineScript.Render failed to run because the parameters provided had incorrect length!: " + displays.Length.ToString() + gears.Length.ToString() + nixies.Length.ToString() + cylinders.Length.ToString());
 
-            SetGear(gears);
-
             for (int i = 0; i < cylinders.Length; i++)
                 FAC.ColoredObjects[i].material.mainTexture = FAC.ColorTextures[cylinders[i]];
 
@@ -66,7 +64,7 @@ namespace ForgetAnyColor
             if (log && init.currentStage / Init.modulesPerStage < init.maxStage)
             {
                 for (int i = 0; i < init.cylinders.GetLength(1); i++)
-                    init.cylinders[(int)(init.currentStage / Init.modulesPerStage), i] = cylinders[i];
+                    init.cylinders[init.currentStage / Init.modulesPerStage, i] = cylinders[i];
             }
         }
 
@@ -163,9 +161,8 @@ namespace ForgetAnyColor
         {
             FAC.GearText.text = gears[0].ToString();
 
-            if (colorblind)
-                FAC.GearText.text = Arrays.ColorLog[gears[1]] != "Pink" ? Arrays.ColorLog[gears[1]].First() + FAC.GearText.text
-                                                                        : FAC.GearText.text = 'I' + FAC.GearText.text;
+            FAC.GearText.text = Arrays.ColorLog[gears[1]] != "Pink" ? Arrays.ColorLog[gears[1]].First() + FAC.GearText.text
+                                                                    : FAC.GearText.text = 'I' + FAC.GearText.text;
         }
 
         internal int[] GetGear()
