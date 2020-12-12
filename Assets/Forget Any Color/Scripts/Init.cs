@@ -37,6 +37,10 @@ namespace ForgetAnyColor
 
         internal void Start()
         {
+            // Boss module handler assignment.
+            if (FAC.Boss.GetIgnoredModules(FAC.Module, Arrays.Ignore) != null)
+                Arrays.Ignore = FAC.Boss.GetIgnoredModules(FAC.Module, Arrays.Ignore);
+
             // Set the final stage to the amount of modules.
             if (!Application.isEditor)
                 finalStage = Math.Min(FAC.Info.GetSolvableModuleNames().Where(m => !Arrays.Ignore.Contains(m)).Count(), ushort.MaxValue);
@@ -51,10 +55,6 @@ namespace ForgetAnyColor
             // Add an event for each interactable element.
             for (byte i = 0; i < FAC.Selectables.Length; i++)
                 FAC.Selectables[i].OnInteract += selectable.Interact(i);
-
-            // Boss module handler assignment.
-            if (FAC.Boss.GetIgnoredModules(FAC.Module, Arrays.Ignore) != null)
-                Arrays.Ignore = FAC.Boss.GetIgnoredModules(FAC.Module, Arrays.Ignore);
 
             // maxStage is used by Souvenir, this grabs the latest guaranteed stage.
             maxStage = finalStage / modulesPerStage;
