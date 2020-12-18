@@ -81,7 +81,6 @@ namespace ForgetAnyColor
             for (byte i = 0; i < FAC.CylinderDisks.Length; i++)
                 FAC.CylinderDisks[i].localRotation = new Quaternion(0, -90, 0, 0);
 
-            FAC.GearText.characterSize = 0.05f;
             FAC.GearText.text = "?";
 
             SetNixieAsInputs();
@@ -149,8 +148,6 @@ namespace ForgetAnyColor
 
             for (int i = 0; i < FAC.ColoredObjects.Length; i++)
                 FAC.ColoredObjects[i].material.SetTextureOffset("_MainTex", new Vector2(0.5f * Convert.ToByte(colorblind) * Convert.ToByte(init.finalStage / Init.modulesPerStage != init.currentStage / Init.modulesPerStage), -0.05f));
-
-            FAC.GearText.characterSize = 0.05f - (Convert.ToByte(colorblind) * 0.025f);
 
             FAC.ColoredObjects[3].material.SetTextureScale("_MainTex", new Vector2(0, 0));
 

@@ -11,7 +11,7 @@ namespace ForgetAnyColor
     {
         public const int EditorMaxStage = 10;
         public const float TPAwardPerStage = 2;
-        public const string Version = "v1.2.2";
+        public const string Version = "v1.2.3";
 
         public static readonly int[,] ColorTable = 
         {

@@ -100,7 +100,6 @@ namespace ForgetTheColors
                     CylinderDisks[i].localRotation = new Quaternion(0, -90, 0, 0);
 
                 //set gear
-                GearText.characterSize = 0.05f;
                 GearText.text = GearText.text.Last().ToString();
             }
 
@@ -124,9 +123,6 @@ namespace ForgetTheColors
                 //deletes cylinders if needed
                 for (byte i = 0; i < CylinderDisks.Length; i++)
                     CylinderDisks[i].localRotation = new Quaternion(90 * Convert.ToByte(colorblind), -90, 0, 0);
-
-                //set gear size
-                GearText.characterSize = 0.05f - (Convert.ToByte(colorblind) * 0.02f);
 
                 //render letter for colorblind
                 if (colorblind)
@@ -157,7 +153,6 @@ namespace ForgetTheColors
 
             //set gear number and size
             GearText.text = gear[stage].ToString();
-            GearText.characterSize = 0.05f - (Convert.ToByte(colorblind) * Convert.ToByte(maxStage != stage) * 0.02f);
 
             //render letter for colorblind
             if (colorblind)
